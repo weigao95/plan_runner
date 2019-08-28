@@ -4,6 +4,7 @@
 
 #include "arm_runner/trajectory_plan.h"
 
+
 void arm_runner::JointTrajectoryPlan::computeCommand(
         const arm_runner::RobotArmMeasurement &measurement,
         const arm_runner::RobotCommunication &history,
@@ -23,6 +24,7 @@ void arm_runner::JointTrajectoryPlan::computeCommand(
     command.position_validity = true;
     command.velocity_validity = true;
 }
+
 
 arm_runner::JointTrajectoryPlan::JointTrajectoryPlan(
         const arm_runner::JointTrajectoryPlan::PiecewisePolynomial &joint_trajectory)
@@ -60,7 +62,7 @@ arm_runner::JointTrajectoryPlan::Ptr arm_runner::ConstructJointTrajectoryPlan(
             if (i == 0) {
                 // Always start moving from the position which we're
                 // currently commanding.
-                knots[0](joint_idx, 0) = measurement.joint_position[j];
+                knots[0](joint_idx, 0) = measurement.joint_position[joint_idx];
             } else {
                 knots[i](joint_idx, 0) = traj_point.positions[j];
             }
