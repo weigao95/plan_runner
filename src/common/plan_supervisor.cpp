@@ -94,12 +94,7 @@ arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
     // Depends on the type
     switch (plan_construction_data_.type) {
         case PlanType::JointTrajectory:{
-            /*auto plan = ConstructJointTrajectoryPlan(
-                    *tree_,
-                    plan_construction_data_.joint_trajectory_goal,
-                    measurement, latest_command
-            );*/
-            //return plan;
+            return constructJointTrajectoryPlan(input);
         }
         default:
             break;
@@ -153,4 +148,26 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
 bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::CommandInput &measurement,
                                                     const arm_runner::RobotArmCommand &command) const {
     return true;
+}
+
+
+// The handler for joint trajectory action
+void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoal::ConstPtr &goal) {
+    std::lock_guard<std::timed_mutex> guard(switch_mutex_);
+    plan_construction_data_.valid = true;
+    plan_construction_data_.type = PlanType::JointTrajectory;
+    plan_construction_data_.joint_trajectory_goal = goal;
+}
+
+
+arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructJointTrajectoryPlan(
+    const CommandInput& input
+) {
+    const auto& latest_command = input.robot_history->GetCommandHistory().back();
+    auto plan = ConstructJointTrajectoryPlan(
+        *input.robot_rbt,
+        plan_construction_data_.joint_trajectory_goal,
+        *input.latest_measurement,
+        latest_command);
+    return plan;
 }

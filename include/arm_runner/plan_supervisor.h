@@ -59,5 +59,11 @@ namespace arm_runner {
         RobotArmMeasurement measurement_cache;
         RobotArmCommand command_cache;
         KinematicsCache<double> cache_measured_state;
+
+        // The handling function
+    public:
+        void HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoal::ConstPtr &goal);
+    private:
+        RobotPlanBase::Ptr constructJointTrajectoryPlan(const CommandInput& input);
     };
 }
