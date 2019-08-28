@@ -47,5 +47,4 @@ namespace arm_runner {
         const decltype(measurement_history_)& GetMeasurementHistory() const { return measurement_history_; }
         const decltype(command_history_)& GetCommandHistory() const { return command_history_; }
     };
-
 }

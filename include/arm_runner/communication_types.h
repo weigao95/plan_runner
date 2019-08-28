@@ -16,7 +16,7 @@ namespace arm_runner {
     // A struct the the robot interface should write to
     // that manages the robot state information
     struct RobotArmMeasurement {
-        // The time record
+        // The time record, must be valid
         TimeStamp time_stamp;
 
         // The position measurement q
