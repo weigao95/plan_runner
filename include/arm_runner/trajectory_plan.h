@@ -40,8 +40,7 @@ namespace arm_runner {
 
     protected:
         void computeCommand(
-                const RobotArmMeasurement& measurement,
-                const RobotCommunication& history,
+                const CommandInput& input,
                 RobotArmCommand& command) override;
 
     private:

@@ -32,8 +32,7 @@ namespace arm_runner {
 
         // The accessing interface of supervisor
         void ComputeCommand(
-                const RobotArmMeasurement& measurement,
-                const RobotCommunication& history,
+                const CommandInput& input,
                 RobotArmCommand& command);
 
         // The command that just stay at current config
@@ -47,8 +46,7 @@ namespace arm_runner {
 
         // Keep current rbt configuration command
         virtual void computeCommand(
-                const RobotArmMeasurement& measurement,
-                const RobotCommunication& history,
+                const CommandInput& input,
                 RobotArmCommand& command) = 0;
 
         // The callback function

@@ -6,10 +6,10 @@
 
 
 void arm_runner::JointTrajectoryPlan::computeCommand(
-        const arm_runner::RobotArmMeasurement &measurement,
-        const arm_runner::RobotCommunication &history,
+        const CommandInput& input,
         arm_runner::RobotArmCommand &command
 ) {
+    const auto& measurement = *input.latest_measurement;
     auto t = measurement.time_stamp.since_plan_start_second;
     DRAKE_ASSERT(t > 0);
     q_command_cache = joint_trajectory_.value(t);

@@ -4,6 +4,11 @@
 
 #pragma once
 
+#include "arm_runner/communication_types.h"
+#include "arm_runner/robot_communication.h"
+#include <drake/multibody/rigid_body_tree.h>
+#include <drake/multibody/kinematics_cache.h>
+
 namespace arm_runner {
 
     // The status of the plan
@@ -32,4 +37,12 @@ namespace arm_runner {
                 || type == PlanType::EEVelocityStreaming 
                 || type == PlanType::EEForceStreaming;
     }
+
+    // The input to command
+    struct CommandInput {
+        const RobotArmMeasurement* latest_measurement;
+        const RobotCommunication* robot_history;
+        std::shared_ptr<const RigidBodyTree<double>> robot_rbt;
+        const KinematicsCache<double>* measured_state_cache;
+    };
 }

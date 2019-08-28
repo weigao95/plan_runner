@@ -22,7 +22,7 @@ namespace arm_runner {
     class PlanSupervisor {
     protected:
         // Software safety check
-        bool checkCommandSafety(const RobotArmMeasurement& measurement, const RobotArmCommand& command) const;
+        bool checkCommandSafety(const CommandInput& measurement, const RobotArmCommand& command) const;
 
         // The processing loop
         void processLoopIter();
@@ -52,11 +52,12 @@ namespace arm_runner {
 
         // These method would read the construction data and can only be accessed on main thread
         bool shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const;
-        void processPlanSwitch(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command);
-        RobotPlanBase::Ptr constructNewPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command);
+        void processPlanSwitch(const CommandInput& input, const RobotArmCommand& latest_command);
+        RobotPlanBase::Ptr constructNewPlan(const CommandInput& input, const RobotArmCommand& latest_command);
 
         // The cache
         RobotArmMeasurement measurement_cache;
         RobotArmCommand command_cache;
+        KinematicsCache<double> cache_measured_state;
     };
 }

@@ -17,15 +17,35 @@ void arm_runner::PlanSupervisor::processLoopIter() {
     // Get measurement
     rbt_communication_->GetMeasurement(measurement_cache, now);
 
+    // Do computation
+    auto q_size = tree_->get_num_positions();
+    auto v_size = tree_->get_num_velocities();
+    Eigen::Map<Eigen::VectorXd> q = Eigen::Map<Eigen::VectorXd>(measurement_cache.joint_position, q_size);
+    Eigen::Map<Eigen::VectorXd> v = Eigen::Map<Eigen::VectorXd>(measurement_cache.joint_velocities, v_size);
+    if(measurement_cache.velocity_validity) {
+        cache_measured_state.initialize(q, v);
+        tree_->doKinematics(cache_measured_state);
+    } else {
+        cache_measured_state.initialize(q);
+        tree_->doKinematics(cache_measured_state);
+    }
+
+    // Construct input
+    CommandInput input;
+    input.latest_measurement = &measurement_cache;
+    input.robot_history = rbt_communication_.get();
+    input.robot_rbt = tree_;
+    input.measured_state_cache = &cache_measured_state;
+
     // Compute command
     if(rbt_active_plan_ != nullptr) {
-        rbt_active_plan_->ComputeCommand(measurement_cache, *rbt_communication_, command_cache);
+        rbt_active_plan_->ComputeCommand(input, command_cache);
     } else {
         RobotPlanBase::KeepCurrentConfigurationCommand(measurement_cache, command_cache);
     }
 
     // Software safety check
-    bool command_safe = checkCommandSafety(measurement_cache, command_cache);
+    bool command_safe = checkCommandSafety(input, command_cache);
     if(!command_safe) {
         // Keep the current pose
         RobotPlanBase::KeepCurrentConfigurationCommand(measurement_cache, command_cache);
@@ -38,11 +58,10 @@ void arm_runner::PlanSupervisor::processLoopIter() {
     if(!command_safe && rbt_active_plan_ != nullptr) {
         rbt_active_plan_->StopPlan();
         rbt_active_plan_.reset();
-        stop_current_ = true;
     }
 
     // Might need to switch the plan
-    processPlanSwitch(measurement_cache, command_cache);
+    processPlanSwitch(input, command_cache);
 }
 
 bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const {
@@ -65,7 +84,7 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& mea
 
 
 arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
-    const RobotArmMeasurement& measurement,
+    const CommandInput& input,
     const RobotArmCommand& latest_command
 ) {
     // If the plan data is valid
@@ -75,12 +94,12 @@ arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
     // Depends on the type
     switch (plan_construction_data_.type) {
         case PlanType::JointTrajectory:{
-            auto plan = ConstructJointTrajectoryPlan(
+            /*auto plan = ConstructJointTrajectoryPlan(
                     *tree_,
                     plan_construction_data_.joint_trajectory_goal,
                     measurement, latest_command
-            );
-            return plan;
+            );*/
+            //return plan;
         }
         default:
             break;
@@ -92,7 +111,7 @@ arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
 
 
 void arm_runner::PlanSupervisor::processPlanSwitch(
-    const RobotArmMeasurement& measurement,
+    const CommandInput& input,
     const RobotArmCommand& latest_command
 ) {
     // Use a fixed time lock
@@ -100,7 +119,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     if(switch_mutex_.try_lock_for(milliseconds(LOOP_MUTEX_TIMEOUT_MS))) {
         // Now this method has lock
         // Check should I switch
-        if (!shouldSwitchPlan(measurement, latest_command)) {
+        if (!shouldSwitchPlan(*input.latest_measurement, latest_command)) {
             switch_mutex_.unlock();
             return;
         }
@@ -110,7 +129,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
             rbt_active_plan_->StopPlan();
 
         // Construct and switch to the new one
-        rbt_active_plan_ = constructNewPlan(measurement, latest_command);
+        rbt_active_plan_ = constructNewPlan(input, latest_command);
         if(rbt_active_plan_ != nullptr) {
             rbt_active_plan_->InitializePlan();
         }
@@ -131,7 +150,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
 }
 
 
-bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::RobotArmMeasurement &measurement,
+bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::CommandInput &measurement,
                                                     const arm_runner::RobotArmCommand &command) const {
     return true;
 }
