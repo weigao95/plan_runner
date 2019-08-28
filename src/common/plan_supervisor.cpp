@@ -10,7 +10,37 @@
 #include <chrono>
 
 
-void arm_runner::PlanSupervisor::processLoopIter() {
+arm_runner::PlanSupervisor::PlanSupervisor(
+    std::shared_ptr<RigidBodyTree<double>> tree,
+    std::unique_ptr<RobotCommunication> robot_hw,
+    ros::NodeHandle nh
+) : tree_(std::move(tree)),
+    rbt_communication_(std::move(robot_hw)),
+    node_handle_(std::move(nh))
+{
+    initializeKinematicAndCache();
+    initializeSwitchData();
+    initializeActions();
+}
+
+void arm_runner::PlanSupervisor::initializeKinematicAndCache() {
+    rbt_active_plan_ = nullptr;
+    plan_start_time_second_ = 0;
+    cache_measured_state = std::make_shared<KinematicsCache<double>>(tree_->CreateKinematicsCache());
+}
+
+
+// The main interface
+void arm_runner::PlanSupervisor::Start() {
+    rbt_communication_->Start();
+    joint_trajectory_action_->start();
+}
+
+void arm_runner::PlanSupervisor::Stop() {
+    rbt_communication_->Stop();
+}
+
+void arm_runner::PlanSupervisor::ProcessLoopIteration() {
     // Get the time
     TimeStamp now;
     now.absolute_time_second = now_in_second();
@@ -25,11 +55,11 @@ void arm_runner::PlanSupervisor::processLoopIter() {
     Eigen::Map<Eigen::VectorXd> q = Eigen::Map<Eigen::VectorXd>(measurement_cache.joint_position, q_size);
     Eigen::Map<Eigen::VectorXd> v = Eigen::Map<Eigen::VectorXd>(measurement_cache.joint_velocities, v_size);
     if(measurement_cache.velocity_validity) {
-        cache_measured_state.initialize(q, v);
-        tree_->doKinematics(cache_measured_state);
+        cache_measured_state->initialize(q, v);
+        tree_->doKinematics(*cache_measured_state);
     } else {
-        cache_measured_state.initialize(q);
-        tree_->doKinematics(cache_measured_state);
+        cache_measured_state->initialize(q);
+        tree_->doKinematics(*cache_measured_state);
     }
 
     // Construct input
@@ -37,7 +67,7 @@ void arm_runner::PlanSupervisor::processLoopIter() {
     input.latest_measurement = &measurement_cache;
     input.robot_history = rbt_communication_.get();
     input.robot_rbt = tree_;
-    input.measured_state_cache = &cache_measured_state;
+    input.measured_state_cache = cache_measured_state.get();
 
     // Compute command
     if(rbt_active_plan_ != nullptr) {
@@ -64,12 +94,6 @@ void arm_runner::PlanSupervisor::processLoopIter() {
 
     // Might need to switch the plan
     processPlanSwitch(input, command_cache);
-}
-
-
-bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::CommandInput &measurement,
-                                                    const arm_runner::RobotArmCommand &command) const {
-    return true;
 }
 
 
@@ -142,6 +166,13 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
 }
 
 
+// For safety check
+bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::CommandInput &measurement,
+                                                    const arm_runner::RobotArmCommand &command) const {
+    return true;
+}
+
+
 // The handler for joint trajectory action
 void arm_runner::PlanSupervisor::initializeActions() {
     // The joint trajectory action
@@ -150,7 +181,6 @@ void arm_runner::PlanSupervisor::initializeActions() {
             node_handle_, "JointTrajectory",
             boost::bind(&PlanSupervisor::HandleJointTrajectoryAction, this, _1),
             false);
-    joint_trajectory_action_->start(); // start the ROS action
 }
 
 

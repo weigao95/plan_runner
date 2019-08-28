@@ -21,22 +21,28 @@
 namespace arm_runner {
 
     class PlanSupervisor {
-    protected:
-        // Software safety check
-        bool checkCommandSafety(const CommandInput& measurement, const RobotArmCommand& command) const;
+    public:
+        PlanSupervisor(
+            std::shared_ptr<RigidBodyTree<double>> tree,
+            std::unique_ptr<RobotCommunication> robot_hw,
+            ros::NodeHandle nh);
 
-        // The processing loop
-        void processLoopIter();
+        // The main interface
+        void Start();
+        void Stop();
+        void ProcessLoopIteration();
 
+
+        // The real state that can only be mutated in main thread
     private:
-        // The real state
-        // Can only be mutated in main thread
         std::shared_ptr<RigidBodyTree<double>> tree_;
         std::unique_ptr<RobotCommunication> rbt_communication_;
         RobotPlanBase::Ptr rbt_active_plan_;
         double plan_start_time_second_;
+        void initializeKinematicAndCache();
 
-        // The field for switching, might be accessed by other thread
+
+        // The members for switching, might be accessed by other thread
         // Protected by the lock
     private:
         std::timed_mutex switch_mutex_;
@@ -62,7 +68,12 @@ namespace arm_runner {
     private:
         mutable RobotArmMeasurement measurement_cache;
         mutable RobotArmCommand command_cache;
-        mutable KinematicsCache<double> cache_measured_state;
+        mutable std::shared_ptr<KinematicsCache<double>> cache_measured_state;
+
+
+        // Software safety check
+    private:
+        bool checkCommandSafety(const CommandInput& measurement, const RobotArmCommand& command) const;
 
 
         // The handling function
