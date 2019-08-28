@@ -8,9 +8,10 @@ arm_runner::RobotCommunication::RobotCommunication()
 : measurement_history_(RobotCommunication::HISTORY_HORIZON),
   command_history_(RobotCommunication::HISTORY_HORIZON) {}
 
-void arm_runner::RobotCommunication::GetMeasurement(RobotArmMeasurement& measurement) {
+void arm_runner::RobotCommunication::GetMeasurement(RobotArmMeasurement& measurement, const TimeStamp& time_stamp) {
     // Get the raw measurement
     getRawMeasurement(measurement);
+    measurement.time_stamp = time_stamp;
 
     // Do processing
     for(const auto& processor : measurement_processor_stack_) {
@@ -21,9 +22,12 @@ void arm_runner::RobotCommunication::GetMeasurement(RobotArmMeasurement& measure
     measurement_history_.push_back(measurement);
 }
 
-void arm_runner::RobotCommunication::SendCommand(const RobotArmCommand & command_in) {
-    // Do processing
+void arm_runner::RobotCommunication::SendCommand(const RobotArmCommand & command_in, const TimeStamp& time_stamp) {
+    // Copy and add time
     auto command = command_in;
+    command.time_stamp = time_stamp;
+
+    // Do processing
     for(const auto& processor : command_processor_stack_) {
         processor(command);
     }

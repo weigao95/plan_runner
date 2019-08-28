@@ -24,8 +24,8 @@ namespace arm_runner {
         virtual void Stop() {}
 
         // The measure and command interface
-        void GetMeasurement(RobotArmMeasurement& measurement);
-        void SendCommand(const RobotArmCommand& command);
+        void GetMeasurement(RobotArmMeasurement& measurement, const TimeStamp& time_stamp);
+        void SendCommand(const RobotArmCommand& command, const TimeStamp& time_stamp);
 
     protected:
         // The actual interface that communicate with the robot

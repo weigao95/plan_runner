@@ -6,6 +6,8 @@
 
 #include <cstring>
 
+#include "arm_runner/time_utils.h"
+
 namespace arm_runner {
 
     // The max number of joints for a robot arm
@@ -14,6 +16,9 @@ namespace arm_runner {
     // A struct the the robot interface should write to
     // that manages the robot state information
     struct RobotArmMeasurement {
+        // The time record
+        TimeStamp time_stamp;
+
         // The position measurement q
         double joint_position[MAX_NUM_JOINTS];
         bool position_validity;
@@ -45,6 +50,9 @@ namespace arm_runner {
     // A struct the the robot interface should write to
     // that comes from external controller
     struct RobotArmCommand {
+        // The time record
+        TimeStamp time_stamp;
+
         // The position command q_desired
         double joint_position[MAX_NUM_JOINTS];
         bool position_validity;

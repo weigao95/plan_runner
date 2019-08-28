@@ -3,15 +3,18 @@
 //
 
 #include "arm_runner/plan_supervisor.h"
+#include "arm_runner/time_utils.h"
 
 void arm_runner::PlanSupervisor::processLoopIter() {
+    // Get the time
+    TimeStamp now;
+    now.absolute_time_second = now_in_second();
+    now.since_plan_start_second = now.absolute_time_second - plan_start_time_second_;
+
     // Get measurement
-    rbt_communication_->GetMeasurement(measurement_cache);
+    rbt_communication_->GetMeasurement(measurement_cache, now);
 
-    // Might need to switch the plan
-    processPlanSwitch(measurement_cache);
-
-    // After switching
+    // Compute command
     if(rbt_active_plan_ != nullptr) {
         rbt_active_plan_->ComputeCommand(measurement_cache, *rbt_communication_, command_cache);
     } else {
@@ -26,36 +29,24 @@ void arm_runner::PlanSupervisor::processLoopIter() {
     }
 
     // Send to robot
-    rbt_communication_->SendCommand(command_cache);
+    rbt_communication_->SendCommand(command_cache, now);
 
     // Invalidate the command if not correct
-    if(!command_safe) {
+    if(!command_safe && rbt_active_plan_ != nullptr) {
         rbt_active_plan_->StopPlan();
         rbt_active_plan_.reset();
+        stop_current_ = true;
     }
+
+    // Might need to switch the plan
+    processPlanSwitch(measurement_cache);
 }
 
 
-void arm_runner::PlanSupervisor::processPlanSwitch(const RobotArmMeasurement& measurement) {
-    // Lock, current not implement
-    // Use a fixed time lock
+bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& measurement) const {
+    // Commanded to stop
+    if (stop_current_) return true;
 
-    // Check should I switch
-    if (!shouldSwitchPlan(measurement)) return;
-
-    // Do switching
-    if(rbt_active_plan_ != nullptr)
-        rbt_active_plan_->StopPlan();
-
-    // Start the new one
-    rbt_active_plan_ = switch_to_plan_;
-    switch_to_plan_.reset();
-    if(rbt_active_plan_ != nullptr) 
-        rbt_active_plan_->InitializePlan();
-}
-
-
-bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& measurement) {
     // No new plan, cannot switch
     if (switch_to_plan_ == nullptr) return false;
 
@@ -68,4 +59,29 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& mea
 
     // Need to wait the current plan
     return false;
+}
+
+
+void arm_runner::PlanSupervisor::processPlanSwitch(const RobotArmMeasurement& measurement) {
+    // Lock, current not implement
+    // Use a fixed time lock
+
+    // Now this method has lock
+    // Check should I switch
+    if (!shouldSwitchPlan(measurement)) return;
+
+    // Do switching
+    if(rbt_active_plan_ != nullptr)
+        rbt_active_plan_->StopPlan();
+
+    // Start the new one
+    rbt_active_plan_ = switch_to_plan_;
+    if(rbt_active_plan_ != nullptr) {
+        rbt_active_plan_->InitializePlan();
+    }
+
+    // Cleanup
+    switch_to_plan_.reset();
+    stop_current_ = false;
+    plan_start_time_second_ = now_in_second();
 }
