@@ -39,13 +39,11 @@ void arm_runner::PlanSupervisor::Stop() {
 }
 
 void arm_runner::PlanSupervisor::ProcessLoopIteration() {
-    // Get the time
-    TimeStamp now;
-    now.absolute_time_second = now_in_second();
-    now.since_plan_start_second = now.absolute_time_second - plan_start_time_second_;
-
     // Get measurement
-    rbt_communication_->GetMeasurement(measurement_cache, now);
+    // Use the time in measurement
+    rbt_communication_->GetMeasurement(measurement_cache);
+    measurement_cache.time_stamp.since_plan_start_second = 
+            measurement_cache.time_stamp.absolute_time_second - plan_start_time_second_;
 
     // Do computation
     auto q_size = tree_->get_num_positions();
@@ -82,7 +80,7 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration() {
     }
 
     // Send to robot
-    rbt_communication_->SendCommand(command_cache, now);
+    rbt_communication_->SendCommand(command_cache);
 
     // Invalidate the command if not correct
     if(!command_safe && rbt_active_plan_ != nullptr) {

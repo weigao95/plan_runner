@@ -3,7 +3,6 @@
 //
 
 #include "arm_runner/plan_supervisor.h"
-#include "arm_runner/time_utils.h"
 #include "arm_runner/trajectory_plan.h"
 
 #include <chrono>
@@ -64,7 +63,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
         // Cleanup
         plan_construction_data_.valid = false;
         action_to_current_plan_ = ActionToCurrentPlan::NoAction;
-        plan_start_time_second_ = now_in_second();
+        plan_start_time_second_ = input.latest_measurement->time_stamp.absolute_time_second;
 
         // Release the lock and return
         switch_mutex_.unlock();
