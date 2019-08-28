@@ -18,6 +18,11 @@ namespace arm_runner {
         RobotCommunication();
         virtual ~RobotCommunication() = default;
 
+        // After start, the robot should accept command (setup connection)
+        // After stop, the robot should not accept command (cleanup connection)
+        virtual void Start() {}
+        virtual void Stop() {}
+
         // The measure and command interface
         void GetMeasurement(RobotArmMeasurement& measurement);
         void SendCommand(const RobotArmCommand& command);
@@ -36,6 +41,11 @@ namespace arm_runner {
         using MeasurementProcessor = std::function<void(RobotArmMeasurement&)>;
         std::vector<CommandProcessor> command_processor_stack_;
         std::vector<MeasurementProcessor> measurement_processor_stack_;
+
+        // Simple getter
+    public:
+        const decltype(measurement_history_)& GetMeasurementHistory() const { return measurement_history_; }
+        const decltype(command_history_)& GetCommandHistory() const { return command_history_; }
     };
 
 }
