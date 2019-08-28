@@ -123,9 +123,12 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
+  include/
   ${catkin_INCLUDE_DIRS}
 )
+
+# The include files
+file(GLOB HEADER_FILES include/arm_runner/*.h include/arm_runner/*.hpp)
 
 # The install targets are in src
 add_subdirectory(src)
