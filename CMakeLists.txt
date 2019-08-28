@@ -19,6 +19,10 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Boost REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
+# The drake library
+set(drake_DIR "/home/wei/Program/build-install/drake-latest-bionic/drake/lib/cmake/drake")
+find_package(drake REQUIRED)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
