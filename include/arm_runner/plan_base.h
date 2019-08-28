@@ -22,7 +22,7 @@ namespace arm_runner {
         virtual void InitializePlan() { status_ = PlanStatus::Running; }
         virtual void StopPlan() {
             for(const auto& callback : stop_callbacks_)
-                callback();
+                callback(this);
             status_ = PlanStatus::Stopped;
         }
 
@@ -50,7 +50,7 @@ namespace arm_runner {
                 RobotArmCommand& command) = 0;
 
         // The callback function
-        using StoppedCallbackFunction = std::function<void()>;
+        using StoppedCallbackFunction = std::function<void(RobotPlanBase*)>;
         std::vector<StoppedCallbackFunction> stop_callbacks_;
     public:
         void AddStoppedCallback(StoppedCallbackFunction func) { stop_callbacks_.emplace_back(std::move(func)); };

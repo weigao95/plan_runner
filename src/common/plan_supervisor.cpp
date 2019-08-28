@@ -5,6 +5,8 @@
 #include "arm_runner/plan_supervisor.h"
 #include "arm_runner/time_utils.h"
 #include "arm_runner/trajectory_plan.h"
+
+#include <cstring>
 #include <chrono>
 
 
@@ -64,6 +66,23 @@ void arm_runner::PlanSupervisor::processLoopIter() {
     processPlanSwitch(input, command_cache);
 }
 
+
+bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::CommandInput &measurement,
+                                                    const arm_runner::RobotArmCommand &command) const {
+    return true;
+}
+
+
+// The method for switching
+void arm_runner::PlanSupervisor::initializeSwitchData() {
+    stop_current_ = false;
+    memset(&plan_construction_data_, 0, sizeof(plan_construction_data_));
+    plan_construction_data_.valid = false;
+    plan_construction_data_.joint_trajectory_goal = nullptr;
+    plan_construction_data_.cartesian_trajectory_goal = nullptr;
+}
+
+
 bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const {
     // Commanded to stop
     if (stop_current_) return true;
@@ -80,28 +99,6 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& mea
 
     // Need to wait the current plan
     return false;
-}
-
-
-arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
-    const CommandInput& input,
-    const RobotArmCommand& latest_command
-) {
-    // If the plan data is valid
-    if(!plan_construction_data_.valid)
-        return nullptr;
-
-    // Depends on the type
-    switch (plan_construction_data_.type) {
-        case PlanType::JointTrajectory:{
-            return constructJointTrajectoryPlan(input);
-        }
-        default:
-            break;
-    }
-
-    // Depends on the type
-    return nullptr;
 }
 
 
@@ -145,18 +142,46 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
 }
 
 
-bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::CommandInput &measurement,
-                                                    const arm_runner::RobotArmCommand &command) const {
-    return true;
+// The handler for joint trajectory action
+void arm_runner::PlanSupervisor::initializeActions() {
+    // The joint trajectory action
+    joint_trajectory_action_ = std::make_shared<
+            actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>>(
+            node_handle_, "JointTrajectory",
+            boost::bind(&PlanSupervisor::HandleJointTrajectoryAction, this, _1),
+            false);
+    joint_trajectory_action_->start(); // start the ROS action
 }
 
 
-// The handler for joint trajectory action
 void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoal::ConstPtr &goal) {
     std::lock_guard<std::timed_mutex> guard(switch_mutex_);
     plan_construction_data_.valid = true;
     plan_construction_data_.type = PlanType::JointTrajectory;
     plan_construction_data_.joint_trajectory_goal = goal;
+}
+
+
+// The plan constructors
+arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
+        const CommandInput& input,
+        const RobotArmCommand& latest_command
+) {
+    // If the plan data is valid
+    if(!plan_construction_data_.valid)
+        return nullptr;
+
+    // Depends on the type
+    switch (plan_construction_data_.type) {
+        case PlanType::JointTrajectory:{
+            return constructJointTrajectoryPlan(input);
+        }
+        default:
+            break;
+    }
+
+    // Depends on the type
+    return nullptr;
 }
 
 
@@ -169,5 +194,15 @@ arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructJointTraject
         plan_construction_data_.joint_trajectory_goal,
         *input.latest_measurement,
         latest_command);
+
+    // The finish callback
+    auto finish_callback = [this](RobotPlanBase* robot_plan) -> void {
+        robot_msgs::JointTrajectoryResult result;
+        result.status.status = result.status.FINISHED_NORMALLY;
+        this->joint_trajectory_action_->setSucceeded(result);
+    };
+    plan->AddStoppedCallback(finish_callback);
+
+    // OK
     return plan;
 }

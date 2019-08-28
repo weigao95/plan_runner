@@ -6,6 +6,7 @@
 
 #include <mutex>
 #include <drake/multibody/rigid_body_tree.h>
+#include <actionlib/server/simple_action_server.h>
 
 #include "arm_runner/plan_base.h"
 #include "arm_runner/plan_common_types.h"
@@ -37,6 +38,7 @@ namespace arm_runner {
 
         // The field for switching, might be accessed by other thread
         // Protected by the lock
+    private:
         std::timed_mutex switch_mutex_;
         static constexpr int LOOP_MUTEX_TIMEOUT_MS = 5;
         bool stop_current_;
@@ -49,21 +51,32 @@ namespace arm_runner {
             robot_msgs::JointTrajectoryGoal::ConstPtr joint_trajectory_goal;
             robot_msgs::CartesianTrajectoryGoal::ConstPtr cartesian_trajectory_goal;
         } plan_construction_data_;
+        void initializeSwitchData();
 
         // These method would read the construction data and can only be accessed on main thread
         bool shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const;
         void processPlanSwitch(const CommandInput& input, const RobotArmCommand& latest_command);
-        RobotPlanBase::Ptr constructNewPlan(const CommandInput& input, const RobotArmCommand& latest_command);
+
 
         // The cache
-        RobotArmMeasurement measurement_cache;
-        RobotArmCommand command_cache;
-        KinematicsCache<double> cache_measured_state;
+    private:
+        mutable RobotArmMeasurement measurement_cache;
+        mutable RobotArmCommand command_cache;
+        mutable KinematicsCache<double> cache_measured_state;
+
 
         // The handling function
     public:
         void HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoal::ConstPtr &goal);
     private:
+        ros::NodeHandle node_handle_;
+        std::shared_ptr<actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>> joint_trajectory_action_;
+        void initializeActions();
+
+
+        // The plan constructor with callbacks
+    private:
+        RobotPlanBase::Ptr constructNewPlan(const CommandInput& input, const RobotArmCommand& latest_command);
         RobotPlanBase::Ptr constructJointTrajectoryPlan(const CommandInput& input);
     };
 }
