@@ -4,7 +4,7 @@
 
 #include "arm_runner/plan_supervisor.h"
 #include "arm_runner/time_utils.h"
-
+#include <chrono>
 
 bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& measurement) const {
     // Commanded to stop
@@ -26,27 +26,39 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& mea
 
 
 void arm_runner::PlanSupervisor::processPlanSwitch(const RobotArmMeasurement& measurement) {
-    // Lock, current not implement
     // Use a fixed time lock
+    using std::chrono::milliseconds;
+    if(switch_mutex_.try_lock_for(milliseconds(LOOP_MUTEX_TIMEOUT_MS))) {
+        // Now this method has lock
+        // Check should I switch
+        if (!shouldSwitchPlan(measurement)) {
+            switch_mutex_.unlock();
+            return;
+        }
 
-    // Now this method has lock
-    // Check should I switch
-    if (!shouldSwitchPlan(measurement)) return;
+        // Do switching
+        if(rbt_active_plan_ != nullptr)
+            rbt_active_plan_->StopPlan();
 
-    // Do switching
-    if(rbt_active_plan_ != nullptr)
-        rbt_active_plan_->StopPlan();
+        // Start the new one
+        rbt_active_plan_ = switch_to_plan_;
+        if(rbt_active_plan_ != nullptr) {
+            rbt_active_plan_->InitializePlan();
+        }
 
-    // Start the new one
-    rbt_active_plan_ = switch_to_plan_;
-    if(rbt_active_plan_ != nullptr) {
-        rbt_active_plan_->InitializePlan();
+        // Cleanup
+        switch_to_plan_.reset();
+        stop_current_ = false;
+        plan_start_time_second_ = now_in_second();
+
+        // Release the lock and return
+        switch_mutex_.unlock();
+        return;
+    } else {
+        // No lock
+        // Just keep current plan
+        return;
     }
-
-    // Cleanup
-    switch_to_plan_.reset();
-    stop_current_ = false;
-    plan_start_time_second_ = now_in_second();
 }
 
 

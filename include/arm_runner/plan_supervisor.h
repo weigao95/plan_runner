@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <mutex>
 #include "arm_runner/plan_base.h"
 #include "arm_runner/plan_common_types.h"
 #include "arm_runner/robot_communication.h"
@@ -31,6 +32,8 @@ namespace arm_runner {
 
         // The field for switching, might be accessed by other thread
         // Protected by the lock
+        std::timed_mutex switch_mutex_;
+        static constexpr int LOOP_MUTEX_TIMEOUT_MS = 5;
         bool stop_current_;
         RobotPlanBase::Ptr switch_to_plan_;
 
