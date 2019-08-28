@@ -16,6 +16,9 @@ namespace arm_runner {
         bool shouldSwitchPlan(const RobotArmMeasurement& measurement) const;
         void processPlanSwitch(const RobotArmMeasurement& measurement);
 
+        // Software safety check
+        bool checkCommandSafety(const RobotArmMeasurement& measurement, const RobotArmCommand& command) const;
+
         // The processing loop
         void processLoopIter();
 

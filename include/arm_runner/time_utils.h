@@ -9,6 +9,7 @@ namespace arm_runner {
     };
 
     // The time for init would be zero
+    // Must be invoked before any call to now_in_second()
     void init_timer();
 
     // Get current time expressed in second

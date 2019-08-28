@@ -25,7 +25,7 @@ namespace arm_runner {
         EEForceStreaming
     };
 
-    bool is_streaming_plan(PlanType type) {
+    inline bool is_streaming_plan(PlanType type) {
         return type == PlanType::JointPositionStreaming 
                 || type == PlanType::JointTorqueStreaming 
                 || type == PlanType::EEVelocityStreaming 
