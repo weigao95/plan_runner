@@ -5,6 +5,8 @@
 #pragma once
 #include "arm_runner/plan_base.h"
 #include <drake/common/trajectories/piecewise_polynomial.h>
+#include <trajectory_msgs/JointTrajectory.h>
+#include <trajectory_msgs/JointTrajectoryPoint.h>
 
 namespace arm_runner {
 
@@ -43,5 +45,6 @@ namespace arm_runner {
         // Cache
         Eigen::VectorXd q_command_cache, v_command_cache;
     };
+
 
 }

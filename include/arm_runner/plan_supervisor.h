@@ -13,10 +13,6 @@ namespace arm_runner {
 
     class PlanSupervisor {
     protected:
-        // The method to handle plan switch
-        bool shouldSwitchPlan(const RobotArmMeasurement& measurement) const;
-        void processPlanSwitch(const RobotArmMeasurement& measurement);
-
         // Software safety check
         bool checkCommandSafety(const RobotArmMeasurement& measurement, const RobotArmCommand& command) const;
 
@@ -35,7 +31,19 @@ namespace arm_runner {
         std::timed_mutex switch_mutex_;
         static constexpr int LOOP_MUTEX_TIMEOUT_MS = 5;
         bool stop_current_;
-        RobotPlanBase::Ptr switch_to_plan_;
+        struct PlanConstructionData {
+            // The flag
+            bool valid;
+            PlanType type;
+
+            // The actual data
+
+        } plan_construction_data_;
+
+        // These method would read the construction data and can only be accessed on main thread
+        RobotPlanBase::Ptr constructNewPlan(const RobotArmMeasurement& measurement);
+        bool shouldSwitchPlan(const RobotArmMeasurement& measurement) const;
+        void processPlanSwitch(const RobotArmMeasurement& measurement);
 
         // The cache
         RobotArmMeasurement measurement_cache;

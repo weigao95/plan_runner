@@ -6,66 +6,6 @@
 #include "arm_runner/time_utils.h"
 #include <chrono>
 
-bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& measurement) const {
-    // Commanded to stop
-    if (stop_current_) return true;
-
-    // No new plan, cannot switch
-    if (switch_to_plan_ == nullptr) return false;
-
-    // Now we have a new plan
-    if (rbt_active_plan_ == nullptr) return true;
-
-    // Now the active plan is not NULL
-    if (is_streaming_plan(rbt_active_plan_->GetPlanType()) || rbt_active_plan_->HasFinished(measurement))
-        return true;
-
-    // Need to wait the current plan
-    return false;
-}
-
-
-void arm_runner::PlanSupervisor::processPlanSwitch(const RobotArmMeasurement& measurement) {
-    // Use a fixed time lock
-    using std::chrono::milliseconds;
-    if(switch_mutex_.try_lock_for(milliseconds(LOOP_MUTEX_TIMEOUT_MS))) {
-        // Now this method has lock
-        // Check should I switch
-        if (!shouldSwitchPlan(measurement)) {
-            switch_mutex_.unlock();
-            return;
-        }
-
-        // Do switching
-        if(rbt_active_plan_ != nullptr)
-            rbt_active_plan_->StopPlan();
-
-        // Start the new one
-        rbt_active_plan_ = switch_to_plan_;
-        if(rbt_active_plan_ != nullptr) {
-            rbt_active_plan_->InitializePlan();
-        }
-
-        // Cleanup
-        switch_to_plan_.reset();
-        stop_current_ = false;
-        plan_start_time_second_ = now_in_second();
-
-        // Release the lock and return
-        switch_mutex_.unlock();
-        return;
-    } else {
-        // No lock
-        // Just keep current plan
-        return;
-    }
-}
-
-
-bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::RobotArmMeasurement &measurement,
-                                                    const arm_runner::RobotArmCommand &command) const {
-    return true;
-}
 
 void arm_runner::PlanSupervisor::processLoopIter() {
     // Get the time
@@ -102,4 +42,74 @@ void arm_runner::PlanSupervisor::processLoopIter() {
 
     // Might need to switch the plan
     processPlanSwitch(measurement_cache);
+}
+
+bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& measurement) const {
+    // Commanded to stop
+    if (stop_current_) return true;
+
+    // No new plan, cannot switch
+    if (!plan_construction_data_.valid) return false;
+
+    // Now we have a new plan
+    if (rbt_active_plan_ == nullptr) return true;
+
+    // Now the active plan is not NULL
+    if (is_streaming_plan(rbt_active_plan_->GetPlanType()) || rbt_active_plan_->HasFinished(measurement))
+        return true;
+
+    // Need to wait the current plan
+    return false;
+}
+
+
+arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(const RobotArmMeasurement& measurement) {
+    if(!plan_construction_data_.valid)
+        return nullptr;
+
+    // Depends on the type
+    return nullptr;
+}
+
+
+void arm_runner::PlanSupervisor::processPlanSwitch(const RobotArmMeasurement& measurement) {
+    // Use a fixed time lock
+    using std::chrono::milliseconds;
+    if(switch_mutex_.try_lock_for(milliseconds(LOOP_MUTEX_TIMEOUT_MS))) {
+        // Now this method has lock
+        // Check should I switch
+        if (!shouldSwitchPlan(measurement)) {
+            switch_mutex_.unlock();
+            return;
+        }
+
+        // Do switching
+        if(rbt_active_plan_ != nullptr)
+            rbt_active_plan_->StopPlan();
+
+        // Construct and switch to the new one
+        rbt_active_plan_ = constructNewPlan(measurement);
+        if(rbt_active_plan_ != nullptr) {
+            rbt_active_plan_->InitializePlan();
+        }
+
+        // Cleanup
+        plan_construction_data_.valid = false;
+        stop_current_ = false;
+        plan_start_time_second_ = now_in_second();
+
+        // Release the lock and return
+        switch_mutex_.unlock();
+        return;
+    } else {
+        // No lock
+        // Just keep current plan
+        return;
+    }
+}
+
+
+bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::RobotArmMeasurement &measurement,
+                                                    const arm_runner::RobotArmCommand &command) const {
+    return true;
 }
