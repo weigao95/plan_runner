@@ -23,11 +23,13 @@ void arm_runner::RobotPlanBase::keepCurrentConfigurationCommand(
 
 void arm_runner::RobotPlanBase::ComputeCommand(
         const arm_runner::RobotArmMeasurement &measurement,
+        const RobotCommunication& history,
         arm_runner::RobotArmCommand &command
 ) {
     if(status_ == PlanStatus::Running)
-        computeCommand(measurement, command);
+        computeCommand(measurement, history, command);
     else {
+        // Should not happen, send warning
         keepCurrentConfigurationCommand(measurement, command);
     }
 }

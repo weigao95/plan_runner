@@ -6,6 +6,7 @@
 
 #include "arm_runner/plan_common_types.h"
 #include "arm_runner/communication_types.h"
+#include "arm_runner/robot_communication.h"
 
 namespace arm_runner {
 
@@ -25,7 +26,10 @@ namespace arm_runner {
         virtual PlanType GetPlanType() const = 0;
 
         // The accessing interface of supervisor
-        void ComputeCommand(const RobotArmMeasurement& measurement, RobotArmCommand& command);
+        void ComputeCommand(
+                const RobotArmMeasurement& measurement,
+                const RobotCommunication& history,
+                RobotArmCommand& command);
 
     protected:
         // The only thing here is the status
@@ -33,7 +37,10 @@ namespace arm_runner {
 
         // Keep current rbt configuration command
         static void keepCurrentConfigurationCommand(const RobotArmMeasurement& measurement, RobotArmCommand& command);
-        virtual void computeCommand(const RobotArmMeasurement& measurement, RobotArmCommand& command) = 0;
+        virtual void computeCommand(
+                const RobotArmMeasurement& measurement,
+                const RobotCommunication& history,
+                RobotArmCommand& command) = 0;
     };
 
     // The default plan, just stay here
@@ -42,7 +49,10 @@ namespace arm_runner {
         KeepCurrentConfigurationPlan() = default;
         PlanType GetPlanType() const override { return PlanType::KeepCurrentConfiguration; }
     protected:
-        void computeCommand(const RobotArmMeasurement& measurement, RobotArmCommand& command) override {
+        void computeCommand(
+                const RobotArmMeasurement& measurement,
+                const RobotCommunication& history,
+                RobotArmCommand& command) override {
             RobotPlanBase::keepCurrentConfigurationCommand(measurement, command);
         }
     };
