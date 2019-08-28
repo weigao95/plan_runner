@@ -75,5 +75,7 @@ arm_runner::JointTrajectoryPlan::Ptr arm_runner::ConstructJointTrajectoryPlan(
     const Eigen::MatrixXd knot_dot = Eigen::MatrixXd::Zero(num_joints, 1);
     auto plan = std::make_shared<JointTrajectoryPlan>(
             JointTrajectoryPlan::PiecewisePolynomial::Cubic(input_time, knots, knot_dot, knot_dot));
+
+    // Add callback
     return plan;
 }
