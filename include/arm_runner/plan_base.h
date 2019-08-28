@@ -20,7 +20,6 @@ namespace arm_runner {
         // The supervisor would call these methods at initialization, preempt and stopping
         // After calling these method, the plan should finish elegantly.
         virtual void InitializePlan() { status_ = PlanStatus::Running; }
-        virtual void PreemptPlan() { status_ = PlanStatus::Preempted; }
         virtual void StopPlan() { status_ = PlanStatus::Stopped; }
 
         // The management of flags
@@ -33,29 +32,19 @@ namespace arm_runner {
                 const RobotCommunication& history,
                 RobotArmCommand& command);
 
+        // The command that just stay at current config
+        static void KeepCurrentConfigurationCommand(
+            const RobotArmMeasurement& measurement, 
+            RobotArmCommand& command);
+
     protected:
         // The only thing here is the status
         PlanStatus status_;
 
         // Keep current rbt configuration command
-        static void keepCurrentConfigurationCommand(const RobotArmMeasurement& measurement, RobotArmCommand& command);
         virtual void computeCommand(
                 const RobotArmMeasurement& measurement,
                 const RobotCommunication& history,
                 RobotArmCommand& command) = 0;
-    };
-
-    // The default plan, just stay here
-    class KeepCurrentConfigurationPlan : public RobotPlanBase {
-    public:
-        KeepCurrentConfigurationPlan() = default;
-        PlanType GetPlanType() const override { return PlanType::KeepCurrentConfiguration; }
-    protected:
-        void computeCommand(
-                const RobotArmMeasurement& measurement,
-                const RobotCommunication& history,
-                RobotArmCommand& command) override {
-            RobotPlanBase::keepCurrentConfigurationCommand(measurement, command);
-        }
     };
 }

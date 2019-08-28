@@ -4,7 +4,7 @@
 
 #include "arm_runner/plan_base.h"
 
-void arm_runner::RobotPlanBase::keepCurrentConfigurationCommand(
+void arm_runner::RobotPlanBase::KeepCurrentConfigurationCommand(
         const arm_runner::RobotArmMeasurement &measurement,
         arm_runner::RobotArmCommand &command
 ) {
@@ -30,6 +30,6 @@ void arm_runner::RobotPlanBase::ComputeCommand(
         computeCommand(measurement, history, command);
     else {
         // Should not happen, send warning
-        keepCurrentConfigurationCommand(measurement, command);
+        KeepCurrentConfigurationCommand(measurement, command);
     }
 }

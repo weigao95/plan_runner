@@ -10,19 +10,25 @@ namespace arm_runner {
     enum class PlanStatus {
         Waiting,
         Running,
-        Preempted,
         Stopped
     };
 
     // The semantic of the plan
+    // The download plan MUST stay at the final knot after the time of trajectory
     enum class PlanType {
-        KeepCurrentConfiguration,
         JointTrajectoryDownload,
-        JointTrajectoryStreaming,
+        JointPositionStreaming,
         JointTorqueStreaming,
         EETrajectoryDownload,
         EETrajectoryStreaming,
         EEVelocityStreaming,
         EEForceStreaming
     };
+
+    bool is_streaming_plan(PlanType type) {
+        return type == PlanType::JointPositionStreaming 
+                || type == PlanType::JointTorqueStreaming 
+                || type == PlanType::EEVelocityStreaming 
+                || type == PlanType::EEForceStreaming;
+    }
 }

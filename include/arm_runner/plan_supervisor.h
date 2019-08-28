@@ -12,12 +12,19 @@ namespace arm_runner {
 
     class PlanSupervisor {
     protected:
+        // The method to handle plan switch
+        bool shouldSwitchPlan(const RobotArmMeasurement& measurement);
+        void processPlanSwitch(const RobotArmMeasurement& measurement);
+
+        // The processing loop
         void processLoopIter();
     private:
         // The real state
         std::unique_ptr<RobotCommunication> rbt_communication_;
         RobotPlanBase::Ptr rbt_active_plan_;
-        RobotPlanBase::Ptr keep_current_config_;
+
+        // The field for switch to
+        RobotPlanBase::Ptr switch_to_plan_;
 
         // The cache
         RobotArmMeasurement measurement_cache;
