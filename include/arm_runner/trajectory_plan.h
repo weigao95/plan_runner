@@ -3,15 +3,22 @@
 //
 
 #pragma once
-#include "arm_runner/plan_base.h"
+
+#include <memory>
 #include <drake/common/trajectories/piecewise_polynomial.h>
+#include <drake/multibody/rigid_body_tree.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
+
+#include "arm_runner/plan_base.h"
+#include "robot_msgs/JointTrajectoryAction.h"
+
 
 namespace arm_runner {
 
     class JointTrajectoryPlan : public RobotPlanBase {
     public:
+        using Ptr = std::shared_ptr<JointTrajectoryPlan>;
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
         JointTrajectoryPlan(const PiecewisePolynomial& joint_trajectory);
         ~JointTrajectoryPlan() = default;
@@ -46,5 +53,11 @@ namespace arm_runner {
         Eigen::VectorXd q_command_cache, v_command_cache;
     };
 
-
+    // Construct a trajectory plan
+    JointTrajectoryPlan::Ptr ConstructJointTrajectoryPlan(
+        const RigidBodyTree<double>& tree,
+        const robot_msgs::JointTrajectoryGoal::ConstPtr &goal,
+        const RobotArmMeasurement& measurement,
+        const RobotArmCommand& latest_command
+    );
 }

@@ -30,3 +30,48 @@ arm_runner::JointTrajectoryPlan::JointTrajectoryPlan(
     DRAKE_ASSERT(joint_trajectory_.cols() == 1);
     joint_velocity_trajectory_ = joint_trajectory_.derivative(1);
 }
+
+
+arm_runner::JointTrajectoryPlan::Ptr arm_runner::ConstructJointTrajectoryPlan(
+    const RigidBodyTree<double> &tree,
+    const robot_msgs::JointTrajectoryGoal::ConstPtr &goal,
+    const arm_runner::RobotArmMeasurement &measurement,
+    const arm_runner::RobotArmCommand &latest_command
+) {
+    int num_knot_points = goal->trajectory.points.size();
+    int num_joints = tree.get_num_positions();
+    const trajectory_msgs::JointTrajectory &trajectory = goal->trajectory;
+    std::vector<Eigen::MatrixXd> knots(num_knot_points,
+                                       Eigen::MatrixXd::Zero(num_joints, 1));
+    std::map<std::string, int> name_to_idx = tree.computePositionNameToIndexMap();
+
+    std::vector<double> input_time;
+    for (int i = 0; i < num_knot_points; ++i) {
+        const trajectory_msgs::JointTrajectoryPoint &traj_point =
+                trajectory.points[i];
+        for (int j = 0; j < trajectory.joint_names.size(); ++j) {
+            std::string joint_name = trajectory.joint_names[j];
+            if (name_to_idx.count(joint_name) == 0) {
+                continue;
+            }
+
+            int joint_idx = name_to_idx[joint_name];
+            // Treat the matrix at knots[i] as a column vector.
+            if (i == 0) {
+                // Always start moving from the position which we're
+                // currently commanding.
+                knots[0](joint_idx, 0) = measurement.joint_position[j];
+            } else {
+                knots[i](joint_idx, 0) = traj_point.positions[j];
+            }
+        }
+
+        input_time.push_back(traj_point.time_from_start.toSec());
+    }
+
+    // OK
+    const Eigen::MatrixXd knot_dot = Eigen::MatrixXd::Zero(num_joints, 1);
+    auto plan = std::make_shared<JointTrajectoryPlan>(
+            JointTrajectoryPlan::PiecewisePolynomial::Cubic(input_time, knots, knot_dot, knot_dot));
+    return plan;
+}

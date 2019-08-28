@@ -9,6 +9,12 @@
 #include "arm_runner/plan_common_types.h"
 #include "arm_runner/robot_communication.h"
 
+#include "robot_msgs/CartesianTrajectoryAction.h"
+#include "robot_msgs/JointTrajectoryAction.h"
+#include "robot_msgs/GetPlanNumberAction.h"
+#include "robot_msgs/StartStreamingPlan.h"
+
+
 namespace arm_runner {
 
     class PlanSupervisor {
@@ -37,7 +43,8 @@ namespace arm_runner {
             PlanType type;
 
             // The actual data
-
+            robot_msgs::JointTrajectoryGoal::ConstPtr joint_trajectory_goal;
+            robot_msgs::CartesianTrajectoryGoal::ConstPtr cartesian_trajectory_goal;
         } plan_construction_data_;
 
         // These method would read the construction data and can only be accessed on main thread
