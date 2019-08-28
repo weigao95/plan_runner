@@ -13,6 +13,7 @@ namespace arm_runner {
     // The base of the plan
     class RobotPlanBase {
     public:
+        using Ptr = std::shared_ptr<RobotPlanBase>;
         RobotPlanBase() : status_(PlanStatus::Waiting) {};
         virtual ~RobotPlanBase() = default;
 
@@ -24,6 +25,7 @@ namespace arm_runner {
 
         // The management of flags
         virtual PlanType GetPlanType() const = 0;
+        virtual bool HasFinished() const { return false; }
 
         // The accessing interface of supervisor
         void ComputeCommand(
