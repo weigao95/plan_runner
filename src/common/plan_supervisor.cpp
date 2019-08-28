@@ -17,7 +17,7 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& mea
     if (rbt_active_plan_ == nullptr) return true;
 
     // Now the active plan is not NULL
-    if (is_streaming_plan(rbt_active_plan_->GetPlanType()) || rbt_active_plan_->HasFinished())
+    if (is_streaming_plan(rbt_active_plan_->GetPlanType()) || rbt_active_plan_->HasFinished(measurement))
         return true;
 
     // Need to wait the current plan

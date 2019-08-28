@@ -25,7 +25,7 @@ namespace arm_runner {
 
     private:
         // The real state
-        // Can only be mutated in processLoopIter() with main thread
+        // Can only be mutated in main thread
         std::unique_ptr<RobotCommunication> rbt_communication_;
         RobotPlanBase::Ptr rbt_active_plan_;
         double plan_start_time_second_;
