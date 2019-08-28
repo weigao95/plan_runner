@@ -35,6 +35,7 @@ void arm_runner::PlanSupervisor::Start() {
 
 void arm_runner::PlanSupervisor::Stop() {
     rbt_communication_->Stop();
+    plan_end_server_->shutdown();
 }
 
 void arm_runner::PlanSupervisor::ProcessLoopIteration() {
