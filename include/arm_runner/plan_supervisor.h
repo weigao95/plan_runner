@@ -16,6 +16,7 @@
 #include "robot_msgs/JointTrajectoryAction.h"
 #include "robot_msgs/GetPlanNumberAction.h"
 #include "robot_msgs/StartStreamingPlan.h"
+#include "std_srvs/Trigger.h"
 
 
 namespace arm_runner {
@@ -47,7 +48,7 @@ namespace arm_runner {
     private:
         std::timed_mutex switch_mutex_;
         static constexpr int LOOP_MUTEX_TIMEOUT_MS = 5;
-        bool stop_current_;
+        ActionToCurrentPlan action_to_current_plan_;
         struct PlanConstructionData {
             // The flag
             bool valid;
@@ -79,10 +80,12 @@ namespace arm_runner {
         // The handling function
     public:
         void HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoal::ConstPtr &goal);
+        bool HandleEndPlanService(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
     private:
         ros::NodeHandle node_handle_;
         std::shared_ptr<actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>> joint_trajectory_action_;
-        void initializeActions();
+        std::shared_ptr<ros::ServiceServer> plan_end_server_;
+        void initializeServiceActions();
 
 
         // The plan constructor with callbacks

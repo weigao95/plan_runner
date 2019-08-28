@@ -30,6 +30,13 @@ namespace arm_runner {
         EEForceStreaming
     };
 
+    enum class ActionToCurrentPlan {
+        NoAction,
+        NormalStop,
+        SafetyStop,
+        PreemptStop
+    };
+
     inline bool is_streaming_plan(PlanType type) {
         return type == PlanType::JointPositionStreaming 
                 || type == PlanType::JointTorqueStreaming
