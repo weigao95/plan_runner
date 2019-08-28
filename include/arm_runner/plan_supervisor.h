@@ -5,6 +5,8 @@
 #pragma once
 
 #include <mutex>
+#include <drake/multibody/rigid_body_tree.h>
+
 #include "arm_runner/plan_base.h"
 #include "arm_runner/plan_common_types.h"
 #include "arm_runner/robot_communication.h"
@@ -28,6 +30,7 @@ namespace arm_runner {
     private:
         // The real state
         // Can only be mutated in main thread
+        std::shared_ptr<RigidBodyTree<double>> tree_;
         std::unique_ptr<RobotCommunication> rbt_communication_;
         RobotPlanBase::Ptr rbt_active_plan_;
         double plan_start_time_second_;
@@ -48,9 +51,9 @@ namespace arm_runner {
         } plan_construction_data_;
 
         // These method would read the construction data and can only be accessed on main thread
-        RobotPlanBase::Ptr constructNewPlan(const RobotArmMeasurement& measurement);
-        bool shouldSwitchPlan(const RobotArmMeasurement& measurement) const;
-        void processPlanSwitch(const RobotArmMeasurement& measurement);
+        RobotPlanBase::Ptr constructNewPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command);
+        bool shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const;
+        void processPlanSwitch(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command);
 
         // The cache
         RobotArmMeasurement measurement_cache;

@@ -4,6 +4,7 @@
 
 #include "arm_runner/plan_supervisor.h"
 #include "arm_runner/time_utils.h"
+#include "arm_runner/trajectory_plan.h"
 #include <chrono>
 
 
@@ -41,10 +42,10 @@ void arm_runner::PlanSupervisor::processLoopIter() {
     }
 
     // Might need to switch the plan
-    processPlanSwitch(measurement_cache);
+    processPlanSwitch(measurement_cache, command_cache);
 }
 
-bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& measurement) const {
+bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const {
     // Commanded to stop
     if (stop_current_) return true;
 
@@ -63,22 +64,43 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& mea
 }
 
 
-arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(const RobotArmMeasurement& measurement) {
+arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
+    const RobotArmMeasurement& measurement,
+    const RobotArmCommand& latest_command
+) {
+    // If the plan data is valid
     if(!plan_construction_data_.valid)
         return nullptr;
+
+    // Depends on the type
+    switch (plan_construction_data_.type) {
+        case PlanType::JointTrajectory:{
+            auto plan = ConstructJointTrajectoryPlan(
+                    *tree_,
+                    plan_construction_data_.joint_trajectory_goal,
+                    measurement, latest_command
+            );
+            return plan;
+        }
+        default:
+            break;
+    }
 
     // Depends on the type
     return nullptr;
 }
 
 
-void arm_runner::PlanSupervisor::processPlanSwitch(const RobotArmMeasurement& measurement) {
+void arm_runner::PlanSupervisor::processPlanSwitch(
+    const RobotArmMeasurement& measurement,
+    const RobotArmCommand& latest_command
+) {
     // Use a fixed time lock
     using std::chrono::milliseconds;
     if(switch_mutex_.try_lock_for(milliseconds(LOOP_MUTEX_TIMEOUT_MS))) {
         // Now this method has lock
         // Check should I switch
-        if (!shouldSwitchPlan(measurement)) {
+        if (!shouldSwitchPlan(measurement, latest_command)) {
             switch_mutex_.unlock();
             return;
         }
@@ -88,7 +110,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(const RobotArmMeasurement& me
             rbt_active_plan_->StopPlan();
 
         // Construct and switch to the new one
-        rbt_active_plan_ = constructNewPlan(measurement);
+        rbt_active_plan_ = constructNewPlan(measurement, latest_command);
         if(rbt_active_plan_ != nullptr) {
             rbt_active_plan_->InitializePlan();
         }
