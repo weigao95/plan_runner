@@ -20,9 +20,9 @@ namespace arm_runner {
         // The supervisor would call these methods at initialization, preempt and stopping
         // After calling these method, the plan should finish elegantly.
         virtual void InitializePlan() { status_ = PlanStatus::Running; }
-        virtual void StopPlan() {
+        virtual void StopPlan(ActionToCurrentPlan action) {
             for(const auto& callback : stop_callbacks_)
-                callback(this);
+                callback(this, action);
             status_ = PlanStatus::Stopped;
         }
 
@@ -50,7 +50,7 @@ namespace arm_runner {
                 RobotArmCommand& command) = 0;
 
         // The callback function
-        using StoppedCallbackFunction = std::function<void(RobotPlanBase*)>;
+        using StoppedCallbackFunction = std::function<void(RobotPlanBase*, ActionToCurrentPlan latest_action)>;
         std::vector<StoppedCallbackFunction> stop_callbacks_;
     public:
         void AddStoppedCallback(StoppedCallbackFunction func) { stop_callbacks_.emplace_back(std::move(func)); };

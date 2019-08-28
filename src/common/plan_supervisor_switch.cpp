@@ -6,14 +6,12 @@
 #include "arm_runner/time_utils.h"
 #include "arm_runner/trajectory_plan.h"
 
-#include <cstring>
 #include <chrono>
 
 
 // The method for switching
 void arm_runner::PlanSupervisor::initializeSwitchData() {
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
-    memset(&plan_construction_data_, 0, sizeof(plan_construction_data_));
     plan_construction_data_.valid = false;
     plan_construction_data_.joint_trajectory_goal = nullptr;
     plan_construction_data_.cartesian_trajectory_goal = nullptr;
@@ -55,7 +53,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
 
         // Do switching
         if(rbt_active_plan_ != nullptr)
-            rbt_active_plan_->StopPlan();
+            rbt_active_plan_->StopPlan(action_to_current_plan_);
 
         // Construct and switch to the new one
         rbt_active_plan_ = constructNewPlan(input, latest_command);

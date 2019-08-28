@@ -88,7 +88,7 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration() {
         action_to_current_plan_ = ActionToCurrentPlan::SafetyStop;
 
         //Remove these?
-        rbt_active_plan_->StopPlan();
+        rbt_active_plan_->StopPlan(action_to_current_plan_);
         rbt_active_plan_.reset();
     }
 
@@ -138,9 +138,16 @@ arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructJointTraject
         latest_command);
 
     // The finish callback
-    auto finish_callback = [this](RobotPlanBase* robot_plan) -> void {
+    auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {
         robot_msgs::JointTrajectoryResult result;
-        result.status.status = result.status.FINISHED_NORMALLY;
+        if(action == ActionToCurrentPlan::NoAction || action == ActionToCurrentPlan::NormalStop)
+            result.status.status = result.status.FINISHED_NORMALLY;
+        else if(action == ActionToCurrentPlan::SafetyStop)
+            result.status.status = result.status.STOPPED_BY_SAFETY_CHECK;
+        else
+            result.status.status = result.status.ERROR;
+
+        // Send back
         this->joint_trajectory_action_->setSucceeded(result);
     };
     plan->AddStoppedCallback(finish_callback);
