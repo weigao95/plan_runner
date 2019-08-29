@@ -20,7 +20,8 @@ TEST(SimRobotTest, ConstructTest) {
 
 TEST(SimRobotTest, SupervisorConstructTest) {
     using namespace arm_runner;
-    std::unique_ptr<RobotCommunication> robot_arm = std::make_unique<SimulatedRobotArm>();
+    constexpr double simulation_time = 10.0;
+    std::unique_ptr<RobotCommunication> robot_arm = std::make_unique<SimulatedRobotArm>(simulation_time);
 
     // Empty init
     std::vector<std::pair<std::string, std::string>> vector_map;
@@ -44,10 +45,19 @@ TEST(SimRobotTest, SupervisorConstructTest) {
     ros::Duration(0.1).sleep(); // Wait for the measurement
 
     // The main loop
+    auto start_time = std::chrono::system_clock::now();
     ros::Rate rate(100); // 10 hz
     while (!ros::isShuttingDown()) {
         // The iteration
         supervisor.ProcessLoopIteration();
+
+        // Check time
+        auto now = std::chrono::system_clock::now();
+        auto int_s = std::chrono::duration_cast<std::chrono::seconds>(now - start_time);
+        if(int_s.count() > int(simulation_time))
+            break;
+
+        // OK
         rate.sleep();
     }
     supervisor.Stop();
