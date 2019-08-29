@@ -1,2 +1,2 @@
 add_subdirectory(common)
-add_subdirectory(kuka_sim)
+add_subdirectory(simulated_robot)
