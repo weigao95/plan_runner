@@ -17,7 +17,10 @@ void arm_runner::PlanSupervisor::initializeSwitchData() {
 }
 
 
-bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const {
+bool arm_runner::PlanSupervisor::shouldSwitchPlan(
+    const RobotArmMeasurement& measurement,
+    const RobotArmCommand& latest_command
+) const {
     // Commanded to stop
     if (action_to_current_plan_ != ActionToCurrentPlan::NoAction) return true;
 
@@ -37,8 +40,8 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(const RobotArmMeasurement& mea
 
 
 void arm_runner::PlanSupervisor::processPlanSwitch(
-        const CommandInput& input,
-        const RobotArmCommand& latest_command
+    const CommandInput& input,
+    const RobotArmCommand& latest_command
 ) {
     // Use a fixed time lock
     using std::chrono::milliseconds;
@@ -100,7 +103,10 @@ void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::J
     plan_construction_data_.joint_trajectory_goal = goal;
 }
 
-bool arm_runner::PlanSupervisor::HandleEndPlanService(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
+bool arm_runner::PlanSupervisor::HandleEndPlanService(
+    std_srvs::Trigger::Request &req,
+    std_srvs::Trigger::Response &res
+) {
     std::lock_guard<std::timed_mutex> guard(switch_mutex_);
     action_to_current_plan_ = ActionToCurrentPlan::NormalStop;
     res.success = true;

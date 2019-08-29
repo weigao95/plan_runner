@@ -113,7 +113,7 @@ arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
 
     // Depends on the type
     switch (plan_construction_data_.type) {
-        case PlanType::JointTrajectory:{
+        case PlanType::JointTrajectory: {
             return constructJointTrajectoryPlan(input);
         }
         default:

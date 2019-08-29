@@ -38,12 +38,16 @@ namespace arm_runner {
         bool torque_validity;
 
         // Mark everything as invalid
-        void SetInvalid() {
+        void set_invalid() {
             memset(this, 0, sizeof(RobotArmMeasurement));
             position_validity = false;
             velocity_validity = false;
             acceleration_validity = false;
             torque_validity = false;
+        }
+
+        bool is_valid() const {
+            return position_validity;
         }
     };
 
@@ -66,11 +70,16 @@ namespace arm_runner {
         bool torque_validity;
 
         // Mark everything as invalid
-        void SetInvalid() {
+        void set_invalid() {
             memset(this, 0, sizeof(RobotArmCommand));
             position_validity = false;
             velocity_validity = false;
             torque_validity = false;
+        }
+
+        bool is_valid() const {
+            // At least one should be valid
+            return position_validity || velocity_validity || torque_validity;
         }
     };
 }

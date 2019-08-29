@@ -16,7 +16,7 @@ void arm_runner::JointTrajectoryPlan::computeCommand(
     v_command_cache = joint_velocity_trajectory_.value(t);
 
     // Write to command
-    command.SetInvalid();
+    command.set_invalid();
     for(auto i = 0; i < q_command_cache.size(); i++) {
         command.joint_position[i] = q_command_cache[i];
         command.joint_velocities[i] = v_command_cache[i];
