@@ -15,8 +15,6 @@ namespace arm_runner {
     // The communication is by the exchange data struct.
     class SimulatedRobotArm : public RobotCommunication {
     public:
-        explicit SimulatedRobotArm(double simulation_time_second = 10)
-        : simulation_time_second_(simulation_time_second) {};
         SimulatedRobotArm(const std::string& model_urdf, double simulation_time_second);
         ~SimulatedRobotArm() override = default;
         void Start() override;

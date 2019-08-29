@@ -9,19 +9,22 @@
 #include <drake/multibody/parsers/urdf_parser.h>
 
 #include "arm_runner/plan_supervisor.h"
+#include "simulated_robot/common_robot_model.h"
 #include "simulated_robot/simulated_robot.h"
+
 
 TEST(SimRobotTest, ConstructTest) {
     using namespace arm_runner;
-    SimulatedRobotArm robot_arm(10);
-    robot_arm.Start();
-    robot_arm.Stop();
+    auto robot_arm = constructSimulatedKukaDefault(10);
+    robot_arm->Start();
+    robot_arm->Stop();
 }
+
 
 TEST(SimRobotTest, SupervisorConstructTest) {
     using namespace arm_runner;
     constexpr double simulation_time = 10.0;
-    std::unique_ptr<RobotCommunication> robot_arm = std::make_unique<SimulatedRobotArm>(simulation_time);
+    std::unique_ptr<RobotCommunication> robot_arm = constructSimulatedKukaDefault(10);
 
     // Empty init
     std::vector<std::pair<std::string, std::string>> vector_map;
