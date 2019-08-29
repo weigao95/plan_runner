@@ -36,12 +36,12 @@ TEST(SimRobotTest, SupervisorConstructTest) {
             "drake/manipulation/models/iiwa_description/"
             "urdf/iiwa14_polytope_collision.urdf";
     const std::string urdf = drake::FindResourceOrThrow(kModelPath);
-    auto tree = std::make_shared<RigidBodyTree<double>>();
+    auto tree = std::make_unique<RigidBodyTree<double>>();
     drake::parsers::urdf::AddModelInstanceFromUrdfFileToWorld(
             urdf, drake::multibody::joints::kFixed, tree.get());
 
     // Construct the supervisor
-    PlanSupervisor supervisor(tree, std::move(robot_arm), nh);
+    PlanSupervisor supervisor(std::move(tree), std::move(robot_arm), nh);
 
     // The initialization
     supervisor.Start();
