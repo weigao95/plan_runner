@@ -43,6 +43,7 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration() {
     rbt_communication_->GetMeasurement(measurement_cache);
     measurement_cache.time_stamp.since_plan_start_second = 
             measurement_cache.time_stamp.absolute_time_second - plan_start_time_second_;
+    std::cout << "Current time " << measurement_cache.time_stamp.absolute_time_second << std::endl;
 
     // Do computation
     auto q_size = tree_->get_num_positions();
