@@ -21,7 +21,6 @@ namespace arm_runner {
     protected:
         // The shared data
         double simulation_time_second_;
-        const bool visualize_ = true;
         SimulationExchangeData exchanged_data_;
         void getRawMeasurement(RobotArmMeasurement& measurement) override;
         void sendRawCommand(const RobotArmCommand& command) override;
