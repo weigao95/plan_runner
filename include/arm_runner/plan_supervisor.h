@@ -47,7 +47,6 @@ namespace arm_runner {
         // Protected by the lock
     private:
         std::timed_mutex switch_mutex_;
-        static constexpr int LOOP_MUTEX_TIMEOUT_MS = 5;
         ActionToCurrentPlan action_to_current_plan_;
         struct PlanConstructionData {
             // The flag

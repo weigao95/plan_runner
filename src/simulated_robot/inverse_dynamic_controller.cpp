@@ -2,7 +2,7 @@
 // Created by wei on 8/28/19.
 //
 
-#include "inverse_dynamic_controller.h"
+#include "simulated_robot/inverse_dynamic_controller.h"
 
 
 arm_runner::QpInverseDynamicsController::QpInverseDynamicsController(

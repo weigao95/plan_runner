@@ -4,6 +4,9 @@
 
 #include <gtest/gtest.h>
 
+#include "simulated_robot/simulated_robot.h"
+
 TEST(SimRobotTest, ConstructTest) {
-    EXPECT_EQ(1, 0);
+    using namespace arm_runner;
+    SimulatedRobotArm robot_arm(10);
 }

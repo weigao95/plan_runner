@@ -2,9 +2,9 @@
 // Created by wei on 8/28/19.
 //
 
-#include "simulated_robot.h"
-#include "iiwa_common.h"
-#include "inverse_dynamic_controller.h"
+#include "simulated_robot/simulated_robot.h"
+#include "simulated_robot/iiwa_common.h"
+#include "simulated_robot/inverse_dynamic_controller.h"
 
 #include <drake/lcm/drake_lcm.h>
 #include <drake/multibody/rigid_body_tree.h>

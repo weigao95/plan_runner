@@ -14,6 +14,10 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   robot_msgs
+  actionlib
+  actionlib_msgs
+  tf2
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -222,6 +226,7 @@ foreach(test_src ${RUNNER_TEST_SRC})
     catkin_add_gtest(${test_name} "${test_src}")
     target_link_libraries(${test_name} common_lib)
     target_link_libraries(${test_name} simrobot_lib)
+    target_link_libraries(${test_name} ${catkin_LIBRARIES})
     target_link_libraries(${test_name} ${GTEST_BOTH_LIBRARIES})
     target_link_libraries(${test_name} ${CMAKE_THREAD_LIBS_INIT})
 endforeach()

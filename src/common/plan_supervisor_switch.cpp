@@ -4,9 +4,11 @@
 
 #include "arm_runner/plan_supervisor.h"
 #include "arm_runner/trajectory_plan.h"
-
 #include <chrono>
 
+
+// The time for wait for switching lock
+constexpr int LOOP_MUTEX_TIMEOUT_MS = 5;
 
 // The method for switching
 void arm_runner::PlanSupervisor::initializeSwitchData() {

@@ -2,7 +2,7 @@
 // Created by wei on 8/28/19.
 //
 
-#include "iiwa_common.h"
+#include "simulated_robot/iiwa_common.h"
 
 void arm_runner::SetPositionControlledIiwaGains(Eigen::VectorXd *Kp, Eigen::VectorXd *Ki, Eigen::VectorXd *Kd) {
     // All the gains are for acceleration, not directly responsible for generating
