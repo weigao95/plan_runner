@@ -3,7 +3,6 @@
 //
 
 #include "simulated_robot/simulated_robot.h"
-#include "simulated_robot/iiwa_common.h"
 #include "simulated_robot/inverse_dynamic_controller.h"
 
 #include <drake/lcm/drake_lcm.h>
@@ -18,8 +17,19 @@
 #include <drake/multibody/rigid_body_plant/rigid_body_plant.h>
 #include <drake/multibody/rigid_body_tree_construction.h>
 #include <drake/systems/analysis/simulator.h>
-#include <drake/systems/framework/diagram.h>
 #include <drake/systems/framework/diagram_builder.h>
+
+
+arm_runner::SimulatedRobotArm::SimulatedRobotArm(
+    const std::string &model_urdf,
+    double simulation_time_second
+) : simulation_time_second_(simulation_time_second)
+{
+    tree_ = std::make_unique<RigidBodyTree<double>>();
+    drake::parsers::urdf::AddModelInstanceFromUrdfFileToWorld(
+            model_urdf, drake::multibody::joints::kFixed, tree_.get());
+    drake::multibody::AddFlatTerrainToWorld(tree_.get(), 100., 10.);
+}
 
 
 void arm_runner::SimulatedRobotArm::getRawMeasurement(RobotArmMeasurement &measurement) {
@@ -51,7 +61,7 @@ void arm_runner::SimulatedRobotArm::runSimulation() {
     systems::RigidBodyPlant<double>* plant = nullptr;
 
     // The plant
-    const char* kModelPath =
+    /*const char* kModelPath =
             "drake/manipulation/models/iiwa_description/"
             "urdf/iiwa14_polytope_collision.urdf";
     const std::string urdf = FindResourceOrThrow(kModelPath);
@@ -63,12 +73,14 @@ void arm_runner::SimulatedRobotArm::runSimulation() {
         multibody::AddFlatTerrainToWorld(tree.get(), 100., 10.);
         plant = builder.template AddSystem<systems::RigidBodyPlant<double>>(
                 std::move(tree));
-    }
+    }*/
+    plant = builder.template AddSystem<systems::RigidBodyPlant<double>>(std::move(tree_));
     const RigidBodyTree<double>& tree = plant->get_rigid_body_tree();
 
     // The controller
-    Eigen::VectorXd iiwa_kp, iiwa_kd, iiwa_ki;
-    SetPositionControlledIiwaGains(&iiwa_kp, &iiwa_ki, &iiwa_kd);
+    auto n_position = tree.get_num_positions();
+    Eigen::VectorXd iiwa_kp, iiwa_kd; iiwa_kp.resize(n_position); iiwa_kd.resize(n_position);
+    QpInverseDynamicsController::SetPositionControlledDefaultGains(&iiwa_kp, &iiwa_kd);
     auto controller = builder.template AddSystem<QpInverseDynamicsController>(
         tree.Clone(), exchanged_data_,
         iiwa_kp, iiwa_kd
