@@ -74,11 +74,18 @@ void arm_runner::SimulatedRobotArm::runSimulation() {
         iiwa_kp, iiwa_kd
     );
 
+    // Creates and adds LCM publisher for visualization.
+    auto vis = builder.template AddSystem<systems::DrakeVisualizer>(tree, &lcm);
+    vis->set_publish_period(0.005);
+
     // A set of connection
     builder.Connect(plant->state_output_port(),
                     controller->get_input_port_estimated_state());
     builder.Connect(controller->get_output_port_torque_commanded(),
                     plant->actuator_command_input_port());
+
+    // Connect if the flag is on
+    builder.Connect(plant->state_output_port(), vis->get_input_port(0));
 
     // The system
     auto sys = builder.Build();

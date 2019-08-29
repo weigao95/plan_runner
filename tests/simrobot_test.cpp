@@ -8,7 +8,7 @@
 
 TEST(SimRobotTest, ConstructTest) {
     using namespace arm_runner;
-    SimulatedRobotArm robot_arm(1);
+    SimulatedRobotArm robot_arm(10);
     robot_arm.Start();
     robot_arm.Stop();
 }
