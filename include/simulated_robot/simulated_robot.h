@@ -13,14 +13,14 @@ namespace arm_runner {
     // The communication is by the exchange data struct.
     class SimulatedRobotArm : public RobotCommunication {
     public:
-        explicit SimulatedRobotArm(double simulation_time) : simulation_time_(simulation_time) {};
+        explicit SimulatedRobotArm(double simulation_time_second = 10) : simulation_time_second_(simulation_time_second) {};
         ~SimulatedRobotArm() override = default;
         void Start() override;
         void Stop() override;
 
     protected:
         // The shared data
-        double simulation_time_;
+        double simulation_time_second_;
         const bool visualize_ = false;
         SimulationExchangeData exchanged_data_;
         void getRawMeasurement(RobotArmMeasurement& measurement) override;

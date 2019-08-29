@@ -20,7 +20,6 @@
 #include <drake/systems/analysis/simulator.h>
 #include <drake/systems/framework/diagram.h>
 #include <drake/systems/framework/diagram_builder.h>
-#include <drake/systems/framework/leaf_system.h>
 
 
 void arm_runner::SimulatedRobotArm::getRawMeasurement(RobotArmMeasurement &measurement) {
@@ -87,4 +86,7 @@ void arm_runner::SimulatedRobotArm::runSimulation() {
     simulator.set_publish_every_time_step(false);
     simulator.set_target_realtime_rate(1.0);
     simulator.Initialize();
+
+    // Start run simulation
+    simulator.StepTo(simulation_time_second_);
 }
