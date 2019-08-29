@@ -6,22 +6,24 @@
 #include <ros/ros.h>
 #include <drake/common/find_resource.h>
 #include <drake/multibody/rigid_body_tree.h>
-#include <drake/multibody/parsers/urdf_parser.h>
 
 #include "arm_runner/plan_supervisor.h"
+#include "simulated_robot/common_robot_model.h"
 #include "simulated_robot/simulated_robot.h"
+
 
 TEST(SimRobotTest, ConstructTest) {
     using namespace arm_runner;
-    SimulatedRobotArm robot_arm(10);
-    robot_arm.Start();
-    robot_arm.Stop();
+    auto robot_arm = constructSimulatedKukaDefault(10);
+    robot_arm->Start();
+    robot_arm->Stop();
 }
+
 
 TEST(SimRobotTest, SupervisorConstructTest) {
     using namespace arm_runner;
-    constexpr double simulation_time = 10.0;
-    std::unique_ptr<RobotCommunication> robot_arm = std::make_unique<SimulatedRobotArm>(simulation_time);
+    constexpr double simulation_time = 1.0;
+    std::unique_ptr<RobotCommunication> robot_arm = constructSimulatedKukaDefault(simulation_time);
 
     // Empty init
     std::vector<std::pair<std::string, std::string>> vector_map;
@@ -29,16 +31,8 @@ TEST(SimRobotTest, SupervisorConstructTest) {
     ros::NodeHandle nh("plan_runner"); // sets the node's namespace
 
     // The rigid body tree
-    const char* kModelPath =
-            "drake/manipulation/models/iiwa_description/"
-            "urdf/iiwa14_polytope_collision.urdf";
-    const std::string urdf = drake::FindResourceOrThrow(kModelPath);
-    auto tree = std::make_shared<RigidBodyTree<double>>();
-    drake::parsers::urdf::AddModelInstanceFromUrdfFileToWorld(
-            urdf, drake::multibody::joints::kFixed, tree.get());
-
-    // Construct the supervisor
-    PlanSupervisor supervisor(tree, std::move(robot_arm), nh);
+    auto tree = constructDefaultKukaRBT();
+    PlanSupervisor supervisor(std::move(tree), std::move(robot_arm), nh);
 
     // The initialization
     supervisor.Start();
@@ -46,7 +40,7 @@ TEST(SimRobotTest, SupervisorConstructTest) {
 
     // The main loop
     auto start_time = std::chrono::system_clock::now();
-    ros::Rate rate(100); // 10 hz
+    ros::Rate rate(100); // 100 hz
     while (!ros::isShuttingDown()) {
         // The iteration
         supervisor.ProcessLoopIteration();

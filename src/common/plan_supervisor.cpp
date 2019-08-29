@@ -7,7 +7,7 @@
 
 
 arm_runner::PlanSupervisor::PlanSupervisor(
-    std::shared_ptr<RigidBodyTree<double>> tree,
+    std::unique_ptr<RigidBodyTree<double>> tree,
     std::unique_ptr<RobotCommunication> robot_hw,
     ros::NodeHandle nh
 ) : tree_(std::move(tree)),
@@ -61,7 +61,7 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration() {
     CommandInput input;
     input.latest_measurement = &measurement_cache;
     input.robot_history = rbt_communication_.get();
-    input.robot_rbt = tree_;
+    input.robot_rbt = tree_.get();
     input.measured_state_cache = cache_measured_state.get();
 
     // Compute command

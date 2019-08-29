@@ -24,7 +24,7 @@ namespace arm_runner {
     class PlanSupervisor {
     public:
         PlanSupervisor(
-            std::shared_ptr<RigidBodyTree<double>> tree,
+            std::unique_ptr<RigidBodyTree<double>> tree,
             std::unique_ptr<RobotCommunication> robot_hw,
             ros::NodeHandle nh);
 
@@ -36,7 +36,7 @@ namespace arm_runner {
 
         // The real state that can only be mutated in main thread
     private:
-        std::shared_ptr<RigidBodyTree<double>> tree_;
+        std::unique_ptr<RigidBodyTree<double>> tree_;
         std::unique_ptr<RobotCommunication> rbt_communication_;
         RobotPlanBase::Ptr rbt_active_plan_;
         double plan_start_time_second_;

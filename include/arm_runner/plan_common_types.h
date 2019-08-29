@@ -49,7 +49,7 @@ namespace arm_runner {
     struct CommandInput {
         const RobotArmMeasurement* latest_measurement;
         const RobotCommunication* robot_history;
-        std::shared_ptr<const RigidBodyTree<double>> robot_rbt;
+        const RigidBodyTree<double>* robot_rbt;
         const KinematicsCache<double>* measured_state_cache;
     };
 }

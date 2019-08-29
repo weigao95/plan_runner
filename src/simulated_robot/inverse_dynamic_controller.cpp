@@ -49,11 +49,10 @@ void arm_runner::QpInverseDynamicsController::DoCalcDiscreteVariableUpdates(
     std::lock_guard<std::mutex> guard(exchange_data_.mutex);
 
     // Discrete state is the output (robot torque)
-    using Vector7d = Eigen::Matrix<double, 7, 1>;
     const Eigen::VectorXd x = (*this->EvalVectorInput(context,
                                     get_input_port_estimated_state().get_index())).CopyToVector();
-    const Vector7d q = x.head(nq_);
-    const Vector7d v = x.tail(nq_);
+    const Eigen::VectorXd q = x.head(nq_);
+    const Eigen::VectorXd v = x.tail(nq_);
     auto current_time_second = context.get_time();
 
     // Create tree alias, so that clion doesn't complain about unique pointers.
@@ -63,27 +62,30 @@ void arm_runner::QpInverseDynamicsController::DoCalcDiscreteVariableUpdates(
     tree.doKinematics(cache, true);
 
     // Desired position tracking
-    Vector7d err_q; err_q.setZero();
+    Eigen::VectorXd err_q; err_q.resize(nq_); err_q.setZero();
     if(exchange_data_.latest_command.position_validity) {
-        Eigen::Map<Vector7d> q_ref = Eigen::Map<Vector7d>(exchange_data_.latest_command.joint_position);
+        Eigen::Map<Eigen::VectorXd> q_ref =
+                Eigen::Map<Eigen::VectorXd>(exchange_data_.latest_command.joint_position, nq_);
         err_q = q_ref - q;
     }
 
     // Desired velocity tracking
-    Vector7d err_v; err_v.setZero();
+    Eigen::VectorXd err_v; err_v.setZero();
     if(exchange_data_.latest_command.velocity_validity) {
-        Eigen::Map<Vector7d> v_ref = Eigen::Map<Vector7d>(exchange_data_.latest_command.joint_velocities);
+        Eigen::Map<Eigen::VectorXd> v_ref =
+                Eigen::Map<Eigen::VectorXd>(exchange_data_.latest_command.joint_velocities, nq_);
         err_v = v_ref - v;
     }
 
     // Compute the feedforward terms
     RigidBodyTree<double>::BodyToWrenchMap external_wrenches;
     Eigen::VectorXd vd_commanded = kp_.array() * err_q.array() + kd_.array() * err_v.array();
-    Vector7d tau = tree.inverseDynamics(cache, external_wrenches, vd_commanded);
+    Eigen::VectorXd tau = tree.inverseDynamics(cache, external_wrenches, vd_commanded);
 
     // Add reference command
     if(exchange_data_.latest_command.torque_validity) {
-        Eigen::Map<Vector7d> tau_ref = Eigen::Map<Vector7d>(exchange_data_.latest_command.joint_torque);
+        Eigen::Map<Eigen::VectorXd> tau_ref =
+                Eigen::Map<Eigen::VectorXd>(exchange_data_.latest_command.joint_torque, nq_);
         tau += tau_ref;
     }
 
@@ -99,4 +101,22 @@ void arm_runner::QpInverseDynamicsController::DoCalcDiscreteVariableUpdates(
 
     // Handin to drake
     discrete_state->get_mutable_vector().SetFromVector(tau);
+}
+
+
+void arm_runner::QpInverseDynamicsController::SetPositionControlledDefaultGains(
+    Eigen::VectorXd *Kp,
+    Eigen::VectorXd *Kd
+) {
+    // All the gains are for acceleration, not directly responsible for generating
+    // torques. These are set to high values to ensure good tracking. These gains
+    // are picked arbitrarily.
+    for(auto i = 0; i < Kp->size(); i++) {
+        (*Kp)[i] = 100;
+    }
+    Kd->resize(Kp->size());
+    for (auto i = 0; i < Kp->size(); i++) {
+        // Critical damping gains.
+        (*Kd)[i] = 2 * std::sqrt((*Kp)[i]);
+    }
 }
