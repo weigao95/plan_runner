@@ -12,20 +12,15 @@
 #include <drake/common/drake_assert.h>
 #include <drake/common/find_resource.h>
 #include <drake/common/text_logging.h>
-#include <drake/common/text_logging_gflags.h>
 #include <drake/multibody/parsers/urdf_parser.h>
 #include <drake/multibody/rigid_body_plant/drake_visualizer.h>
 #include <drake/multibody/rigid_body_plant/frame_visualizer.h>
 #include <drake/multibody/rigid_body_plant/rigid_body_plant.h>
 #include <drake/multibody/rigid_body_tree_construction.h>
 #include <drake/systems/analysis/simulator.h>
-#include <drake/systems/controllers/inverse_dynamics_controller.h>
 #include <drake/systems/framework/diagram.h>
 #include <drake/systems/framework/diagram_builder.h>
 #include <drake/systems/framework/leaf_system.h>
-#include <drake/systems/lcm/lcm_publisher_system.h>
-#include <drake/systems/lcm/lcm_subscriber_system.h>
-#include <drake/systems/primitives/constant_vector_source.h>
 
 
 void arm_runner::SimulatedRobotArm::getRawMeasurement(RobotArmMeasurement &measurement) {
