@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED)
+find_package(Threads)
 find_package(yaml-cpp REQUIRED)
 
 # The drake library
@@ -215,6 +216,15 @@ add_subdirectory(src)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
+file(GLOB RUNNER_TEST_SRC tests/*_test.cpp)
+foreach(test_src ${RUNNER_TEST_SRC})
+    get_filename_component(test_name ${test_src} NAME_WE)
+    catkin_add_gtest(${test_name} "${test_src}")
+    target_link_libraries(${test_name} common_lib)
+    target_link_libraries(${test_name} simrobot_lib)
+    target_link_libraries(${test_name} ${GTEST_BOTH_LIBRARIES})
+    target_link_libraries(${test_name} ${CMAKE_THREAD_LIBS_INIT})
+endforeach()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
