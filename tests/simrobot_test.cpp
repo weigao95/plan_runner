@@ -22,8 +22,8 @@ TEST(SimRobotTest, ConstructTest) {
 
 TEST(SimRobotTest, SupervisorConstructTest) {
     using namespace arm_runner;
-    constexpr double simulation_time = 10.0;
-    std::unique_ptr<RobotCommunication> robot_arm = constructSimulatedKukaDefault(10);
+    constexpr double simulation_time = 1.0;
+    std::unique_ptr<RobotCommunication> robot_arm = constructSimulatedKukaDefault(simulation_time);
 
     // Empty init
     std::vector<std::pair<std::string, std::string>> vector_map;
@@ -40,7 +40,7 @@ TEST(SimRobotTest, SupervisorConstructTest) {
 
     // The main loop
     auto start_time = std::chrono::system_clock::now();
-    ros::Rate rate(100); // 10 hz
+    ros::Rate rate(100); // 100 hz
     while (!ros::isShuttingDown()) {
         // The iteration
         supervisor.ProcessLoopIteration();
