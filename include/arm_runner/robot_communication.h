@@ -24,6 +24,7 @@ namespace arm_runner {
         virtual void Stop() {}
 
         // The measure and command interface
+        // These functions are NOT thread-safe
         void GetMeasurement(RobotArmMeasurement& measurement);
         void SendCommand(const RobotArmCommand& command);
 
