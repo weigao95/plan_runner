@@ -3,8 +3,30 @@
 //
 
 #include "simulated_robot.h"
+#include "iiwa_common.h"
+#include "inverse_dynamic_controller.h"
 
+#include <drake/lcm/drake_lcm.h>
 #include <drake/multibody/rigid_body_tree.h>
+#include <drake/multibody/rigid_body_plant/rigid_body_plant.h>
+#include <drake/common/drake_assert.h>
+#include <drake/common/find_resource.h>
+#include <drake/common/text_logging.h>
+#include <drake/common/text_logging_gflags.h>
+#include <drake/multibody/parsers/urdf_parser.h>
+#include <drake/multibody/rigid_body_plant/drake_visualizer.h>
+#include <drake/multibody/rigid_body_plant/frame_visualizer.h>
+#include <drake/multibody/rigid_body_plant/rigid_body_plant.h>
+#include <drake/multibody/rigid_body_tree_construction.h>
+#include <drake/systems/analysis/simulator.h>
+#include <drake/systems/controllers/inverse_dynamics_controller.h>
+#include <drake/systems/framework/diagram.h>
+#include <drake/systems/framework/diagram_builder.h>
+#include <drake/systems/framework/leaf_system.h>
+#include <drake/systems/lcm/lcm_publisher_system.h>
+#include <drake/systems/lcm/lcm_subscriber_system.h>
+#include <drake/systems/primitives/constant_vector_source.h>
+
 
 void arm_runner::SimulatedRobotArm::getRawMeasurement(RobotArmMeasurement &measurement) {
     std::lock_guard<std::mutex> guard(exchanged_data_.mutex);
@@ -16,4 +38,58 @@ void arm_runner::SimulatedRobotArm::sendRawCommand(const arm_runner::RobotArmCom
     std::lock_guard<std::mutex> guard(exchanged_data_.mutex);
     DRAKE_ASSERT(command.is_valid());
     exchanged_data_.latest_command = command;
+}
+
+void arm_runner::SimulatedRobotArm::Start() {
+    simulation_thread_ = std::thread(&SimulatedRobotArm::runSimulation, this);
+}
+
+void arm_runner::SimulatedRobotArm::Stop() {
+    if(simulation_thread_.joinable())
+        simulation_thread_.join();
+}
+
+void arm_runner::SimulatedRobotArm::runSimulation() {
+    // Use drake namespace
+    using namespace drake;
+    drake::lcm::DrakeLcm lcm;
+    systems::DiagramBuilder<double> builder;
+    systems::RigidBodyPlant<double>* plant = nullptr;
+
+    // The plant
+    const char* kModelPath =
+            "drake/manipulation/models/iiwa_description/"
+            "urdf/iiwa14_polytope_collision.urdf";
+    const std::string urdf = FindResourceOrThrow(kModelPath);
+    {
+        // Construct the tree
+        auto tree = std::make_unique<RigidBodyTree<double>>();
+        parsers::urdf::AddModelInstanceFromUrdfFileToWorld(
+                urdf, multibody::joints::kFixed, tree.get());
+        multibody::AddFlatTerrainToWorld(tree.get(), 100., 10.);
+        plant = builder.template AddSystem<systems::RigidBodyPlant<double>>(
+                std::move(tree));
+    }
+    const RigidBodyTree<double>& tree = plant->get_rigid_body_tree();
+
+    // The controller
+    Eigen::VectorXd iiwa_kp, iiwa_kd, iiwa_ki;
+    SetPositionControlledIiwaGains(&iiwa_kp, &iiwa_ki, &iiwa_kd);
+    auto controller = builder.template AddSystem<QpInverseDynamicsController>(
+        tree.Clone(), exchanged_data_,
+        iiwa_kp, iiwa_kd
+    );
+
+    // A set of connection
+    builder.Connect(plant->state_output_port(),
+                    controller->get_input_port_estimated_state());
+    builder.Connect(controller->get_output_port_torque_commanded(),
+                    plant->actuator_command_input_port());
+
+    // The system
+    auto sys = builder.Build();
+    systems::Simulator<double> simulator(*sys);
+    simulator.set_publish_every_time_step(false);
+    simulator.set_target_realtime_rate(1.0);
+    simulator.Initialize();
 }
