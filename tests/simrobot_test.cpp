@@ -6,7 +6,6 @@
 #include <ros/ros.h>
 #include <drake/common/find_resource.h>
 #include <drake/multibody/rigid_body_tree.h>
-#include <drake/multibody/parsers/urdf_parser.h>
 
 #include "arm_runner/plan_supervisor.h"
 #include "simulated_robot/common_robot_model.h"
@@ -32,15 +31,7 @@ TEST(SimRobotTest, SupervisorConstructTest) {
     ros::NodeHandle nh("plan_runner"); // sets the node's namespace
 
     // The rigid body tree
-    const char* kModelPath =
-            "drake/manipulation/models/iiwa_description/"
-            "urdf/iiwa14_polytope_collision.urdf";
-    const std::string urdf = drake::FindResourceOrThrow(kModelPath);
-    auto tree = std::make_unique<RigidBodyTree<double>>();
-    drake::parsers::urdf::AddModelInstanceFromUrdfFileToWorld(
-            urdf, drake::multibody::joints::kFixed, tree.get());
-
-    // Construct the supervisor
+    auto tree = constructDefaultKukaRBT();
     PlanSupervisor supervisor(std::move(tree), std::move(robot_arm), nh);
 
     // The initialization
