@@ -83,10 +83,6 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration() {
     // Invalidate the command if not correct
     if(!command_safe && rbt_active_plan_ != nullptr) {
         action_to_current_plan_ = ActionToCurrentPlan::SafetyStop;
-
-        //Remove these?
-        rbt_active_plan_->StopPlan(action_to_current_plan_);
-        rbt_active_plan_.reset();
     }
 
     // Might need to switch the plan
