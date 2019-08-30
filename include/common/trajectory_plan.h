@@ -28,7 +28,6 @@ namespace arm_runner {
         // The method in base class
         PlanType GetPlanType() const override { return PlanType::JointTrajectory; }
         bool HasFinished(const RobotArmMeasurement& measurement) const override {
-            ROS_INFO("Inside JointTrajectoryPlan::HasFinished");
             return measurement.time_stamp.since_plan_start_second >= TrajectoryDuration();
         }
 

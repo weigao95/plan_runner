@@ -38,6 +38,10 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(
         return true;
     }
 
+    // Current no plan, a new plan is valid
+    if (rbt_active_plan_ == nullptr && plan_construction_data_.valid)
+        return true;
+
     // Other cases, just false
     return false;
 }
@@ -68,7 +72,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     // Construct and switch to the new one
     rbt_active_plan_ = constructNewPlan(input, latest_command);
     if(rbt_active_plan_ != nullptr) {
-        ROS_INFO("Construct Plan %d", rbt_active_plan_->plan_number);
+
         rbt_active_plan_->InitializePlan();
     }
 
@@ -133,9 +137,8 @@ void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::J
 
     // Wait for the task being accomplished
     do {
-        constexpr int WAIT_RESULT_TIME_MS = 1000;
+        constexpr int WAIT_RESULT_TIME_MS = 300;
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_RESULT_TIME_MS));
-        ROS_INFO("Still waiting where my id is %d", current_plan_number);
 
         // Read the status
         bool current_plan_in_queue = false;
