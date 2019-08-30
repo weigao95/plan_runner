@@ -80,13 +80,8 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration() {
     // Send to robot
     rbt_communication_->SendCommand(command_cache);
 
-    // Invalidate the command if not correct
-    if(!command_safe && rbt_active_plan_ != nullptr) {
-        action_to_current_plan_ = ActionToCurrentPlan::SafetyStop;
-    }
-
     // Might need to switch the plan
-    processPlanSwitch(input, command_cache);
+    processPlanSwitch(input, command_cache, command_safe);
 }
 
 

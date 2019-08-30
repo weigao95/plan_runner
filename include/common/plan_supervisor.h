@@ -46,7 +46,7 @@ namespace arm_runner {
         // The members for switching, might be accessed by other thread
         // Protected by the lock
     private:
-        std::timed_mutex switch_mutex_;
+        std::mutex switch_mutex_;
         ActionToCurrentPlan action_to_current_plan_;
         struct PlanConstructionData {
             // The flag
@@ -62,7 +62,7 @@ namespace arm_runner {
 
         // These method would read the construction data and can only be accessed on main thread
         bool shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const;
-        void processPlanSwitch(const CommandInput& input, const RobotArmCommand& latest_command);
+        void processPlanSwitch(const CommandInput& input, const RobotArmCommand& latest_command, bool command_safety);
 
         // The member to maintain the queue of accomplished tasks
     private:

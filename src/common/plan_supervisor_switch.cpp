@@ -44,41 +44,37 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(
 
 void arm_runner::PlanSupervisor::processPlanSwitch(
     const CommandInput& input,
-    const RobotArmCommand& latest_command
+    const RobotArmCommand& latest_command,
+    bool command_safety
 ) {
-    // Use a fixed time lock
-    using std::chrono::milliseconds;
-    if(switch_mutex_.try_lock_for(milliseconds(LOOP_MUTEX_TIMEOUT_MS))) {
-        // Now this method has lock
-        // Check should I switch
-        if (!shouldSwitchPlan(*input.latest_measurement, latest_command)) {
-            switch_mutex_.unlock();
-            return;
-        }
+    // It's OK as other operation on this lock is rather small
+    std::lock_guard<std::mutex> guard(switch_mutex_);
 
-        // Do switching
-        if(rbt_active_plan_ != nullptr)
-            rbt_active_plan_->StopPlan(action_to_current_plan_);
+    // Command is unsafe
+    if(!command_safety)
+        action_to_current_plan_ = ActionToCurrentPlan::SafetyStop;
 
-        // Construct and switch to the new one
-        rbt_active_plan_ = constructNewPlan(input, latest_command);
-        if(rbt_active_plan_ != nullptr) {
-            rbt_active_plan_->InitializePlan();
-        }
-
-        // Cleanup
-        plan_construction_data_.valid = false;
-        action_to_current_plan_ = ActionToCurrentPlan::NoAction;
-        plan_start_time_second_ = input.latest_measurement->time_stamp.absolute_time_second;
-
-        // Release the lock and return
+    // Now this method has lock
+    // Check should I switch
+    if (!shouldSwitchPlan(*input.latest_measurement, latest_command)) {
         switch_mutex_.unlock();
         return;
-    } else {
-        // No lock
-        // Just keep current plan
-        return;
     }
+
+    // Do switching
+    if(rbt_active_plan_ != nullptr)
+        rbt_active_plan_->StopPlan(action_to_current_plan_);
+
+    // Construct and switch to the new one
+    rbt_active_plan_ = constructNewPlan(input, latest_command);
+    if(rbt_active_plan_ != nullptr) {
+        rbt_active_plan_->InitializePlan();
+    }
+
+    // Cleanup
+    plan_construction_data_.valid = false;
+    action_to_current_plan_ = ActionToCurrentPlan::NoAction;
+    plan_start_time_second_ = input.latest_measurement->time_stamp.absolute_time_second;
 }
 
 
@@ -173,7 +169,7 @@ bool arm_runner::PlanSupervisor::HandleEndPlanService(
     std_srvs::Trigger::Request &req,
     std_srvs::Trigger::Response &res
 ) {
-    std::lock_guard<std::timed_mutex> guard(switch_mutex_);
+    std::lock_guard<std::mutex> guard(switch_mutex_);
     action_to_current_plan_ = ActionToCurrentPlan::NormalStop;
     res.success = true;
     return true;
