@@ -69,11 +69,11 @@ void arm_runner::SimulatedRobotArm::Start() {
     while(true) {
         // Read the measurement
         exchanged_data_.mutex.lock();
-        bool measuremeent_valid = exchanged_data_.latest_measurement.is_valid();
+        bool measurement_valid = exchanged_data_.latest_measurement.is_valid();
         exchanged_data_.mutex.unlock();
 
         // Break if ok
-        if(measuremeent_valid)
+        if(measurement_valid)
             break;
         else {
             constexpr int WAIT_MEASUREMENT_SLEEP_MS = 10;
