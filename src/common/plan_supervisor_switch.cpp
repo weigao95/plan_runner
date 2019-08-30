@@ -3,7 +3,7 @@
 //
 
 #include "common/plan_supervisor.h"
-#include "common/trajectory_plan.h"
+#include "common/joint_trajectory_plan.h"
 #include <chrono>
 
 

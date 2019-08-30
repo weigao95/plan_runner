@@ -2,7 +2,7 @@
 // Created by wei on 8/28/19.
 //
 
-#include "common/trajectory_plan.h"
+#include "common/joint_trajectory_plan.h"
 
 
 arm_runner::JointTrajectoryPlan::JointTrajectoryPlan(
