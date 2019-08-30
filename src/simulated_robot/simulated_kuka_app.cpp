@@ -4,6 +4,7 @@
 
 #include <string>
 #include <memory>
+#include <chrono>
 #include <ros/ros.h>
 #include <drake/common/find_resource.h>
 #include <drake/multibody/rigid_body_tree.h>
@@ -43,12 +44,26 @@ int main(int argc, char* argv[]) {
     supervisor.Start();
     ROS_INFO("Simulated robot fully started for %f sceonds!", simulation_time);
 
+    // The counting
+    long average = 0;
+    long max_time = 0;
+    int iteration = 0;
+
     // The main loop
     auto start_time = std::chrono::system_clock::now();
     ros::Rate rate(100); // 100 hz
     while (!ros::isShuttingDown()) {
         // The iteration
+        auto before = std::chrono::system_clock::now();
         supervisor.ProcessLoopIteration();
+        auto after = std::chrono::system_clock::now();
+        auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(after - before).count();
+
+        // Update
+        if(duration_ns > max_time)
+            max_time = duration_ns;
+        iteration += 1;
+        average += duration_ns;
 
         // Check time
         auto now = std::chrono::system_clock::now();
@@ -61,5 +76,11 @@ int main(int argc, char* argv[]) {
         ros::spinOnce();
         rate.sleep();
     }
+
+    // Output
+    std::cout << "Max in ns is " << max_time << std::endl;
+    std::cout << "Average in ns is " << double(average) / double(iteration) << std::endl;
+    std::cout << "The iterations number is " << iteration << std::endl;
+    std::cout << "" << average << std::endl;
     supervisor.Stop();
 }
