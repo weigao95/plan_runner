@@ -10,6 +10,8 @@
 #include <trajectory_msgs/JointTrajectory.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
 
+#include <ros/ros.h>
+
 #include "common/plan_base.h"
 #include "robot_msgs/JointTrajectoryAction.h"
 
@@ -20,7 +22,7 @@ namespace arm_runner {
     public:
         using Ptr = std::shared_ptr<JointTrajectoryPlan>;
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
-        JointTrajectoryPlan(const PiecewisePolynomial& joint_trajectory);
+        JointTrajectoryPlan(const PiecewisePolynomial& joint_trajectory, int plan_number);
         ~JointTrajectoryPlan() = default;
 
         // The method in base class
@@ -54,6 +56,7 @@ namespace arm_runner {
 
     // Construct a trajectory plan
     JointTrajectoryPlan::Ptr ConstructJointTrajectoryPlan(
+        int plan_number,
         const RigidBodyTree<double>& tree,
         const robot_msgs::JointTrajectoryGoal::ConstPtr &goal,
         const RobotArmMeasurement& measurement,

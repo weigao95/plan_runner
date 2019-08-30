@@ -46,12 +46,13 @@ namespace arm_runner {
         // The members for switching, might be accessed by other thread
         // Protected by the lock
     private:
-        std::timed_mutex switch_mutex_;
+        std::mutex switch_mutex_;
         ActionToCurrentPlan action_to_current_plan_;
         struct PlanConstructionData {
             // The flag
             bool valid;
             PlanType type;
+            int plan_number;
 
             // The actual data
             robot_msgs::JointTrajectoryGoal::ConstPtr joint_trajectory_goal;
@@ -61,7 +62,24 @@ namespace arm_runner {
 
         // These method would read the construction data and can only be accessed on main thread
         bool shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const;
-        void processPlanSwitch(const CommandInput& input, const RobotArmCommand& latest_command);
+        void processPlanSwitch(const CommandInput& input, const RobotArmCommand& latest_command, bool command_safety);
+
+        // The member to maintain the queue of accomplished tasks
+    private:
+        struct FinishedPlanRecord {
+            int plan_number;
+            ActionToCurrentPlan action_to_plan;
+        };
+        struct FinishedPlanQueue {
+            std::mutex mutex;
+            std::vector<FinishedPlanRecord> queue;
+        } finished_task_queue_;
+        void lockAndCheckPlanStatus(
+                int plan_number,
+                bool& current_plan_in_queue,
+                bool& new_plan_in_queue,
+                ActionToCurrentPlan& action_to_plan);
+        void lockAndEnQueue(FinishedPlanRecord record);
 
 
         // The cache
@@ -90,6 +108,6 @@ namespace arm_runner {
         // The plan constructor with callbacks
     private:
         RobotPlanBase::Ptr constructNewPlan(const CommandInput& input, const RobotArmCommand& latest_command);
-        RobotPlanBase::Ptr constructJointTrajectoryPlan(const CommandInput& input);
+        RobotPlanBase::Ptr constructJointTrajectoryPlan(const CommandInput& input, int plan_number);
     };
 }

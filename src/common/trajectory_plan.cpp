@@ -27,14 +27,17 @@ void arm_runner::JointTrajectoryPlan::computeCommand(
 
 
 arm_runner::JointTrajectoryPlan::JointTrajectoryPlan(
-        const arm_runner::JointTrajectoryPlan::PiecewisePolynomial &joint_trajectory)
-        : joint_trajectory_(joint_trajectory) {
+    const arm_runner::JointTrajectoryPlan::PiecewisePolynomial &joint_trajectory,
+    int plan_number
+) : RobotPlanBase(plan_number),
+  joint_trajectory_(joint_trajectory) {
     DRAKE_ASSERT(joint_trajectory_.cols() == 1);
     joint_velocity_trajectory_ = joint_trajectory_.derivative(1);
 }
 
 
 arm_runner::JointTrajectoryPlan::Ptr arm_runner::ConstructJointTrajectoryPlan(
+    int plan_number,
     const RigidBodyTree<double> &tree,
     const robot_msgs::JointTrajectoryGoal::ConstPtr &goal,
     const arm_runner::RobotArmMeasurement &measurement,
@@ -74,7 +77,7 @@ arm_runner::JointTrajectoryPlan::Ptr arm_runner::ConstructJointTrajectoryPlan(
     // OK
     const Eigen::MatrixXd knot_dot = Eigen::MatrixXd::Zero(num_joints, 1);
     auto plan = std::make_shared<JointTrajectoryPlan>(
-            JointTrajectoryPlan::PiecewisePolynomial::Cubic(input_time, knots, knot_dot, knot_dot));
+            JointTrajectoryPlan::PiecewisePolynomial::Cubic(input_time, knots, knot_dot, knot_dot), plan_number);
 
     // Add callback
     return plan;

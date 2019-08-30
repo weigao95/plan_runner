@@ -80,17 +80,8 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration() {
     // Send to robot
     rbt_communication_->SendCommand(command_cache);
 
-    // Invalidate the command if not correct
-    if(!command_safe && rbt_active_plan_ != nullptr) {
-        action_to_current_plan_ = ActionToCurrentPlan::SafetyStop;
-
-        //Remove these?
-        rbt_active_plan_->StopPlan(action_to_current_plan_);
-        rbt_active_plan_.reset();
-    }
-
     // Might need to switch the plan
-    processPlanSwitch(input, command_cache);
+    processPlanSwitch(input, command_cache, command_safe);
 }
 
 
@@ -113,7 +104,7 @@ arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
     // Depends on the type
     switch (plan_construction_data_.type) {
         case PlanType::JointTrajectory: {
-            return constructJointTrajectoryPlan(input);
+            return constructJointTrajectoryPlan(input, plan_construction_data_.plan_number);
         }
         default:
             break;
@@ -125,10 +116,11 @@ arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
 
 
 arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructJointTrajectoryPlan(
-    const CommandInput& input
+    const CommandInput& input, int plan_number
 ) {
     const auto& latest_command = input.robot_history->GetCommandHistory().back();
     auto plan = ConstructJointTrajectoryPlan(
+        plan_number,
         *input.robot_rbt,
         plan_construction_data_.joint_trajectory_goal,
         *input.latest_measurement,
@@ -136,16 +128,9 @@ arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructJointTraject
 
     // The finish callback
     auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {
-        robot_msgs::JointTrajectoryResult result;
-        if(action == ActionToCurrentPlan::NoAction || action == ActionToCurrentPlan::NormalStop)
-            result.status.status = result.status.FINISHED_NORMALLY;
-        else if(action == ActionToCurrentPlan::SafetyStop)
-            result.status.status = result.status.STOPPED_BY_SAFETY_CHECK;
-        else
-            result.status.status = result.status.ERROR;
-
-        // Send back
-        this->joint_trajectory_action_->setSucceeded(result);
+        // Push this task to result
+        FinishedPlanRecord record{robot_plan->plan_number, action};
+        this->lockAndEnQueue(record);
     };
     plan->AddStoppedCallback(finish_callback);
 
