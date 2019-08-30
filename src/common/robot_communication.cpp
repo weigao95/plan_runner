@@ -14,7 +14,7 @@ void arm_runner::RobotCommunication::GetMeasurement(RobotArmMeasurement& measure
 
     // Do processing
     for(const auto& processor : measurement_processor_stack_) {
-        processor(measurement);
+        processor->ProcessMeasurement(*this, measurement);
     }
 
     // Save
@@ -27,7 +27,7 @@ void arm_runner::RobotCommunication::SendCommand(const RobotArmCommand & command
 
     // Do processing
     for(const auto& processor : command_processor_stack_) {
-        processor(command);
+        processor->ProcessCommand(*this, command);
     }
 
     // Save
