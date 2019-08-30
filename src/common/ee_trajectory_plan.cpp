@@ -96,6 +96,14 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
     ee_xyz_knots_[0] = ee_transform.translation();
     ee_quat_knots_[0] = Eigen::Quaterniond(ee_transform.linear());
 
+    // Transform all other knots as they are expressed in wrt_frame
+    int wrt_frame_index = getBodyOrFrameIndex(tree, wrt_frame_name_);
+    Eigen::Isometry3d knot_transform = tree.relativeTransform(cache, world_frame, wrt_frame_index);
+    for(auto i = 1; i < ee_xyz_knots_.size(); i++) {
+        ee_xyz_knots_[i] = knot_transform.linear() * ee_xyz_knots_[i] + knot_transform.translation();
+        ee_quat_knots_[i] = knot_transform.rotation() * ee_quat_knots_[i];
+    }
+
     // Compute the trajectory
     Eigen::MatrixXd knot_dot = Eigen::MatrixXd::Zero(3, 1);
     ee_xyz_trajectory_ = PiecewisePolynomial::Cubic(input_time_, ee_xyz_knots_, knot_dot, knot_dot);
