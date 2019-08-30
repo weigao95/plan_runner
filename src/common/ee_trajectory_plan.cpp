@@ -170,5 +170,11 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
     }
 
     // Construct
-
+    return std::make_shared<EETrajectoryPlan>(
+        std::move(task_frame_name),
+        std::move(input_time),
+        std::move(position_knot_vec),
+        std::move(orientation_knot_vec),
+        std::move(wrt_frame_name)
+    );
 }

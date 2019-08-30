@@ -35,6 +35,21 @@ namespace arm_runner {
         // The initialization
         void InitializePlan(const CommandInput& input) override;
 
+        // Getters
+        PlanType GetPlanType() const override { return PlanType::EETrajectory; }
+        bool HasFinished(const RobotArmMeasurement& measurement) const override {
+            return measurement.time_stamp.since_plan_start_second >= TrajectoryDuration();
+        }
+
+        // The total time for the trajectory
+        double TrajectoryDuration() const {
+            if (ee_xyz_trajectory_.get_number_of_segments() > 0) {
+                return ee_xyz_trajectory_.end_time() - ee_xyz_trajectory_.start_time();
+            } else {
+                return 0.;
+            }
+        }
+
 
         // The actual computation
     protected:
