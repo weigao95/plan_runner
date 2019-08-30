@@ -40,8 +40,15 @@ namespace arm_runner {
         boost::circular_buffer<RobotArmCommand> command_history_;
 
         // The processor for command and measurement
+        // Should be constructed before Start
+    public:
+        void AddMeasurementProcessor(MeasurementProcessor::Ptr processor) { measurement_processor_stack_.emplace_back(std::move(processor)); };
+        void AddCommandProcessor(CommandProcessor::Ptr processor) { command_processor_stack_.emplace_back(std::move(processor)); };
+    protected:
+        // The stack of processor
         std::vector<CommandProcessor::Ptr> command_processor_stack_;
         std::vector<MeasurementProcessor::Ptr> measurement_processor_stack_;
+
 
         // Simple getter
         // Should only be accessed on the main thread
