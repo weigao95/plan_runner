@@ -28,7 +28,7 @@ namespace arm_runner {
 
         // The management of flags
         virtual PlanType GetPlanType() const = 0;
-        virtual bool HasFinished(const RobotArmMeasurement& measurement) const { return false; }
+        virtual bool HasFinished(const RobotArmMeasurement& measurement) const = 0;
 
         // The accessing interface of supervisor
         void ComputeCommand(

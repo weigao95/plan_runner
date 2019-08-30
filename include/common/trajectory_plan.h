@@ -10,6 +10,8 @@
 #include <trajectory_msgs/JointTrajectory.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
 
+#include <ros/ros.h>
+
 #include "common/plan_base.h"
 #include "robot_msgs/JointTrajectoryAction.h"
 
@@ -26,6 +28,7 @@ namespace arm_runner {
         // The method in base class
         PlanType GetPlanType() const override { return PlanType::JointTrajectory; }
         bool HasFinished(const RobotArmMeasurement& measurement) const override {
+            ROS_INFO("Inside JointTrajectoryPlan::HasFinished");
             return measurement.time_stamp.since_plan_start_second >= TrajectoryDuration();
         }
 

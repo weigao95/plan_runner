@@ -27,17 +27,18 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(
     // Commanded to stop
     if (action_to_current_plan_ != ActionToCurrentPlan::NoAction) return true;
 
-    // No new plan, cannot switch
-    if (!plan_construction_data_.valid) return false;
-
-    // Now we have a new plan
-    if (rbt_active_plan_ == nullptr) return true;
-
-    // Now the active plan is not NULL
-    if (is_streaming_plan(rbt_active_plan_->GetPlanType()) || rbt_active_plan_->HasFinished(measurement))
+    // Current plan has finished
+    if (rbt_active_plan_ != nullptr && rbt_active_plan_->HasFinished(measurement))
         return true;
 
-    // Need to wait the current plan
+    // Current plan don't finish, and we have new plan
+    if (rbt_active_plan_ != nullptr
+        && is_streaming_plan(rbt_active_plan_->GetPlanType())
+        && plan_construction_data_.valid) {
+        return true;
+    }
+
+    // Other cases, just false
     return false;
 }
 
@@ -57,7 +58,6 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     // Now this method has lock
     // Check should I switch
     if (!shouldSwitchPlan(*input.latest_measurement, latest_command)) {
-        switch_mutex_.unlock();
         return;
     }
 
@@ -68,6 +68,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     // Construct and switch to the new one
     rbt_active_plan_ = constructNewPlan(input, latest_command);
     if(rbt_active_plan_ != nullptr) {
+        ROS_INFO("Construct Plan %d", rbt_active_plan_->plan_number);
         rbt_active_plan_->InitializePlan();
     }
 
@@ -128,11 +129,11 @@ void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::J
     plan_construction_data_.joint_trajectory_goal = goal;
     plan_construction_data_.plan_number++;
     int current_plan_number = plan_construction_data_.plan_number;
-            switch_mutex_.unlock();
+    switch_mutex_.unlock();
 
     // Wait for the task being accomplished
     do {
-        constexpr int WAIT_RESULT_TIME_MS = 200;
+        constexpr int WAIT_RESULT_TIME_MS = 1000;
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_RESULT_TIME_MS));
         ROS_INFO("Still waiting where my id is %d", current_plan_number);
 
