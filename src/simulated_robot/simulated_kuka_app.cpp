@@ -12,6 +12,7 @@
 #include "simulated_robot/common_robot_model.h"
 #include "simulated_robot/simulated_robot.h"
 
+
 int main(int argc, char* argv[]) {
     // Get the simulation time
     double simulation_time = 20.0;
