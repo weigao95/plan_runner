@@ -64,9 +64,11 @@ namespace arm_runner {
         } plan_construction_data_;
         void initializeSwitchData();
 
+
         // These method would read the construction data and can only be accessed on main thread
         bool shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const;
         void processPlanSwitch(const CommandInput& input, const RobotArmCommand& latest_command, bool command_safety);
+
 
         // The member to maintain the queue of accomplished tasks
     private:
