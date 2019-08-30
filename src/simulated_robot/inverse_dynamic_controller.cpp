@@ -56,7 +56,6 @@ void arm_runner::QpInverseDynamicsController::DoCalcDiscreteVariableUpdates(
     auto current_time_second = context.get_time();
 
     // Create tree alias, so that clion doesn't complain about unique pointers.
-    std::cout << x << std::endl;
     const RigidBodyTreed &tree = *tree_;
     KinematicsCache<double> cache = tree.CreateKinematicsCache();
     cache.initialize(q, v);
@@ -71,7 +70,7 @@ void arm_runner::QpInverseDynamicsController::DoCalcDiscreteVariableUpdates(
     }
 
     // Desired velocity tracking
-    Eigen::VectorXd err_v; err_v.setZero();
+    Eigen::VectorXd err_v; err_v.resize(nq_); err_v.setZero();
     if(exchange_data_.latest_command.velocity_validity) {
         Eigen::Map<Eigen::VectorXd> v_ref =
                 Eigen::Map<Eigen::VectorXd>(exchange_data_.latest_command.joint_velocities, nq_);
