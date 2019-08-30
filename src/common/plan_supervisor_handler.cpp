@@ -148,6 +148,11 @@ void arm_runner::PlanSupervisor::HandleEETrajectoryAction(
         ee_trajectory_action_->setAborted(result);
         return;
     }
+
+    // Send to queue and wait for the task being accomplished
+    constexpr int WAIT_RESULT_TIME_MS = 300;
+    appendAndWaitForTrajectoryPlan<robot_msgs::CartesianTrajectoryAction, robot_msgs::CartesianTrajectoryResult>(
+        ee_trajectory_action_, plan, WAIT_RESULT_TIME_MS);
 }
 
 
