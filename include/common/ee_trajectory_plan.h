@@ -23,6 +23,9 @@ namespace arm_runner {
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
         using PiecewiseQuaternionSlerp = drake::trajectories::PiecewiseQuaternionSlerp<double>;
 
+        // The initialization
+        void InitializePlan(const CommandInput& input) override;
+
         // The actual computation
     protected:
         void computeCommand(
@@ -30,7 +33,15 @@ namespace arm_runner {
             RobotArmCommand& command) override;
         static Eigen::Vector3d logSO3(const Eigen::Matrix3d& rotation);
 
-        // The members
+        // The member used for construction
+    private:
+        std::string task_frame_name_;
+        std::vector<double> input_time_;
+        std::vector<Eigen::MatrixXd> ee_xyz_knots_;
+        std::vector<Eigen::Quaterniond> ee_quat_knots_;
+        static int getBodyOrFrameIndex(const RigidBodyTree<double>& tree, const std::string& body_or_frame_name);
+
+        // The constructed members
     private:
         static const int world_frame;
         int task_frame_index_;

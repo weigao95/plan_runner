@@ -64,3 +64,44 @@ Eigen::Vector3d arm_runner::EETrajectoryPlan::logSO3(const Eigen::Matrix3d& rota
     Eigen::AngleAxisd angle_axis(rotation);
     return angle_axis.angle() * angle_axis.axis();
 }
+
+
+void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput &input) {
+    // Get data
+    const auto& tree = *input.robot_rbt;
+    const auto& cache = *input.measured_state_cache;
+    task_frame_index_ = getBodyOrFrameIndex(tree, task_frame_name_);
+
+    // Compute the initial configuration
+    Eigen::Isometry3d ee_transform = tree.relativeTransform(cache, world_frame, task_frame_index_);
+    ee_xyz_knots_[0] = ee_transform.translation();
+    ee_quat_knots_[0] = Eigen::Quaterniond(ee_transform.linear());
+
+    // Compute the trajectory
+    Eigen::MatrixXd knot_dot = Eigen::MatrixXd::Zero(3, 1);
+    ee_xyz_trajectory_ = PiecewisePolynomial::Cubic(input_time_, ee_xyz_knots_, knot_dot, knot_dot);
+    ee_orientation_trajectory_ = PiecewiseQuaternionSlerp(input_time_, ee_quat_knots_);
+
+    // Set the flag
+    RobotPlanBase::InitializePlan(input);
+}
+
+
+int arm_runner::EETrajectoryPlan::getBodyOrFrameIndex(
+    const RigidBodyTree<double> &tree,
+    const std::string &body_or_frame_name
+) {
+    int body_frame_index = 0;
+
+    // First try the body
+    try {
+        body_frame_index = tree.FindBodyIndex(body_or_frame_name);
+    } catch (const std::logic_error& e) {
+        // Then try the frame
+        auto frame = tree.findFrame(body_or_frame_name);
+        body_frame_index = frame->get_frame_index();
+    }
+
+    // OK
+    return body_frame_index;
+}
