@@ -101,7 +101,6 @@ void arm_runner::PlanSupervisor::initializeServiceActions() {
 
 void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoalConstPtr &goal) {
     // Logging
-    ROS_INFO("The command has been received!");
     std::lock_guard<std::timed_mutex> guard(switch_mutex_);
     plan_construction_data_.valid = true;
     plan_construction_data_.type = PlanType::JointTrajectory;
