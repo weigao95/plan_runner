@@ -5,7 +5,6 @@
 #include "common/plan_supervisor.h"
 #include "common/joint_trajectory_plan.h"
 #include "common/ee_trajectory_plan.h"
-#include <chrono>
 
 
 // The handler for joint trajectory action
@@ -24,9 +23,8 @@ void arm_runner::PlanSupervisor::initializeServiceActions() {
 
     // The plan-end service
     plan_end_server_ = std::make_shared<ros::ServiceServer>(
-            node_handle_.advertiseService(
-                    "/plan_runner/stop_plan",
-                    &PlanSupervisor::HandleEndPlanService, this));
+        node_handle_.advertiseService("/plan_runner/stop_plan",
+        &PlanSupervisor::HandleEndPlanService, this));
 }
 
 
