@@ -56,7 +56,6 @@ namespace arm_runner {
         struct PlanConstructionData {
             // The flag
             bool valid;
-            PlanType type;
             int plan_number;
 
             // The actual plan
