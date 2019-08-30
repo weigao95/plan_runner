@@ -49,9 +49,8 @@ void arm_runner::JointTrajectoryPlan::computeCommand(
 }
 
 
-arm_runner::JointTrajectoryPlan::Ptr arm_runner::ConstructJointTrajectoryPlan(
-    const std::map<std::string, int>& joint_name_to_idx,
-    int num_joints,
+std::shared_ptr<arm_runner::JointTrajectoryPlan> arm_runner::JointTrajectoryPlan::ConstructFromMessage(
+    const std::map<std::string, int> &joint_name_to_idx, int num_joints,
     const robot_msgs::JointTrajectoryGoal::ConstPtr &goal
 ) {
     // Basic info

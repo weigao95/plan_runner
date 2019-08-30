@@ -126,7 +126,15 @@ void arm_runner::PlanSupervisor::lockAndEnQueue(FinishedPlanRecord record) {
 
 void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoalConstPtr &goal) {
     // Construct the plan
-    auto plan = ConstructJointTrajectoryPlan(joint_name_to_idx_, num_joint_, goal);
+    auto plan = JointTrajectoryPlan::ConstructFromMessage(joint_name_to_idx_, num_joint_, goal);
+    if(plan == nullptr) {
+        robot_msgs::JointTrajectoryResult result;
+        result.status.status = result.status.STOPPED_BY_SAFETY_CHECK;
+        joint_trajectory_action_->setAborted(result);
+        return;
+    }
+
+    // The construction is OK
     auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {
         // Push this task to result
         FinishedPlanRecord record{robot_plan->GetPlanNumber(), action};
