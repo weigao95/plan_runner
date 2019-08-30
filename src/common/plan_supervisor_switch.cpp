@@ -126,13 +126,15 @@ void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::J
     plan_construction_data_.valid = true;
     plan_construction_data_.type = PlanType::JointTrajectory;
     plan_construction_data_.joint_trajectory_goal = goal;
-    int current_plan_number = plan_construction_data_.plan_number++;
-    switch_mutex_.unlock();
+    plan_construction_data_.plan_number++;
+    int current_plan_number = plan_construction_data_.plan_number;
+            switch_mutex_.unlock();
 
     // Wait for the task being accomplished
     do {
         constexpr int WAIT_RESULT_TIME_MS = 200;
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_RESULT_TIME_MS));
+        ROS_INFO("Still waiting where my id is %d", current_plan_number);
 
         // Read the status
         bool current_plan_in_queue = false;

@@ -129,6 +129,7 @@ arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructJointTraject
     // The finish callback
     auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {
         // Push this task to result
+        ROS_INFO("Plan %d finished", robot_plan->plan_number);
         FinishedPlanRecord record{robot_plan->plan_number, action};
         this->lockAndEnQueue(record);
     };
