@@ -14,7 +14,7 @@ namespace arm_runner {
     class RobotPlanBase {
     public:
         using Ptr = std::shared_ptr<RobotPlanBase>;
-        RobotPlanBase() : status_(PlanStatus::Waiting) {};
+        explicit RobotPlanBase(int plan_number) : status_(PlanStatus::Waiting), plan_number(plan_number) {};
         virtual ~RobotPlanBase() = default;
 
         // The supervisor would call these methods at initialization, preempt and stopping
@@ -40,8 +40,12 @@ namespace arm_runner {
             const RobotArmMeasurement& measurement, 
             RobotArmCommand& command);
 
+
+        // The plan number can be accessed outside
+        // While the status is internal
+    public:
+        const int plan_number;
     protected:
-        // The only thing here is the status
         PlanStatus status_;
 
         // Keep current rbt configuration command
