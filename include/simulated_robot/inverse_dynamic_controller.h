@@ -9,7 +9,7 @@
 #include <drake/multibody/rigid_body_tree.h>
 #include <drake/systems/framework/leaf_system.h>
 
-#include "exchange_type.h"
+#include "simulated_robot/exchange_type.h"
 
 namespace arm_runner {
 

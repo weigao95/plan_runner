@@ -2,7 +2,7 @@
 // Created by wei on 8/27/19.
 //
 
-#include "arm_runner/robot_communication.h"
+#include "common/robot_communication.h"
 
 arm_runner::RobotCommunication::RobotCommunication()
 : measurement_history_(RobotCommunication::HISTORY_HORIZON),

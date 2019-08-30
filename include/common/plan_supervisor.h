@@ -8,9 +8,9 @@
 #include <drake/multibody/rigid_body_tree.h>
 #include <actionlib/server/simple_action_server.h>
 
-#include "arm_runner/plan_base.h"
-#include "arm_runner/plan_common_types.h"
-#include "arm_runner/robot_communication.h"
+#include "common/plan_base.h"
+#include "common/plan_common_types.h"
+#include "common/robot_communication.h"
 
 #include "robot_msgs/CartesianTrajectoryAction.h"
 #include "robot_msgs/JointTrajectoryAction.h"

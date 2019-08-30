@@ -2,8 +2,8 @@
 // Created by wei on 8/28/19.
 //
 
-#include "arm_runner/plan_supervisor.h"
-#include "arm_runner/trajectory_plan.h"
+#include "common/plan_supervisor.h"
+#include "common/trajectory_plan.h"
 
 
 arm_runner::PlanSupervisor::PlanSupervisor(

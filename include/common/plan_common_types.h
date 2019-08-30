@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "arm_runner/communication_types.h"
-#include "arm_runner/robot_communication.h"
+#include "common/communication_types.h"
+#include "common/robot_communication.h"
 #include <drake/multibody/rigid_body_tree.h>
 #include <drake/multibody/kinematics_cache.h>
 

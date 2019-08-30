@@ -10,7 +10,7 @@
 #include <trajectory_msgs/JointTrajectory.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
 
-#include "arm_runner/plan_base.h"
+#include "common/plan_base.h"
 #include "robot_msgs/JointTrajectoryAction.h"
 
 

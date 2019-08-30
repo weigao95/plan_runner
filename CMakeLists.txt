@@ -134,7 +134,7 @@ include_directories(
 )
 
 # The include files
-file(GLOB HEADER_FILES include/arm_runner/*.h include/simulated_robot/*.h)
+file(GLOB HEADER_FILES include/common/*.h include/simulated_robot/*.h)
 
 # The install targets are in src
 add_subdirectory(src)

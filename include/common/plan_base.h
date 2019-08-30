@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "arm_runner/plan_common_types.h"
-#include "arm_runner/communication_types.h"
-#include "arm_runner/robot_communication.h"
+#include "common/plan_common_types.h"
+#include "common/communication_types.h"
+#include "common/robot_communication.h"
 
 namespace arm_runner {
 

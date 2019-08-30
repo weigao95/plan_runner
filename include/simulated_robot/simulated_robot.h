@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "exchange_type.h"
+#include "simulated_robot/exchange_type.h"
 
 #include <thread>
 #include <drake/multibody/rigid_body_tree.h>

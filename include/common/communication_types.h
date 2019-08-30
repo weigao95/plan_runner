@@ -6,7 +6,7 @@
 
 #include <cstring>
 
-#include "arm_runner/time_utils.h"
+#include "common/time_utils.h"
 
 namespace arm_runner {
 

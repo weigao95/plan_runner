@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "arm_runner/communication_types.h"
+#include "common/communication_types.h"
 
 #include <vector>
 #include <functional>
