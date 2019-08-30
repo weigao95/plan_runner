@@ -13,7 +13,7 @@ void arm_runner::PlanSupervisor::initializeServiceActions() {
     // The joint trajectory action
     joint_trajectory_action_ = std::make_shared<actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>>(
         node_handle_, "/plan_runner/JointTrajectory",
-        boost::bind(&PlanSupervisor::HandleJointTrajectoryActionTemplate, this, _1), false);
+        boost::bind(&PlanSupervisor::HandleJointTrajectoryAction, this, _1), false);
     joint_trajectory_action_->start();
 
     // The joint trajectory action
@@ -55,71 +55,6 @@ void arm_runner::PlanSupervisor::lockAndEnQueue(FinishedPlanRecord record) {
 
 
 void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(
-    const robot_msgs::JointTrajectoryGoal::ConstPtr &goal
-) {
-    // Construct the plan
-    auto plan = JointTrajectoryPlan::ConstructFromMessage(joint_name_to_idx_, num_joint_, goal);
-    if(plan == nullptr) {
-        robot_msgs::JointTrajectoryResult result;
-        result.status.status = result.status.STOPPED_BY_SAFETY_CHECK;
-        joint_trajectory_action_->setAborted(result);
-        return;
-    }
-
-    // The construction is OK
-    auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {
-        // Push this task to result
-        FinishedPlanRecord record{robot_plan->GetPlanNumber(), action};
-        this->lockAndEnQueue(record);
-    };
-    plan->AddStoppedCallback(finish_callback);
-
-    // Send to active task
-    switch_mutex_.lock();
-    plan_construction_data_.valid = true;
-    plan_construction_data_.switch_to_plan = plan;
-    plan_construction_data_.plan_number++;
-    int current_plan_number = plan_construction_data_.plan_number;
-    switch_mutex_.unlock();
-
-    // Wait for the task being accomplished
-    do {
-        constexpr int WAIT_RESULT_TIME_MS = 300;
-        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_RESULT_TIME_MS));
-
-        // Read the status
-        bool current_plan_in_queue = false;
-        bool new_plan_in_queue = false;
-        ActionToCurrentPlan action_to_current_plan = ActionToCurrentPlan::NoAction;
-        lockAndCheckPlanStatus(current_plan_number,
-                               current_plan_in_queue, new_plan_in_queue, action_to_current_plan);
-
-        // Determine the state
-        if(current_plan_in_queue) {
-            robot_msgs::JointTrajectoryResult result;
-            if(action_to_current_plan == ActionToCurrentPlan::NoAction
-               || action_to_current_plan == ActionToCurrentPlan::NormalStop) {
-                result.status.status = result.status.FINISHED_NORMALLY;
-                joint_trajectory_action_->setSucceeded(result);
-            } else {
-                result.status.status = result.status.STOPPED_BY_SAFETY_CHECK;
-                joint_trajectory_action_->setAborted(result);
-            }
-            return;
-        } else if ((!current_plan_in_queue) && new_plan_in_queue) {
-            robot_msgs::JointTrajectoryResult result;
-            result.status.status = result.status.STOPPED_BY_EXTERNAL_TRIGGER;
-            joint_trajectory_action_->setPreempted(result);
-            return;
-        } else
-            continue;
-
-    } while(true);
-}
-
-
-
-void arm_runner::PlanSupervisor::HandleJointTrajectoryActionTemplate(
         const robot_msgs::JointTrajectoryGoal::ConstPtr &goal){
     // Construct the plan
     auto plan = JointTrajectoryPlan::ConstructFromMessage(joint_name_to_idx_, num_joint_, goal);

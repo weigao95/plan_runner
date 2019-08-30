@@ -102,7 +102,6 @@ namespace arm_runner {
         // The handling function
     public:
         void HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoal::ConstPtr& goal);
-        void HandleJointTrajectoryActionTemplate(const robot_msgs::JointTrajectoryGoal::ConstPtr& goal);
         void HandleEETrajectoryAction(const robot_msgs::CartesianTrajectoryGoal::ConstPtr& goal);
         bool HandleEndPlanService(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
     private:
