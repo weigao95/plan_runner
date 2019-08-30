@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
     // The initialization
     supervisor.Start();
     ros::Duration(0.1).sleep(); // Wait for the measurement
+    ROS_INFO("Simulated robot fully started!");
 
     // The main loop
     auto start_time = std::chrono::system_clock::now();
