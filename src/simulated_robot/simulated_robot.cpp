@@ -29,6 +29,20 @@ arm_runner::SimulatedRobotArm::SimulatedRobotArm(
     drake::parsers::urdf::AddModelInstanceFromUrdfFileToWorld(
             model_urdf, drake::multibody::joints::kFixed, tree_.get());
     drake::multibody::AddFlatTerrainToWorld(tree_.get(), 100., 10.);
+
+    // Clear the exchange data
+    exchanged_data_.latest_measurement.set_invalid();
+    exchanged_data_.latest_command.set_invalid();
+}
+
+arm_runner::SimulatedRobotArm::SimulatedRobotArm(
+    std::unique_ptr<RigidBodyTree<double>> robot,
+    double simulation_time_second
+) : simulation_time_second_(simulation_time_second), tree_(std::move(robot))
+{
+    // Clear the exchange data
+    exchanged_data_.latest_measurement.set_invalid();
+    exchanged_data_.latest_command.set_invalid();
 }
 
 
@@ -61,19 +75,6 @@ void arm_runner::SimulatedRobotArm::runSimulation() {
     systems::RigidBodyPlant<double>* plant = nullptr;
 
     // The plant
-    /*const char* kModelPath =
-            "drake/manipulation/models/iiwa_description/"
-            "urdf/iiwa14_polytope_collision.urdf";
-    const std::string urdf = FindResourceOrThrow(kModelPath);
-    {
-        // Construct the tree
-        auto tree = std::make_unique<RigidBodyTree<double>>();
-        parsers::urdf::AddModelInstanceFromUrdfFileToWorld(
-                urdf, multibody::joints::kFixed, tree.get());
-        multibody::AddFlatTerrainToWorld(tree.get(), 100., 10.);
-        plant = builder.template AddSystem<systems::RigidBodyPlant<double>>(
-                std::move(tree));
-    }*/
     plant = builder.template AddSystem<systems::RigidBodyPlant<double>>(std::move(tree_));
     const RigidBodyTree<double>& tree = plant->get_rigid_body_tree();
 
@@ -103,8 +104,12 @@ void arm_runner::SimulatedRobotArm::runSimulation() {
     systems::Simulator<double> simulator(*sys);
     simulator.set_publish_every_time_step(false);
     simulator.set_target_realtime_rate(1.0);
-    simulator.Initialize();
+
+    // Set the initial configuration
+    auto& context = simulator.get_mutable_context();
+    Eigen::VectorXd zero_init; zero_init.resize(n_position * 2); zero_init.setZero();
+    context.SetContinuousState(zero_init);
 
     // Start run simulation
-    simulator.StepTo(simulation_time_second_);
+    simulator.AdvanceTo(simulation_time_second_);
 }

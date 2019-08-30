@@ -5,6 +5,7 @@
 #pragma once
 
 #include "common/communication_types.h"
+#include "common/processor_interface.h"
 
 #include <vector>
 #include <functional>
@@ -39,12 +40,18 @@ namespace arm_runner {
         boost::circular_buffer<RobotArmCommand> command_history_;
 
         // The processor for command and measurement
-        using CommandProcessor = std::function<void(RobotArmCommand&)>;
-        using MeasurementProcessor = std::function<void(RobotArmMeasurement&)>;
-        std::vector<CommandProcessor> command_processor_stack_;
-        std::vector<MeasurementProcessor> measurement_processor_stack_;
+        // Should be constructed before Start
+    public:
+        void AddMeasurementProcessor(MeasurementProcessor::Ptr processor) { measurement_processor_stack_.emplace_back(std::move(processor)); };
+        void AddCommandProcessor(CommandProcessor::Ptr processor) { command_processor_stack_.emplace_back(std::move(processor)); };
+    protected:
+        // The stack of processor
+        std::vector<CommandProcessor::Ptr> command_processor_stack_;
+        std::vector<MeasurementProcessor::Ptr> measurement_processor_stack_;
+
 
         // Simple getter
+        // Should only be accessed on the main thread
     public:
         const decltype(measurement_history_)& GetMeasurementHistory() const { return measurement_history_; }
         const decltype(command_history_)& GetCommandHistory() const { return command_history_; }

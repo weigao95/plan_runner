@@ -7,6 +7,19 @@
 #include <drake/multibody/parsers/urdf_parser.h>
 
 
+std::vector<std::string> arm_runner::getKukaJointNameList() {
+    return {
+        "iiwa_joint_1",
+        "iiwa_joint_2",
+        "iiwa_joint_3",
+        "iiwa_joint_4",
+        "iiwa_joint_5",
+        "iiwa_joint_6",
+        "iiwa_joint_7"
+    };
+}
+
+
 std::unique_ptr<RigidBodyTree<double>> arm_runner::constructDefaultKukaRBT() {
     const char* kModelPath =
             "drake/manipulation/models/iiwa_description/"
