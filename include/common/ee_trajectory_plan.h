@@ -66,8 +66,6 @@ namespace arm_runner {
         std::vector<double> input_time_;
         std::vector<Eigen::MatrixXd> ee_xyz_knots_;
         std::vector<Eigen::Quaterniond> ee_quat_knots_;
-        static int getBodyOrFrameIndex(const RigidBodyTree<double>& tree, const std::string& body_or_frame_name);
-
 
         // The constructed members
     private:
@@ -83,6 +81,14 @@ namespace arm_runner {
 
     public:
         static std::shared_ptr<EETrajectoryPlan> ConstructFromMessage(
-                const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal);
+            const RigidBodyTree<double>& tree,
+            const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal);
+        static bool FrameContainedInTree(
+            const RigidBodyTree<double>& tree,
+            const std::string& body_or_frame_name);
+        // This method assume must contained
+        static int GetBodyOrFrameIndex(
+            const RigidBodyTree<double>& tree,
+            const std::string& body_or_frame_name);
     };
 }

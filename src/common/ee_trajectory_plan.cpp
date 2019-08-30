@@ -88,7 +88,7 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
     // Get data
     const auto& tree = *input.robot_rbt;
     const auto& cache = *input.measured_state_cache;
-    task_frame_index_ = getBodyOrFrameIndex(tree, task_frame_name_);
+    task_frame_index_ = GetBodyOrFrameIndex(tree, task_frame_name_);
     DRAKE_ASSERT(task_frame_index_ != 0);
 
     // Compute the initial configuration
@@ -97,7 +97,7 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
     ee_quat_knots_[0] = Eigen::Quaterniond(ee_transform.linear());
 
     // Transform all other knots as they are expressed in wrt_frame
-    int wrt_frame_index = getBodyOrFrameIndex(tree, wrt_frame_name_);
+    int wrt_frame_index = GetBodyOrFrameIndex(tree, wrt_frame_name_);
     Eigen::Isometry3d knot_transform = tree.relativeTransform(cache, world_frame, wrt_frame_index);
     for(auto i = 1; i < ee_xyz_knots_.size(); i++) {
         ee_xyz_knots_[i] = knot_transform.linear() * ee_xyz_knots_[i] + knot_transform.translation();
@@ -114,27 +114,8 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
 }
 
 
-int arm_runner::EETrajectoryPlan::getBodyOrFrameIndex(
-    const RigidBodyTree<double> &tree,
-    const std::string &body_or_frame_name
-) {
-    int body_frame_index = 0;
-
-    // First try the body
-    try {
-        body_frame_index = tree.FindBodyIndex(body_or_frame_name);
-    } catch (const std::logic_error& e) {
-        // Then try the frame
-        auto frame = tree.findFrame(body_or_frame_name);
-        body_frame_index = frame->get_frame_index();
-    }
-
-    // OK
-    return body_frame_index;
-}
-
-
 std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::ConstructFromMessage(
+    const RigidBodyTree<double>& tree,
     const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal
 ) {
     // Get data and basic check
@@ -144,6 +125,10 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
         return nullptr;
     std::string task_frame_name = traj.ee_frame_id;
     std::string wrt_frame_name = traj.xyz_points[0].header.frame_id;
+
+    // Check the name
+    if((!FrameContainedInTree(tree, task_frame_name)) || (!FrameContainedInTree(tree, wrt_frame_name)))
+        return nullptr;
 
     // Allocate the space
     std::vector<Eigen::MatrixXd> position_knot_vec(num_knot_points, Eigen::MatrixXd::Zero(3, 1));
@@ -185,4 +170,53 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
         std::move(orientation_knot_vec),
         std::move(wrt_frame_name)
     );
+}
+
+
+bool arm_runner::EETrajectoryPlan::FrameContainedInTree(
+    const RigidBodyTree<double> &tree,
+    const std::string &body_or_frame_name
+) {
+    // Initial flag
+    bool body_in_tree = false;
+    bool frame_in_tree = false;
+
+    // Check body
+    try {
+        auto body_frame_index = tree.FindBodyIndex(body_or_frame_name);
+        body_in_tree = true;
+    } catch (const std::logic_error& e) {
+        // Let it go
+    }
+
+    // Check the frame
+    try {
+        auto frame = tree.findFrame(body_or_frame_name);
+        frame_in_tree = true;
+    } catch (const std::logic_error& e) {
+        // Let it go
+    }
+
+    // OK
+    return body_in_tree || frame_in_tree;
+}
+
+
+int arm_runner::EETrajectoryPlan::GetBodyOrFrameIndex(
+        const RigidBodyTree<double> &tree,
+        const std::string &body_or_frame_name
+) {
+    int body_frame_index = 0;
+
+    // First try the body
+    try {
+        body_frame_index = tree.FindBodyIndex(body_or_frame_name);
+    } catch (const std::logic_error& e) {
+        // Then try the frame
+        auto frame = tree.findFrame(body_or_frame_name);
+        body_frame_index = frame->get_frame_index();
+    }
+
+    // OK
+    return body_frame_index;
 }
