@@ -36,7 +36,6 @@ TEST(SimRobotTest, SupervisorConstructTest) {
 
     // The initialization
     supervisor.Start();
-    ros::Duration(0.1).sleep(); // Wait for the measurement
 
     // The main loop
     auto start_time = std::chrono::system_clock::now();

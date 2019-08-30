@@ -19,6 +19,9 @@
 #include <drake/systems/analysis/simulator.h>
 #include <drake/systems/framework/diagram_builder.h>
 
+#include <chrono>
+#include <thread>
+
 
 arm_runner::SimulatedRobotArm::SimulatedRobotArm(
     const std::string &model_urdf,
@@ -59,7 +62,24 @@ void arm_runner::SimulatedRobotArm::sendRawCommand(const arm_runner::RobotArmCom
 }
 
 void arm_runner::SimulatedRobotArm::Start() {
+    // Launch the simulation thread
     simulation_thread_ = std::thread(&SimulatedRobotArm::runSimulation, this);
+
+    // Wait until on measurement is active
+    while(true) {
+        // Read the measurement
+        exchanged_data_.mutex.lock();
+        bool measuremeent_valid = exchanged_data_.latest_measurement.is_valid();
+        exchanged_data_.mutex.unlock();
+
+        // Break if ok
+        if(measuremeent_valid)
+            break;
+        else {
+            constexpr int WAIT_MEASUREMENT_SLEEP_MS = 10;
+            std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_MEASUREMENT_SLEEP_MS));
+        }
+    }
 }
 
 void arm_runner::SimulatedRobotArm::Stop() {
