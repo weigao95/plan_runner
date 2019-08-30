@@ -8,6 +8,24 @@
 const int arm_runner::EETrajectoryPlan::world_frame = 0;
 
 
+arm_runner::EETrajectoryPlan::EETrajectoryPlan(
+    std::string task_frame,
+    std::vector<double> input_time,
+    std::vector<Eigen::MatrixXd> ee_xyz_knots,
+    std::vector<Eigen::Quaterniond> ee_quat_knots,
+    std::string wrt_frame)
+    : task_frame_name_(std::move(task_frame)),
+      input_time_(std::move(input_time)),
+      ee_xyz_knots_(std::move(ee_xyz_knots)),
+      ee_quat_knots_(std::move(ee_quat_knots)),
+      task_frame_index_(0),
+      wrt_frame_name_(std::move(wrt_frame))
+{
+    DRAKE_ASSERT(input_time_.size() == ee_xyz_knots_.size());
+    DRAKE_ASSERT(input_time_.size() == ee_quat_knots_.size());
+}
+
+
 // The workforce function
 void arm_runner::EETrajectoryPlan::computeCommand(
     const arm_runner::CommandInput &input,
@@ -71,6 +89,7 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
     const auto& tree = *input.robot_rbt;
     const auto& cache = *input.measured_state_cache;
     task_frame_index_ = getBodyOrFrameIndex(tree, task_frame_name_);
+    DRAKE_ASSERT(task_frame_index_ != 0);
 
     // Compute the initial configuration
     Eigen::Isometry3d ee_transform = tree.relativeTransform(cache, world_frame, task_frame_index_);
@@ -104,4 +123,52 @@ int arm_runner::EETrajectoryPlan::getBodyOrFrameIndex(
 
     // OK
     return body_frame_index;
+}
+
+
+std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::ConstructFromMessage(
+    const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal
+) {
+    // Get data and basic check
+    const auto& traj = goal->trajectory;
+    int num_knot_points = traj.xyz_points.size();
+    if(traj.xyz_points.size() < 2)
+        return nullptr;
+    std::string task_frame_name = traj.ee_frame_id;
+    std::string wrt_frame_name = traj.xyz_points[0].header.frame_id;
+
+    // Allocate the space
+    std::vector<Eigen::MatrixXd> position_knot_vec(num_knot_points, Eigen::MatrixXd::Zero(3, 1));
+    std::vector<Eigen::Quaterniond> orientation_knot_vec(num_knot_points, Eigen::Quaterniond::Identity());
+    std::vector<double> input_time;
+
+    // Construct the knots
+    for (int i = 0; i < num_knot_points; i++) {
+        // The cache
+        Eigen::Vector3d knot_position;
+        Eigen::Quaterniond knot_orientation;
+        if (i == 0) {
+            // replace first knot point by current position of ee_frame
+            knot_position.setZero();
+            knot_orientation.setIdentity();
+        } else {
+            const geometry_msgs::PointStamped &xyz_point = traj.xyz_points[i];
+            const auto& quat = traj.quaternions[i];
+            knot_position = Eigen::Vector3d(xyz_point.point.x, xyz_point.point.y, xyz_point.point.z);
+            knot_orientation = Eigen::Quaterniond(quat.w, quat.x, quat.y, quat.z);
+
+            // Check the frame
+            if(xyz_point.header.frame_id != wrt_frame_name) {
+                return nullptr;
+            }
+        }
+
+        // Push
+        position_knot_vec.emplace_back(knot_position);
+        orientation_knot_vec.emplace_back(knot_orientation);
+        input_time.emplace_back(traj.time_from_start[i].toSec());
+    }
+
+    // Construct
+
 }
