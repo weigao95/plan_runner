@@ -20,11 +20,11 @@ void arm_runner::EETrajectoryPlan::computeCommand(
     auto t = input.latest_measurement->time_stamp.since_plan_start_second;
 
     // Compute the desired frame transformation
-    Eigen::Vector3d ee_xyz_ref = ee_xyz_trajectory_.value(t);
-    Eigen::Quaterniond ee_quat_ref = ee_orientation_trajectory_.orientation(t);
+    Eigen::Vector3d ee_position_ref = ee_xyz_trajectory_.value(t);
+    Eigen::Quaterniond ee_orientation_ref = ee_orientation_trajectory_.orientation(t);
     Eigen::Isometry3d ee_transform_ref;
-    ee_transform_ref.linear() = ee_quat_ref.toRotationMatrix();
-    ee_transform_ref.translation() = ee_xyz_ref;
+    ee_transform_ref.linear() = ee_orientation_ref.toRotationMatrix();
+    ee_transform_ref.translation() = ee_position_ref;
 
     // Compute the actual transform
     Eigen::Isometry3d ee_transform = tree.relativeTransform(cache, world_frame, task_frame_index_);
