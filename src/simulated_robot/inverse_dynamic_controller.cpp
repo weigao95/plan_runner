@@ -56,6 +56,7 @@ void arm_runner::QpInverseDynamicsController::DoCalcDiscreteVariableUpdates(
     auto current_time_second = context.get_time();
 
     // Create tree alias, so that clion doesn't complain about unique pointers.
+    std::cout << x << std::endl;
     const RigidBodyTreed &tree = *tree_;
     KinematicsCache<double> cache = tree.CreateKinematicsCache();
     cache.initialize(q, v);
