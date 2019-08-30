@@ -7,16 +7,12 @@
 #include <chrono>
 
 
-// The time for wait for switching lock
-constexpr int LOOP_MUTEX_TIMEOUT_MS = 5;
-
 // The method for switching
 void arm_runner::PlanSupervisor::initializeSwitchData() {
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
     plan_construction_data_.valid = false;
     plan_construction_data_.plan_number = -1;
-    plan_construction_data_.joint_trajectory_goal = nullptr;
-    plan_construction_data_.cartesian_trajectory_goal = nullptr;
+    plan_construction_data_.switch_to_plan = nullptr;
 }
 
 
@@ -70,14 +66,14 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
         rbt_active_plan_->StopPlan(action_to_current_plan_);
 
     // Construct and switch to the new one
-    rbt_active_plan_ = constructNewPlan(input, latest_command);
+    rbt_active_plan_ = plan_construction_data_.switch_to_plan;
     if(rbt_active_plan_ != nullptr) {
-
-        rbt_active_plan_->InitializePlan();
+        rbt_active_plan_->InitializePlan(input);
     }
 
     // Cleanup
     plan_construction_data_.valid = false;
+    plan_construction_data_.switch_to_plan = nullptr;
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
     plan_start_time_second_ = input.latest_measurement->time_stamp.absolute_time_second;
 }
@@ -126,14 +122,26 @@ void arm_runner::PlanSupervisor::lockAndEnQueue(FinishedPlanRecord record) {
 
 
 void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoalConstPtr &goal) {
+    // Construct the plan
+    auto plan = ConstructJointTrajectoryPlan(joint_name_to_idx_, num_joint_, goal);
+    auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {
+        // Push this task to result
+        FinishedPlanRecord record{robot_plan->GetPlanNumber(), action};
+        this->lockAndEnQueue(record);
+    };
+    plan->AddStoppedCallback(finish_callback);
+
     // Send to active task
     switch_mutex_.lock();
     plan_construction_data_.valid = true;
     plan_construction_data_.type = PlanType::JointTrajectory;
-    plan_construction_data_.joint_trajectory_goal = goal;
+    plan_construction_data_.switch_to_plan = plan;
     plan_construction_data_.plan_number++;
     int current_plan_number = plan_construction_data_.plan_number;
     switch_mutex_.unlock();
+
+    // Update the plan number
+    plan->SetPlanNumber(current_plan_number);
 
     // Wait for the task being accomplished
     do {

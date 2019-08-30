@@ -19,10 +19,13 @@ arm_runner::PlanSupervisor::PlanSupervisor(
     initializeServiceActions();
 }
 
+
 void arm_runner::PlanSupervisor::initializeKinematicAndCache() {
     rbt_active_plan_ = nullptr;
     plan_start_time_second_ = 0;
     cache_measured_state = std::make_shared<KinematicsCache<double>>(tree_->CreateKinematicsCache());
+    joint_name_to_idx_ = tree_->computePositionNameToIndexMap();
+    num_joint_ = tree_->get_num_positions();
 }
 
 
@@ -89,51 +92,4 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration() {
 bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::CommandInput &measurement,
                                                     const arm_runner::RobotArmCommand &command) const {
     return true;
-}
-
-
-// The plan constructors
-arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructNewPlan(
-        const CommandInput& input,
-        const RobotArmCommand& latest_command
-) {
-    // If the plan data is valid
-    if(!plan_construction_data_.valid)
-        return nullptr;
-
-    // Depends on the type
-    switch (plan_construction_data_.type) {
-        case PlanType::JointTrajectory: {
-            return constructJointTrajectoryPlan(input, plan_construction_data_.plan_number);
-        }
-        default:
-            break;
-    }
-
-    // Depends on the type
-    return nullptr;
-}
-
-
-arm_runner::RobotPlanBase::Ptr arm_runner::PlanSupervisor::constructJointTrajectoryPlan(
-    const CommandInput& input, int plan_number
-) {
-    const auto& latest_command = input.robot_history->GetCommandHistory().back();
-    auto plan = ConstructJointTrajectoryPlan(
-        plan_number,
-        *input.robot_rbt,
-        plan_construction_data_.joint_trajectory_goal,
-        *input.latest_measurement,
-        latest_command);
-
-    // The finish callback
-    auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {
-        // Push this task to result
-        FinishedPlanRecord record{robot_plan->plan_number, action};
-        this->lockAndEnQueue(record);
-    };
-    plan->AddStoppedCallback(finish_callback);
-
-    // OK
-    return plan;
 }
