@@ -29,7 +29,6 @@ void arm_runner::PlanSupervisor::initializeKinematicAndCache() {
 // The main interface
 void arm_runner::PlanSupervisor::Start() {
     rbt_communication_->Start();
-    joint_trajectory_action_->start();
 }
 
 void arm_runner::PlanSupervisor::Stop() {

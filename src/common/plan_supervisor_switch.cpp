@@ -85,10 +85,11 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
 void arm_runner::PlanSupervisor::initializeServiceActions() {
     // The joint trajectory action
     joint_trajectory_action_ = std::make_shared<
-            actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>>(
-            node_handle_, "JointTrajectory",
+        actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>>(node_handle_, "/plan_runner/iiwa/JointTrajectory",
             boost::bind(&PlanSupervisor::HandleJointTrajectoryAction, this, _1),
             false);
+    joint_trajectory_action_->start();
+    std::cout << "Start the action" << std::endl;
 
     // The plan-end service
     plan_end_server_ = std::make_shared<ros::ServiceServer>(
@@ -98,7 +99,8 @@ void arm_runner::PlanSupervisor::initializeServiceActions() {
 }
 
 
-void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoal::ConstPtr &goal) {
+void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoalConstPtr &goal) {
+    // Logging
     std::lock_guard<std::timed_mutex> guard(switch_mutex_);
     plan_construction_data_.valid = true;
     plan_construction_data_.type = PlanType::JointTrajectory;

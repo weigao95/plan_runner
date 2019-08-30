@@ -16,7 +16,7 @@
 
 int main(int argc, char* argv[]) {
     // Get the simulation time
-    double simulation_time = 20.0;
+    double simulation_time = 30.0;
     if(argc == 2) {
         simulation_time = std::stod(argv[1]);
     }
@@ -58,6 +58,7 @@ int main(int argc, char* argv[]) {
         }
 
         // OK
+        ros::spinOnce();
         rate.sleep();
     }
     supervisor.Stop();
