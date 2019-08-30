@@ -4,6 +4,7 @@
 
 #include "common/plan_supervisor.h"
 #include "common/joint_trajectory_plan.h"
+#include "common/ee_trajectory_plan.h"
 #include <chrono>
 
 
@@ -12,7 +13,7 @@ void arm_runner::PlanSupervisor::initializeServiceActions() {
     // The joint trajectory action
     joint_trajectory_action_ = std::make_shared<actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>>(
         node_handle_, "/plan_runner/JointTrajectory",
-        boost::bind(&PlanSupervisor::HandleJointTrajectoryAction, this, _1), false);
+        boost::bind(&PlanSupervisor::HandleJointTrajectoryActionTemplate, this, _1), false);
     joint_trajectory_action_->start();
 
     // The joint trajectory action
@@ -117,10 +118,36 @@ void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(
 }
 
 
+
+void arm_runner::PlanSupervisor::HandleJointTrajectoryActionTemplate(
+        const robot_msgs::JointTrajectoryGoal::ConstPtr &goal){
+    // Construct the plan
+    auto plan = JointTrajectoryPlan::ConstructFromMessage(joint_name_to_idx_, num_joint_, goal);
+    if(plan == nullptr) {
+        robot_msgs::JointTrajectoryResult result;
+        result.status.status = result.status.STOPPED_BY_SAFETY_CHECK;
+        joint_trajectory_action_->setAborted(result);
+        return;
+    }
+
+    // Send to queue and wait for the task being accomplished
+    constexpr int WAIT_RESULT_TIME_MS = 300;
+    appendAndWaitForTrajectoryPlan<robot_msgs::JointTrajectoryAction, robot_msgs::JointTrajectoryResult>(
+        joint_trajectory_action_, plan, WAIT_RESULT_TIME_MS);
+}
+
+
 void arm_runner::PlanSupervisor::HandleEETrajectoryAction(
     const robot_msgs::CartesianTrajectoryGoal::ConstPtr& goal
 ) {
-
+    // Construct the plan
+    auto plan = EETrajectoryPlan::ConstructFromMessage(*tree_, goal);
+    if(plan == nullptr) {
+        robot_msgs::CartesianTrajectoryResult result;
+        result.status.status = result.status.STOPPED_BY_SAFETY_CHECK;
+        ee_trajectory_action_->setAborted(result);
+        return;
+    }
 }
 
 
