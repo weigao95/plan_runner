@@ -57,12 +57,12 @@ namespace arm_runner {
 
         // Cache
         Eigen::VectorXd q_command_cache, v_command_cache;
-    };
 
-    // Construct a trajectory plan
-    JointTrajectoryPlan::Ptr ConstructJointTrajectoryPlan(
-        const std::map<std::string, int>& joint_name_to_idx,
-        int num_joints,
-        const robot_msgs::JointTrajectoryGoal::ConstPtr &goal
-    );
+        // Construct the plan from msg
+    public:
+        static std::shared_ptr<JointTrajectoryPlan> ConstructFromMessage(
+            const std::map<std::string, int>& joint_name_to_idx,
+            int num_joints,
+            const robot_msgs::JointTrajectoryGoal::ConstPtr &goal);
+    };
 }

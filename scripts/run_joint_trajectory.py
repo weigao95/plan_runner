@@ -13,7 +13,7 @@ import robot_msgs.msg
 
 class RobotMovementService(object):
 
-    def __init__(self, joint_trajectory_action="/plan_runner/iiwa/JointTrajectory"):
+    def __init__(self, joint_trajectory_action="/plan_runner/JointTrajectory"):
         self._setupActionClients(joint_trajectory_action)
         self._joint_names = [
             "iiwa_joint_1",
@@ -88,5 +88,11 @@ class RobotMovementService(object):
 if __name__ == '__main__':
     rospy.init_node("RobotMovementService")
     rbt_movement = RobotMovementService()
-    q = [1.3, 0, 0, 0, 0, 0, 0]
+    q = [0.035684049129486084,
+         0.6206402778625488,
+         -0.03777864947915077,
+         -0.5906810164451599,
+         0.03872400149703026,
+         1.786637783050537,
+         0.4146159589290619]
     rbt_movement.move_to(q)

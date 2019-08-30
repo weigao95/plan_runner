@@ -31,7 +31,7 @@ namespace arm_runner {
         // The main interface
         void Start();
         void Stop();
-        void ProcessLoopIteration();
+        void ProcessLoopIteration(double control_peroid_second);
 
         // The real state that can only be mutated in main thread
     private:
@@ -101,12 +101,24 @@ namespace arm_runner {
 
         // The handling function
     public:
-        void HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoalConstPtr &goal);
+        void HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoal::ConstPtr& goal);
+        void HandleEETrajectoryAction(const robot_msgs::CartesianTrajectoryGoal::ConstPtr& goal);
         bool HandleEndPlanService(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
     private:
         ros::NodeHandle node_handle_;
         std::shared_ptr<actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>> joint_trajectory_action_;
+        std::shared_ptr<actionlib::SimpleActionServer<robot_msgs::CartesianTrajectoryAction>> ee_trajectory_action_;
         std::shared_ptr<ros::ServiceServer> plan_end_server_;
         void initializeServiceActions();
+
+        // Wait for the result
+        template<typename ActionT, typename ResultT>
+        void appendAndWaitForTrajectoryPlan(
+            std::shared_ptr<actionlib::SimpleActionServer<ActionT>>& action_server,
+            RobotPlanBase::Ptr plan,
+            int wait_result_interval);
     };
 }
+
+// The templated method
+#include "common/plan_supervisor_handler.hpp"
