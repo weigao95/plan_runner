@@ -16,7 +16,7 @@
 
 int main(int argc, char* argv[]) {
     // Get the simulation time
-    double simulation_time = 2000.0;
+    double simulation_time = 20.0;
     if(argc == 2) {
         simulation_time = std::stod(argv[1]);
     }
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
 
     // The initialization
     supervisor.Start();
-    ROS_INFO("Simulated robot fully started!");
+    ROS_INFO("Simulated robot fully started for %f sceonds!", simulation_time);
 
     // The main loop
     auto start_time = std::chrono::system_clock::now();

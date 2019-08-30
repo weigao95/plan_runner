@@ -9,12 +9,9 @@
 #include <drake/multibody/rigid_body_tree.h>
 #include <drake/multibody/rigid_body_plant/rigid_body_plant.h>
 #include <drake/common/drake_assert.h>
-#include <drake/common/find_resource.h>
 #include <drake/common/text_logging.h>
 #include <drake/multibody/parsers/urdf_parser.h>
 #include <drake/multibody/rigid_body_plant/drake_visualizer.h>
-#include <drake/multibody/rigid_body_plant/frame_visualizer.h>
-#include <drake/multibody/rigid_body_plant/rigid_body_plant.h>
 #include <drake/multibody/rigid_body_tree_construction.h>
 #include <drake/systems/analysis/simulator.h>
 #include <drake/systems/framework/diagram_builder.h>
@@ -38,6 +35,7 @@ arm_runner::SimulatedRobotArm::SimulatedRobotArm(
     exchanged_data_.latest_command.set_invalid();
 }
 
+
 arm_runner::SimulatedRobotArm::SimulatedRobotArm(
     std::unique_ptr<RigidBodyTree<double>> robot,
     double simulation_time_second
@@ -55,11 +53,13 @@ void arm_runner::SimulatedRobotArm::getRawMeasurement(RobotArmMeasurement &measu
     measurement = exchanged_data_.latest_measurement;
 }
 
+
 void arm_runner::SimulatedRobotArm::sendRawCommand(const arm_runner::RobotArmCommand &command) {
     std::lock_guard<std::mutex> guard(exchanged_data_.mutex);
     DRAKE_ASSERT(command.is_valid());
     exchanged_data_.latest_command = command;
 }
+
 
 void arm_runner::SimulatedRobotArm::Start() {
     // Launch the simulation thread
@@ -82,10 +82,12 @@ void arm_runner::SimulatedRobotArm::Start() {
     }
 }
 
+
 void arm_runner::SimulatedRobotArm::Stop() {
     if(simulation_thread_.joinable())
         simulation_thread_.join();
 }
+
 
 void arm_runner::SimulatedRobotArm::runSimulation() {
     // Use drake namespace
