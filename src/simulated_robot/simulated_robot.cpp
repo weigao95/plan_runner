@@ -35,6 +35,16 @@ arm_runner::SimulatedRobotArm::SimulatedRobotArm(
     exchanged_data_.latest_command.set_invalid();
 }
 
+arm_runner::SimulatedRobotArm::SimulatedRobotArm(
+    std::unique_ptr<RigidBodyTree<double>> robot,
+    double simulation_time_second
+) : simulation_time_second_(simulation_time_second), tree_(std::move(robot))
+{
+    // Clear the exchange data
+    exchanged_data_.latest_measurement.set_invalid();
+    exchanged_data_.latest_command.set_invalid();
+}
+
 
 void arm_runner::SimulatedRobotArm::getRawMeasurement(RobotArmMeasurement &measurement) {
     std::lock_guard<std::mutex> guard(exchanged_data_.mutex);

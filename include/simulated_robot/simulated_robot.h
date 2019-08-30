@@ -16,8 +16,7 @@ namespace arm_runner {
     class SimulatedRobotArm : public RobotCommunication {
     public:
         SimulatedRobotArm(const std::string& model_urdf, double simulation_time_second);
-        SimulatedRobotArm(std::unique_ptr<RigidBodyTree<double>> robot, double simulation_time_second)
-        : tree_(std::move(robot)), simulation_time_second_(simulation_time_second) {}
+        SimulatedRobotArm(std::unique_ptr<RigidBodyTree<double>> robot, double simulation_time_second);
         ~SimulatedRobotArm() override = default;
         void Start() override;
         void Stop() override;
