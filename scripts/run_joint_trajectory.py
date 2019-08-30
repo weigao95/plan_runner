@@ -13,7 +13,7 @@ import robot_msgs.msg
 
 class RobotMovementService(object):
 
-    def __init__(self, joint_trajectory_action="/plan_runner/iiwa/JointTrajectory"):
+    def __init__(self, joint_trajectory_action="/plan_runner/JointTrajectory"):
         self._setupActionClients(joint_trajectory_action)
         self._joint_names = [
             "iiwa_joint_1",
