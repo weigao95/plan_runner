@@ -51,11 +51,13 @@ int main(int argc, char* argv[]) {
 
     // The main loop
     auto start_time = std::chrono::system_clock::now();
-    ros::Rate rate(100); // 100 hz
+    double control_rate = 100.0;
+    double control_interval = 1.0 / control_rate;
+    ros::Rate rate(control_rate); // 100 hz
     while (!ros::isShuttingDown()) {
         // The iteration
         auto before = std::chrono::system_clock::now();
-        supervisor.ProcessLoopIteration();
+        supervisor.ProcessLoopIteration(control_interval);
         auto after = std::chrono::system_clock::now();
         auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(after - before).count();
 

@@ -42,7 +42,7 @@ TEST(SimRobotTest, SupervisorConstructTest) {
     ros::Rate rate(100); // 100 hz
     while (!ros::isShuttingDown()) {
         // The iteration
-        supervisor.ProcessLoopIteration();
+        supervisor.ProcessLoopIteration(0.01);
 
         // Check time
         auto now = std::chrono::system_clock::now();

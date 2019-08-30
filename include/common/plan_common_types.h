@@ -47,6 +47,7 @@ namespace arm_runner {
 
     // The input to command
     struct CommandInput {
+        float control_interval_second;
         const RobotArmMeasurement* latest_measurement;
         const RobotCommunication* robot_history;
         const RigidBodyTree<double>* robot_rbt;
@@ -56,7 +57,8 @@ namespace arm_runner {
             return latest_measurement != nullptr
             && robot_history != nullptr
             && robot_rbt != nullptr
-            && measured_state_cache != nullptr;
+            && measured_state_cache != nullptr
+            && control_interval_second > 0.0;
         }
     };
 }

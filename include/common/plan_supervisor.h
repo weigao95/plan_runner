@@ -31,7 +31,7 @@ namespace arm_runner {
         // The main interface
         void Start();
         void Stop();
-        void ProcessLoopIteration();
+        void ProcessLoopIteration(double control_peroid_second);
 
         // The real state that can only be mutated in main thread
     private:

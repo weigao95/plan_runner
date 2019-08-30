@@ -39,7 +39,7 @@ void arm_runner::PlanSupervisor::Stop() {
     plan_end_server_->shutdown();
 }
 
-void arm_runner::PlanSupervisor::ProcessLoopIteration() {
+void arm_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_second) {
     // Get measurement
     // Use the time in measurement
     rbt_communication_->GetMeasurement(measurement_cache);
@@ -65,6 +65,7 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration() {
     input.robot_history = rbt_communication_.get();
     input.robot_rbt = tree_.get();
     input.measured_state_cache = cache_measured_state.get();
+    input.control_interval_second = control_peroid_second;
 
     // Compute command
     if(rbt_active_plan_ != nullptr) {

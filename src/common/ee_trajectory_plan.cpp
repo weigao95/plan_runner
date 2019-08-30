@@ -51,8 +51,11 @@ void arm_runner::EETrajectoryPlan::computeCommand(
     // Write to the result
     command.set_invalid();
     for(auto i = 0; i < qdot_command.size(); i++) {
-        command.joint_position[i] = qdot_command[i];
+        command.joint_velocities[i] = qdot_command[i];
+        command.joint_position[i] =
+                input.latest_measurement->joint_position[i] + qdot_command[i] * input.control_interval_second;
     }
+    command.velocity_validity = true;
     command.position_validity = true;
 }
 
