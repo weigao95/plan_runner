@@ -22,10 +22,11 @@ namespace arm_runner {
     public:
         using Ptr = std::shared_ptr<JointTrajectoryPlan>;
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
-        JointTrajectoryPlan(const PiecewisePolynomial& joint_trajectory, int plan_number);
-        ~JointTrajectoryPlan() = default;
+        JointTrajectoryPlan(std::vector<double> input_time, std::vector<Eigen::MatrixXd> knots);
+        ~JointTrajectoryPlan() override = default;
 
         // The method in base class
+        void InitializePlan(const CommandInput& input) override;
         PlanType GetPlanType() const override { return PlanType::JointTrajectory; }
         bool HasFinished(const RobotArmMeasurement& measurement) const override {
             return measurement.time_stamp.since_plan_start_second >= TrajectoryDuration();
@@ -46,6 +47,10 @@ namespace arm_runner {
                 RobotArmCommand& command) override;
 
     private:
+        // The data used to construct the trajectory
+        std::vector<double> input_time_;
+        std::vector<Eigen::MatrixXd> knots_;
+
         // The trajectory
         PiecewisePolynomial joint_trajectory_;
         PiecewisePolynomial joint_velocity_trajectory_;
@@ -56,10 +61,8 @@ namespace arm_runner {
 
     // Construct a trajectory plan
     JointTrajectoryPlan::Ptr ConstructJointTrajectoryPlan(
-        int plan_number,
-        const RigidBodyTree<double>& tree,
-        const robot_msgs::JointTrajectoryGoal::ConstPtr &goal,
-        const RobotArmMeasurement& measurement,
-        const RobotArmCommand& latest_command
+        const std::map<std::string, int>& joint_name_to_idx,
+        int num_joints,
+        const robot_msgs::JointTrajectoryGoal::ConstPtr &goal
     );
 }

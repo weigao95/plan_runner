@@ -33,7 +33,6 @@ namespace arm_runner {
         void Stop();
         void ProcessLoopIteration();
 
-
         // The real state that can only be mutated in main thread
     private:
         std::unique_ptr<RigidBodyTree<double>> tree_;
@@ -41,6 +40,12 @@ namespace arm_runner {
         RobotPlanBase::Ptr rbt_active_plan_;
         double plan_start_time_second_;
         void initializeKinematicAndCache();
+
+
+        // Some constant data that can be accessed by all threads
+    private:
+        std::map<std::string, int> joint_name_to_idx_;
+        int num_joint_;
 
 
         // The members for switching, might be accessed by other thread
@@ -51,18 +56,18 @@ namespace arm_runner {
         struct PlanConstructionData {
             // The flag
             bool valid;
-            PlanType type;
             int plan_number;
 
-            // The actual data
-            robot_msgs::JointTrajectoryGoal::ConstPtr joint_trajectory_goal;
-            robot_msgs::CartesianTrajectoryGoal::ConstPtr cartesian_trajectory_goal;
+            // The actual plan
+            RobotPlanBase::Ptr switch_to_plan;
         } plan_construction_data_;
         void initializeSwitchData();
+
 
         // These method would read the construction data and can only be accessed on main thread
         bool shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const;
         void processPlanSwitch(const CommandInput& input, const RobotArmCommand& latest_command, bool command_safety);
+
 
         // The member to maintain the queue of accomplished tasks
     private:
@@ -103,11 +108,5 @@ namespace arm_runner {
         std::shared_ptr<actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>> joint_trajectory_action_;
         std::shared_ptr<ros::ServiceServer> plan_end_server_;
         void initializeServiceActions();
-
-
-        // The plan constructor with callbacks
-    private:
-        RobotPlanBase::Ptr constructNewPlan(const CommandInput& input, const RobotArmCommand& latest_command);
-        RobotPlanBase::Ptr constructJointTrajectoryPlan(const CommandInput& input, int plan_number);
     };
 }
