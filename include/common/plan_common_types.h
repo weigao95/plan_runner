@@ -51,5 +51,12 @@ namespace arm_runner {
         const RobotCommunication* robot_history;
         const RigidBodyTree<double>* robot_rbt;
         const KinematicsCache<double>* measured_state_cache;
+
+        bool is_valid() const {
+            return latest_measurement != nullptr
+            && robot_history != nullptr
+            && robot_rbt != nullptr
+            && measured_state_cache != nullptr;
+        }
     };
 }
