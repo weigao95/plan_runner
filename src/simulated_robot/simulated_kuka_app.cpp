@@ -17,7 +17,7 @@
 
 int main(int argc, char* argv[]) {
     // Get the simulation time
-    double simulation_time = 300.0;
+    double simulation_time = 30.0;
     if(argc == 2) {
         simulation_time = std::stod(argv[1]);
     }
@@ -66,6 +66,11 @@ int main(int argc, char* argv[]) {
             max_time = duration_ns;
         iteration += 1;
         average += duration_ns;
+
+        // Debug
+        if(duration_ns > 1000000) {
+            ROS_INFO("SLOW Iteration!");
+        }
 
         // Check time
         auto now = std::chrono::system_clock::now();

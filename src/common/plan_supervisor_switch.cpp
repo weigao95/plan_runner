@@ -77,6 +77,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     // Construct and switch to the new one
     rbt_active_plan_ = construction_data.switch_to_plan;
     if(rbt_active_plan_ != nullptr) {
+        ROS_INFO("Start new plan %d", construction_data.plan_number);
         rbt_active_plan_->SetPlanNumber(construction_data.plan_number);
         rbt_active_plan_->InitializePlan(input);
     }
