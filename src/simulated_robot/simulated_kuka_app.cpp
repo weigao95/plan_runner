@@ -17,7 +17,7 @@
 
 int main(int argc, char* argv[]) {
     // Get the simulation time
-    double simulation_time = 30.0;
+    double simulation_time = 300.0;
     if(argc == 2) {
         simulation_time = std::stod(argv[1]);
     }
