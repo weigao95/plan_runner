@@ -9,12 +9,14 @@ const int arm_runner::EETrajectoryPlan::world_frame = 0;
 
 
 arm_runner::EETrajectoryPlan::EETrajectoryPlan(
+    bool has_quaternion,
     std::string task_frame,
     std::vector<double> input_time,
     std::vector<Eigen::MatrixXd> ee_xyz_knots,
     std::vector<Eigen::Quaterniond> ee_quat_knots,
     std::string wrt_frame)
-    : task_frame_name_(std::move(task_frame)),
+    : has_quaternion_(has_quaternion),
+      task_frame_name_(std::move(task_frame)),
       input_time_(std::move(input_time)),
       ee_xyz_knots_(std::move(ee_xyz_knots)),
       ee_quat_knots_(std::move(ee_quat_knots)),

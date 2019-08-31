@@ -25,6 +25,7 @@ namespace arm_runner {
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
         using PiecewiseQuaternionSlerp = drake::trajectories::PiecewiseQuaternionSlerp<double>;
         EETrajectoryPlan(
+            bool has_quaternion,
             std::string task_frame,
             std::vector<double> input_time,
             std::vector<Eigen::MatrixXd> ee_xyz_knots,
@@ -61,6 +62,7 @@ namespace arm_runner {
 
         // The member used for construction
     private:
+        bool has_quaternion_;
         std::string task_frame_name_;
         std::string wrt_frame_name_;
         std::vector<double> input_time_;
