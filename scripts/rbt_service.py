@@ -147,7 +147,7 @@ class RobotMovementService(object):
         return finished_normally
 
     def move_ee_wrt_world(self, trajectory=[0.636498, 0.0157858, 0.617309]):
-        goal_msg = make_cartesian_goal_trajectory_msg(trajectory, 'iiwa_link_ee', 'world')
+        goal_msg = make_cartesian_goal_trajectory_msg(trajectory, 'iiwa_link_ee', 'world', speed=0.05)
         self.ee_trajectory_action.send_goal(goal_msg)
         print('EE goal message sent. Wait for result!')
         self.ee_trajectory_action.wait_for_result()

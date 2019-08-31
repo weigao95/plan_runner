@@ -107,22 +107,13 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
     int wrt_frame_index = GetBodyOrFrameIndex(tree, wrt_frame_name_);
     Eigen::Isometry3d knot_transform = tree.relativeTransform(cache, world_frame, wrt_frame_index);
 
-    std::cout << "Before transform " << std::endl;
-    std::cout << knot_transform.linear() << std::endl;
-    std::cout << knot_transform.translation() << std::endl;
-    std::cout << ee_xyz_knots_[1] << std::endl;
-
     // Apply the transform
     for(auto i = 1; i < ee_xyz_knots_.size(); i++) {
         ee_xyz_knots_[i] = knot_transform.linear() * ee_xyz_knots_[i] + knot_transform.translation();
-        ee_quat_knots_[i] = knot_transform.rotation() * ee_quat_knots_[i];
-    }
-
-    // Debug print
-    for (auto i = 0; i < ee_xyz_knots_.size(); i++) {
-        std::cout << "After transform " << i << std::endl;
-        std::cout << ee_xyz_knots_[i] << std::endl;
-        std::cout << ee_quat_knots_[i].toRotationMatrix() << std::endl;
+        if(has_quaternion_)
+            ee_quat_knots_[i] = knot_transform.rotation() * ee_quat_knots_[i];
+        else
+            ee_quat_knots_[i] = ee_quat_knots_[0];
     }
 
     // Compute the trajectory
@@ -193,6 +184,7 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
 
     // Construct
     return std::make_shared<EETrajectoryPlan>(
+        has_quat,
         std::move(task_frame_name),
         std::move(input_time),
         std::move(position_knot_vec),
