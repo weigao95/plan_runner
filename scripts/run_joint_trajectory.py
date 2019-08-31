@@ -88,11 +88,5 @@ class RobotMovementService(object):
 if __name__ == '__main__':
     rospy.init_node("RobotMovementService")
     rbt_movement = RobotMovementService()
-    q = [0.035684049129486084,
-         0.6206402778625488,
-         -0.03777864947915077,
-         -0.5906810164451599,
-         0.03872400149703026,
-         1.786637783050537,
-         0.4146159589290619]
+    q = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
     rbt_movement.move_to(q)
