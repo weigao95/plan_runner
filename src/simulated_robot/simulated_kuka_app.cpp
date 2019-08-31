@@ -56,6 +56,7 @@ int main(int argc, char* argv[]) {
     ros::Rate rate(control_rate); // 100 hz
     while (!ros::isShuttingDown()) {
         // The iteration
+        ROS_INFO("Iteration: %d", iteration);
         auto before = std::chrono::system_clock::now();
         supervisor.ProcessLoopIteration(control_interval);
         auto after = std::chrono::system_clock::now();
@@ -69,7 +70,7 @@ int main(int argc, char* argv[]) {
 
         // Debug
         if(duration_ns > 1000000) {
-            ROS_INFO("SLOW Iteration!");
+            ROS_INFO("SLOW Iteration! %d which take %d", iteration, duration_ns);
         }
 
         // Check time
