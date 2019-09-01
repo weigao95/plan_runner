@@ -4,6 +4,20 @@
 
 #include "common/plan_base.h"
 
+
+void arm_runner::RobotPlanBase::ComputeCommand(
+        const CommandInput& input,
+        arm_runner::RobotArmCommand &command
+) {
+    if(status_ == PlanStatus::Running)
+        computeCommand(input, command);
+    else {
+        // Should not happen, send warning
+        KeepCurrentConfigurationCommand(*input.latest_measurement, command);
+    }
+}
+
+
 void arm_runner::RobotPlanBase::KeepCurrentConfigurationCommand(
         const arm_runner::RobotArmMeasurement &measurement,
         arm_runner::RobotArmCommand &command
@@ -21,14 +35,21 @@ void arm_runner::RobotPlanBase::KeepCurrentConfigurationCommand(
     command.torque_validity = false;
 }
 
-void arm_runner::RobotPlanBase::ComputeCommand(
-        const CommandInput& input,
-        arm_runner::RobotArmCommand &command
+
+bool arm_runner::RobotPlanBase::CheckSafety(
+    const arm_runner::CommandInput &input,
+    const arm_runner::RobotArmCommand &command
 ) {
-    if(status_ == PlanStatus::Running)
-        computeCommand(input, command);
-    else {
-        // Should not happen, send warning
-        KeepCurrentConfigurationCommand(*input.latest_measurement, command);
+    // Any fails of the checker will result in safety failed
+    for(auto& checker : safety_checker_stack_) {
+        bool is_safe = true;
+        if(checker->HasRequiredField(input, command)) {
+            is_safe = checker->CheckSafety(input, command);
+        }
+        if(!is_safe)
+            return false;
     }
+
+    // No fail in the checkers
+    return true;
 }

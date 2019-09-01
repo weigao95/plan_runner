@@ -7,6 +7,8 @@
 #include "common/plan_common_types.h"
 #include "common/communication_types.h"
 #include "common/robot_communication.h"
+#include "common/safety_checker_interface.h"
+
 
 namespace arm_runner {
 
@@ -30,15 +32,19 @@ namespace arm_runner {
         virtual PlanType GetPlanType() const = 0;
         virtual bool HasFinished(const RobotArmMeasurement& measurement) const = 0;
 
-        // The accessing interface of supervisor
+
+        // The external and internal processing interface of supervisor
+    public:
         void ComputeCommand(
                 const CommandInput& input,
                 RobotArmCommand& command);
-
-        // The command that just stay at current config
         static void KeepCurrentConfigurationCommand(
             const RobotArmMeasurement& measurement, 
             RobotArmCommand& command);
+    protected:
+        virtual void computeCommand(
+                const CommandInput& input,
+                RobotArmCommand& command) = 0;
 
 
         // The plan number can be accessed outside
@@ -51,12 +57,18 @@ namespace arm_runner {
         PlanStatus status_;
         int plan_number_;
 
-        // Keep current rbt configuration command
-        virtual void computeCommand(
-                const CommandInput& input,
-                RobotArmCommand& command) = 0;
+
+        // The safety checking function
+        // Some checkers are specified to plan, which is maintained here
+    public:
+        void AddSafetyChecker(SafetyChecker::Ptr checker) { safety_checker_stack_.emplace_back(std::move(checker)); };
+        bool CheckSafety(const CommandInput& input, const RobotArmCommand& command);
+    protected:
+        std::vector<SafetyChecker::Ptr> safety_checker_stack_;
+
 
         // The callback function
+    protected:
         using StoppedCallbackFunction = std::function<void(RobotPlanBase*, ActionToCurrentPlan latest_action)>;
         std::vector<StoppedCallbackFunction> stop_callbacks_;
     public:

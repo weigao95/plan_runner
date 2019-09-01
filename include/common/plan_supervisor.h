@@ -11,6 +11,7 @@
 #include "common/plan_base.h"
 #include "common/plan_common_types.h"
 #include "common/robot_communication.h"
+#include "common/safety_checker_interface.h"
 
 #include "robot_msgs/CartesianTrajectoryAction.h"
 #include "robot_msgs/JointTrajectoryAction.h"
@@ -95,8 +96,12 @@ namespace arm_runner {
 
 
         // Software safety check
-    private:
-        bool checkCommandSafety(const CommandInput& measurement, const RobotArmCommand& command) const;
+        // The safety checkers here are plan-independent
+    public:
+        void AddSafetyChecker(SafetyChecker::Ptr checker) { safety_checker_stack_.emplace_back(std::move(checker)); };
+    protected:
+        std::vector<SafetyChecker::Ptr> safety_checker_stack_;
+        bool checkCommandSafety(const CommandInput& measurement, const RobotArmCommand& command);
 
 
         // The handling function

@@ -90,7 +90,27 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_seco
 
 
 // For safety check
-bool arm_runner::PlanSupervisor::checkCommandSafety(const arm_runner::CommandInput &measurement,
-                                                    const arm_runner::RobotArmCommand &command) const {
+bool arm_runner::PlanSupervisor::checkCommandSafety(
+    const arm_runner::CommandInput &input,
+    const arm_runner::RobotArmCommand &command
+) {
+    // Plan-specific check
+    if(rbt_active_plan_ != nullptr) {
+        auto plan_safety = rbt_active_plan_->CheckSafety(input, command);
+        if(!plan_safety)
+            return false;
+    }
+
+    // General check
+    for(auto& checker : safety_checker_stack_) {
+        bool is_safe = true;
+        if(checker->HasRequiredField(input, command)) {
+            is_safe = checker->CheckSafety(input, command);
+        }
+        if(!is_safe)
+            return false;
+    }
+
+    // Everything OK
     return true;
 }
