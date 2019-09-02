@@ -48,6 +48,10 @@ namespace arm_runner {
         // The force information
         Eigen::Vector3d force_threshold_;
         const int force_expressed_in_frame_;
+
+        // The cache types
+        Eigen::MatrixXd jacobian_cache;
+        Eigen::VectorXd torque_threshold_cache;
     };
 
 }
