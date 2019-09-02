@@ -46,7 +46,9 @@ namespace arm_runner {
         static ExternalForceGuardChecker::Ptr ConstructFromMessage(
             const RigidBodyTree<double>& tree,
             const robot_msgs::ExternalForceGuard &message);
-
+        static std::vector<SafetyChecker::Ptr> ConstructCheckersFromForceGuardMessage(
+            const RigidBodyTree<double>& tree,
+            const robot_msgs::ForceGuard& message);
     private:
         // The force applied on which body
         const int body_idx_;
@@ -60,5 +62,4 @@ namespace arm_runner {
         Eigen::MatrixXd jacobian_cache;
         Eigen::VectorXd torque_threshold_cache;
     };
-
 }

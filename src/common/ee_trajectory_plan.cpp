@@ -4,10 +4,7 @@
 
 #include "common/ee_trajectory_plan.h"
 #include "common/rbt_utils.h"
-
-
-// The world frame in drake is always zero
-const int arm_runner::EETrajectoryPlan::world_frame = 0;
+#include "common/forceguard_checker.h"
 
 
 arm_runner::EETrajectoryPlan::EETrajectoryPlan(
@@ -42,6 +39,7 @@ void arm_runner::EETrajectoryPlan::computeCommand(
 ) {
     // Collect data
     DRAKE_ASSERT(input.is_valid());
+    const int world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
     const RigidBodyTree<double>& tree = *input.robot_rbt;
     const auto& cache = *input.measured_state_cache;
     auto t = input.latest_measurement->time_stamp.since_plan_start_second;
@@ -101,6 +99,7 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
     DRAKE_ASSERT(task_frame_index_ != 0);
 
     // Compute the initial configuration
+    const int world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
     Eigen::Isometry3d ee_transform = tree.relativeTransform(cache, world_frame, task_frame_index_);
     ee_xyz_knots_[0] = ee_transform.translation();
     ee_quat_knots_[0] = Eigen::Quaterniond(ee_transform.linear());
@@ -185,7 +184,7 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
     }
 
     // Construct
-    return std::make_shared<EETrajectoryPlan>(
+    auto plan = std::make_shared<EETrajectoryPlan>(
         has_quat,
         std::move(task_frame_name),
         std::move(input_time),
@@ -193,4 +192,15 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
         std::move(orientation_knot_vec),
         std::move(wrt_frame_name)
     );
+
+    // The force guard
+    for(const auto& guard_msg : goal->force_guard) {
+        auto checker_vec = ExternalForceGuardChecker::ConstructCheckersFromForceGuardMessage(tree, guard_msg);
+        for(const auto& checker : checker_vec) {
+            plan->AddSafetyChecker(checker);
+        }
+    }
+
+    // OK
+    return plan;
 }

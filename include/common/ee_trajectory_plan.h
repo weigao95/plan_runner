@@ -71,7 +71,6 @@ namespace arm_runner {
 
         // The constructed members
     private:
-        static const int world_frame;
         int task_frame_index_;
         PiecewisePolynomial ee_xyz_trajectory_;
         PiecewiseQuaternionSlerp ee_orientation_trajectory_;

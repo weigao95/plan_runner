@@ -43,6 +43,7 @@ bool arm_runner::ExternalForceGuardChecker::HasRequiredField(
         return false;
 }
 
+
 arm_runner::SafetyChecker::CheckResult arm_runner::ExternalForceGuardChecker::CheckSafety(
     const arm_runner::CommandInput &input,
     const arm_runner::RobotArmCommand &command
@@ -104,4 +105,27 @@ arm_runner::ExternalForceGuardChecker::Ptr arm_runner::ExternalForceGuardChecker
     return std::make_shared<ExternalForceGuardChecker>(
         body_frame_index, std::move(point_in_body),
         force_threshold, force_expressed_in_frame_index);
+}
+
+
+std::vector<arm_runner::SafetyChecker::Ptr> arm_runner::ExternalForceGuardChecker::ConstructCheckersFromForceGuardMessage(
+    const RigidBodyTree<double> &tree,
+    const robot_msgs::ForceGuard &message
+) {
+    // The total force guard
+    std::vector<arm_runner::SafetyChecker::Ptr> checker_vec;
+    if(!message.joint_torque_external_l2_norm.empty()) {
+        double threshold = message.joint_torque_external_l2_norm[0];
+        auto guard = std::make_shared<TotalForceGuardChecker>(threshold);
+        checker_vec.emplace_back(std::move(guard));
+    }
+
+    // The external forceguard
+    for(const auto& guard_msg : message.external_force_guards) {
+        auto guard = ConstructFromMessage(tree, guard_msg);
+        checker_vec.emplace_back(std::move(guard));
+    }
+
+    // OK
+    return checker_vec;
 }
