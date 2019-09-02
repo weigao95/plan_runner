@@ -14,7 +14,14 @@ namespace arm_runner {
 
     class SafetyChecker {
     public:
+        // Types
         using Ptr = std::shared_ptr<SafetyChecker>;
+        struct CheckResult {
+            bool is_safe;
+            double violation; // Potentially not used
+        };
+
+        // Virtual class
         virtual ~SafetyChecker() = default;
 
         // The input and command might not have the measurement/command field required for this checker.
@@ -24,6 +31,6 @@ namespace arm_runner {
 
         // The main checking interface
         // When this method is invoked, the HasRequiredField MUST be true.
-        virtual bool CheckSafety(const CommandInput& input, const RobotArmCommand& command) = 0;
+        virtual CheckResult CheckSafety(const CommandInput& input, const RobotArmCommand& command) = 0;
     };
 }

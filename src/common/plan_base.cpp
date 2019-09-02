@@ -44,7 +44,8 @@ bool arm_runner::RobotPlanBase::CheckSafety(
     for(auto& checker : safety_checker_stack_) {
         bool is_safe = true;
         if(checker->HasRequiredField(input, command)) {
-            is_safe = checker->CheckSafety(input, command);
+            auto result = checker->CheckSafety(input, command);
+            is_safe = result.is_safe;
         }
         if(!is_safe)
             return false;
