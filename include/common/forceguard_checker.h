@@ -5,6 +5,8 @@
 #pragma once
 
 #include <memory>
+#include <robot_msgs/ForceGuard.h>
+#include <robot_msgs/ExternalForceGuard.h>
 
 #include "common/safety_checker_interface.h"
 
@@ -31,7 +33,7 @@ namespace arm_runner {
     class ExternalForceGuardChecker : public SafetyChecker {
     public:
         using Ptr = std::shared_ptr<ExternalForceGuardChecker>;
-        explicit ExternalForceGuardChecker(
+        ExternalForceGuardChecker(
             int body_idx, Eigen::Vector3d point_in_body,
             Eigen::Vector3d force_threshold, int force_expressed_in_frame);
         ~ExternalForceGuardChecker() override = default;
@@ -39,6 +41,11 @@ namespace arm_runner {
         // The evaluation interface
         bool HasRequiredField(const CommandInput& input, const RobotArmCommand& command) override;
         CheckResult CheckSafety(const CommandInput& input, const RobotArmCommand& command) override;
+
+        // Construct from message
+        static ExternalForceGuardChecker::Ptr ConstructFromMessage(
+            const RigidBodyTree<double>& tree,
+            const robot_msgs::ExternalForceGuard &message);
 
     private:
         // The force applied on which body

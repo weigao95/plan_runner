@@ -73,3 +73,35 @@ arm_runner::SafetyChecker::CheckResult arm_runner::ExternalForceGuardChecker::Ch
     result.is_safe = result.violation > 1.0;
     return result;
 }
+
+
+arm_runner::ExternalForceGuardChecker::Ptr arm_runner::ExternalForceGuardChecker::ConstructFromMessage(
+    const RigidBodyTree<double> &tree,
+    const robot_msgs::ExternalForceGuard &message
+) {
+    // Collect info about force
+    const auto& force_msg = message.force;
+    Eigen::Vector3d force_threshold = Eigen::Vector3d(
+        force_msg.vector.x, force_msg.vector.y, force_msg.vector.z);
+
+    // Current not supported
+    Eigen::Vector3d point_in_body = Eigen::Vector3d::Zero();
+
+    // Collect info about frame
+    auto body_frame_name = message.body_frame;
+    auto force_expressed_in_frame = force_msg.header.frame_id;
+    if(force_expressed_in_frame == "base" || force_expressed_in_frame.empty())
+        force_expressed_in_frame = "world";
+
+    // Check the name
+    if((!bodyOrFrameContainedInTree(tree, body_frame_name))
+    || (!bodyOrFrameContainedInTree(tree, force_expressed_in_frame)))
+        return nullptr;
+
+    // OK
+    int body_frame_index = getBodyOrFrameIndex(tree, body_frame_name);
+    int force_expressed_in_frame_index = getBodyOrFrameIndex(tree, force_expressed_in_frame);
+    return std::make_shared<ExternalForceGuardChecker>(
+        body_frame_index, std::move(point_in_body),
+        force_threshold, force_expressed_in_frame_index);
+}
