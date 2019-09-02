@@ -19,6 +19,11 @@ namespace arm_runner {
         struct CheckResult {
             bool is_safe;
             double violation; // Potentially not used
+
+            void set_safe() {
+                is_safe = true;
+                violation = 0;
+            }
         };
 
         // Virtual class

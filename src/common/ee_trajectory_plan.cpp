@@ -3,6 +3,8 @@
 //
 
 #include "common/ee_trajectory_plan.h"
+#include "common/rbt_utils.h"
+
 
 // The world frame in drake is always zero
 const int arm_runner::EETrajectoryPlan::world_frame = 0;
@@ -95,7 +97,7 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
     // Get data
     const auto& tree = *input.robot_rbt;
     const auto& cache = *input.measured_state_cache;
-    task_frame_index_ = GetBodyOrFrameIndex(tree, task_frame_name_);
+    task_frame_index_ = getBodyOrFrameIndex(tree, task_frame_name_);
     DRAKE_ASSERT(task_frame_index_ != 0);
 
     // Compute the initial configuration
@@ -104,7 +106,7 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
     ee_quat_knots_[0] = Eigen::Quaterniond(ee_transform.linear());
 
     // Transform all other knots as they are expressed in wrt_frame
-    int wrt_frame_index = GetBodyOrFrameIndex(tree, wrt_frame_name_);
+    int wrt_frame_index = getBodyOrFrameIndex(tree, wrt_frame_name_);
     Eigen::Isometry3d knot_transform = tree.relativeTransform(cache, world_frame, wrt_frame_index);
 
     // Apply the transform
@@ -140,7 +142,7 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
     bool has_quat = (traj.quaternions.size() == traj.xyz_points.size());
 
     // Check the name
-    if((!FrameContainedInTree(tree, task_frame_name)) || (!FrameContainedInTree(tree, wrt_frame_name)))
+    if((!bodyOrFrameContainedInTree(tree, task_frame_name)) || (!bodyOrFrameContainedInTree(tree, wrt_frame_name)))
         return nullptr;
 
     // Allocate the space
@@ -191,53 +193,4 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
         std::move(orientation_knot_vec),
         std::move(wrt_frame_name)
     );
-}
-
-
-bool arm_runner::EETrajectoryPlan::FrameContainedInTree(
-    const RigidBodyTree<double> &tree,
-    const std::string &body_or_frame_name
-) {
-    // Initial flag
-    bool body_in_tree = false;
-    bool frame_in_tree = false;
-
-    // Check body
-    try {
-        auto body_frame_index = tree.FindBodyIndex(body_or_frame_name);
-        body_in_tree = true;
-    } catch (const std::logic_error& e) {
-        // Let it go
-    }
-
-    // Check the frame
-    try {
-        auto frame = tree.findFrame(body_or_frame_name);
-        frame_in_tree = true;
-    } catch (const std::logic_error& e) {
-        // Let it go
-    }
-
-    // OK
-    return body_in_tree || frame_in_tree;
-}
-
-
-int arm_runner::EETrajectoryPlan::GetBodyOrFrameIndex(
-        const RigidBodyTree<double> &tree,
-        const std::string &body_or_frame_name
-) {
-    int body_frame_index = 0;
-
-    // First try the body
-    try {
-        body_frame_index = tree.FindBodyIndex(body_or_frame_name);
-    } catch (const std::logic_error& e) {
-        // Then try the frame
-        auto frame = tree.findFrame(body_or_frame_name);
-        body_frame_index = frame->get_frame_index();
-    }
-
-    // OK
-    return body_frame_index;
 }
