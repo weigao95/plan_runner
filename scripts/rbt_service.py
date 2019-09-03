@@ -113,6 +113,7 @@ class RobotMovementService(object):
         # Check the result
         result = self.joint_space_trajectory_action.get_result()
         finished_normally = (result.status.status == result.status.FINISHED_NORMALLY)
+        print('Has finish normally? ', finished_normally)
         return finished_normally
 
     def joint_state_from_vector(self, q):

@@ -24,6 +24,7 @@ void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
     int current_plan_number = plan_construction_data_.plan_number;
     plan_construction_data_.plan_number++;
     switch_mutex_.unlock();
+    ROS_INFO("New plan appended with plan number %d", current_plan_number);
 
     // Wait for the task being accomplished
     do {

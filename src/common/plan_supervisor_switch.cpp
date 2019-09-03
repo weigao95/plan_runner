@@ -38,7 +38,7 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(
 
     // Current plan don't finish, and we have new plan
     if (rbt_active_plan_ != nullptr
-        && will_plan_stop_internally(rbt_active_plan_->GetPlanType())
+        && !(will_plan_stop_internally(rbt_active_plan_->GetPlanType()))
         && plan_construction_data_.valid) {
         return true;
     }
@@ -105,4 +105,5 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     DRAKE_ASSERT(rbt_active_plan_ != nullptr);
     rbt_active_plan_->SetPlanNumber(construction_data.plan_number);
     rbt_active_plan_->InitializePlan(input);
+    ROS_INFO("Start new plan with number %d", rbt_active_plan_->GetPlanNumber());
 }
