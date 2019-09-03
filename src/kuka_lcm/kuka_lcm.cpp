@@ -4,6 +4,9 @@
 
 #include "kuka_lcm.h"
 
+#include<ros/ros.h>
+
+
 // This app only works for kuka iiwa arm
 constexpr int KUKA_IIWA_ARM_NUM_JOINT = 7;
 
@@ -45,6 +48,9 @@ void arm_runner::KukaLCMInterface::Start() {
         if(msg_valid)
             break;
     } while(true);
+
+    // Log
+    ROS_INFO("The lcm interface of kuka is started!");
 }
 
 
@@ -69,7 +75,7 @@ void arm_runner::KukaLCMInterface::sendRawCommand(
     const arm_runner::RobotArmCommand &command
 ) {
     // The time from command
-    command_cache.utime = int64_t(command.time_stamp.absolute_time_second * 1000.0);
+    command_cache.utime = int64_t(command.time_stamp.absolute_time_second * 1e6);
 
     // Joint position should always work
     command_cache.num_joints = KUKA_IIWA_ARM_NUM_JOINT;
@@ -113,7 +119,7 @@ void arm_runner::KukaLCMInterface::handleReceiveIIWAStatus(
     measurement_cache.torque_validity = true;
 
     // The time of measurement
-    measurement_cache.time_stamp.absolute_time_second = double(status.utime) / 1000.0;
+    measurement_cache.time_stamp.absolute_time_second = double(status.utime) / 1e6;
 
     // Copy to exchange data
     exchange_data_.mutex.lock();

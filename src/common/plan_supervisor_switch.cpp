@@ -21,11 +21,16 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(
     const RobotArmCommand& latest_command
 ) const {
     // Commanded to stop
-    if (action_to_current_plan_ != ActionToCurrentPlan::NoAction) return true;
+    if (action_to_current_plan_ != ActionToCurrentPlan::NoAction) {
+        ROS_INFO("Stop the plan as requested or it is not safe.");
+        return true;
+    }
 
     // Current plan has finished
-    if (rbt_active_plan_ != nullptr && rbt_active_plan_->HasFinished(measurement))
+    if (rbt_active_plan_ != nullptr && rbt_active_plan_->HasFinished(measurement)) {
+        ROS_INFO("Stop the plan as it finished.");
         return true;
+    }
 
     // Current plan don't finish, and we have new plan
     if (rbt_active_plan_ != nullptr
@@ -35,8 +40,9 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(
     }
 
     // Current no plan, a new plan is valid
-    if (rbt_active_plan_ == nullptr && plan_construction_data_.valid)
+    if (rbt_active_plan_ == nullptr && plan_construction_data_.valid) {
         return true;
+    }
 
     // Other cases, just false
     return false;
@@ -71,13 +77,15 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     switch_mutex_.unlock();
 
     // Do switching
-    if(rbt_active_plan_ != nullptr)
+    if(rbt_active_plan_ != nullptr) {
+        ROS_INFO("Stop plan %d at time %f", rbt_active_plan_->GetPlanNumber(), input.latest_measurement->time_stamp.absolute_time_second);
         rbt_active_plan_->StopPlan(current_action);
+    }
 
     // Construct and switch to the new one
     rbt_active_plan_ = construction_data.switch_to_plan;
     if(rbt_active_plan_ != nullptr) {
-        ROS_INFO("Start new plan %d", construction_data.plan_number);
+        ROS_INFO("Start new plan %d at time %f", construction_data.plan_number, input.latest_measurement->time_stamp.absolute_time_second);
         rbt_active_plan_->SetPlanNumber(construction_data.plan_number);
         rbt_active_plan_->InitializePlan(input);
     }
