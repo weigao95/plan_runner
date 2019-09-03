@@ -2,7 +2,7 @@
 file(GLOB SIMROBOT_SRC *.h *.hpp *.cpp)
 
 # Exclude the test source
-file(GLOB SIMROBOT_APP_SRC *_app.cpp)
+file(GLOB SIMROBOT_APP_SRC *_node.cpp)
 exclude(SIMROBOT_SRC "${SIMROBOT_SRC}" ${SIMROBOT_APP_SRC})
 
 # Build the lib

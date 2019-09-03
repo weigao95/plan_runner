@@ -2,7 +2,7 @@
 file(GLOB KUKA_LCM_SRC *.h *.hpp *.cpp)
 
 # Exclude the test source
-file(GLOB KUKA_LCM_APP_SRC *_app.cpp)
+file(GLOB KUKA_LCM_APP_SRC *_node.cpp)
 exclude(KUKA_LCM_SRC "${KUKA_LCM_SRC}" ${KUKA_LCM_APP_SRC})
 
 # Build the lib

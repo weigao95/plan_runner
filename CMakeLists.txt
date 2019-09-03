@@ -219,6 +219,11 @@ add_subdirectory(src)
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
+install(DIRECTORY
+   launch/
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)
+
 #############
 ## Testing ##
 #############
