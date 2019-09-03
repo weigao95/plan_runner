@@ -5,6 +5,7 @@ project(arm_runner)
 add_compile_options(-std=c++11)
 
 ## CMake scripts
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/UtilFunctions.cmake)
 
 ## Find catkin macros and libraries
@@ -26,7 +27,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED)
 find_package(Threads)
-find_package(yaml-cpp REQUIRED)
+find_package(YamlCpp REQUIRED)
+include_directories(${YAMLCPP_INCLUDE_DIR})
 
 # The drake library
 set(drake_DIR "/home/wei/Program/build-install/drake-latest-bionic/drake/lib/cmake/drake")

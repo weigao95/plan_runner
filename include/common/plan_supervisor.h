@@ -30,7 +30,7 @@ namespace arm_runner {
             ros::NodeHandle nh);
 
         // The main interface
-        void Start();
+        void Initialize();
         void Stop();
         void ProcessLoopIteration(double control_peroid_second);
 

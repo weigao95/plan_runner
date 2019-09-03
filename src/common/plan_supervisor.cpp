@@ -30,7 +30,7 @@ void arm_runner::PlanSupervisor::initializeKinematicAndCache() {
 
 
 // The main interface
-void arm_runner::PlanSupervisor::Start() {
+void arm_runner::PlanSupervisor::Initialize() {
     rbt_communication_->Start();
 }
 
