@@ -133,5 +133,5 @@ void arm_runner::SimulatedRobotArm::runSimulation() {
     context.SetContinuousState(zero_init);
 
     // Start run simulation
-    simulator.AdvanceTo(simulation_time_second_);
+    simulator.StepTo(simulation_time_second_);
 }
