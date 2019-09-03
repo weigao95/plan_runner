@@ -58,6 +58,5 @@ namespace arm_runner {
         // Caches
     private:
         RobotArmMeasurement measurement_cache;
-        lcmt_iiwa_command command_cache;
     };
 }

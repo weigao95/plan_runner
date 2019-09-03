@@ -67,6 +67,9 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_seco
     input.measured_state_cache = cache_measured_state.get();
     input.control_interval_second = control_peroid_second;
 
+    // Setup the command time
+    command_cache.time_stamp = measurement_cache.time_stamp;
+
     // Compute command
     if(rbt_active_plan_ != nullptr) {
         rbt_active_plan_->ComputeCommand(input, command_cache);
