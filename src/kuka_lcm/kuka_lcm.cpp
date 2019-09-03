@@ -16,6 +16,39 @@ arm_runner::KukaLCMInterface::KukaLCMInterface(
 {
     // Set everything to invalid
     exchange_data_.measurement.set_invalid();
+    quit_receiving_ = false;
+}
+
+
+void arm_runner::KukaLCMInterface::Start() {
+    // Invoke the subscriber thread
+    exchange_data_.measurement.set_invalid();
+    quit_receiving_ = false;
+    receive_rbt_status_thread_ = std::thread(&KukaLCMInterface::receiveRobotStatusThread, this);
+
+    // Wait for one msg
+    constexpr int WAIT_MSG_INTERVAL_MS = 40;
+    do {
+        // Wait the msg
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_MSG_INTERVAL_MS));
+
+        // Get validity
+        bool msg_valid = false;
+        exchange_data_.mutex.lock();
+        msg_valid = exchange_data_.measurement.is_valid();
+        exchange_data_.mutex.unlock();
+
+        // Check it
+        if(msg_valid)
+            break;
+    } while(true);
+}
+
+
+void arm_runner::KukaLCMInterface::Stop() {
+    quit_receiving_ = true;
+    if(receive_rbt_status_thread_.joinable())
+        receive_rbt_status_thread_.join();
 }
 
 
@@ -83,4 +116,28 @@ void arm_runner::KukaLCMInterface::handleReceiveIIWAStatus(
     exchange_data_.mutex.lock();
     exchange_data_.measurement = measurement_cache;
     exchange_data_.mutex.unlock();
+}
+
+
+void arm_runner::KukaLCMInterface::receiveRobotStatusThread() {
+    // Construct the receiver
+    lcm::LCM receiver_lcm;
+    receiver_lcm.subscribe(
+        lcm_status_channel_,
+        &KukaLCMInterface::handleReceiveIIWAStatus, this);
+
+    // Go
+    while (true) {
+        // Call lcm handle until at least one status message is
+        // processed.
+        constexpr int MESSAGE_TIMEOUT_MS = 10;
+        while (0 == receiver_lcm.handleTimeout(MESSAGE_TIMEOUT_MS)) {
+            // TODO: Print something here so users know no LCM message has been
+            // received.
+        }
+
+        // Break if requested
+        if(quit_receiving_)
+            break;
+    }
 }

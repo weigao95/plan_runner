@@ -5,6 +5,7 @@
 #pragma once
 
 #include <mutex>
+#include <thread>
 #include <lcm/lcm-cpp.hpp>
 #include <drake/lcmt_iiwa_command.hpp>
 #include <drake/lcmt_iiwa_status.hpp>
@@ -37,17 +38,22 @@ namespace arm_runner {
         std::string lcm_command_channel_;
         lcm::LCM command_publisher_lcm_;
 
+
         // The measurement exchange data
     private:
         struct {
             std::mutex mutex;
             RobotArmMeasurement measurement;
         } exchange_data_;
+        bool quit_receiving_;
+        std::thread receive_rbt_status_thread_;
     public:
         void handleReceiveIIWAStatus(
             const lcm::ReceiveBuffer *,
             const std::string &,
             const lcmt_iiwa_status *status);
+        void receiveRobotStatusThread();
+
 
         // Caches
     private:
