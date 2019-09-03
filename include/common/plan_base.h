@@ -38,8 +38,8 @@ namespace arm_runner {
         void ComputeCommand(
                 const CommandInput& input,
                 RobotArmCommand& command);
-        static void KeepCurrentConfigurationCommand(
-            const RobotArmMeasurement& measurement, 
+        static void CopyConfigurationToCommand(
+            const RobotArmMeasurement& measurement,
             RobotArmCommand& command);
     protected:
         virtual void computeCommand(
@@ -73,5 +73,27 @@ namespace arm_runner {
         std::vector<StoppedCallbackFunction> stop_callbacks_;
     public:
         void AddStoppedCallback(StoppedCallbackFunction func) { stop_callbacks_.emplace_back(std::move(func)); };
+    };
+
+
+    // The default plan that keeps the current configuration
+    class KeepCurrentConfigurationPlan : public RobotPlanBase {
+    public:
+        using Ptr = std::shared_ptr<KeepCurrentConfigurationPlan>;
+        explicit KeepCurrentConfigurationPlan();
+        ~KeepCurrentConfigurationPlan() override = default;
+
+        // The interface
+        void InitializePlan(const CommandInput& input);
+        PlanType GetPlanType() const override { return PlanType::KeepCurrentConfigurationPlan; }
+        bool HasFinished(const RobotArmMeasurement& measurement) const override { return false; }
+
+        // The command just copy kept_config
+    protected:
+        void computeCommand(
+            const CommandInput& input,
+            RobotArmCommand& command) override;
+    private:
+        RobotArmMeasurement kept_configuration_;
     };
 }
