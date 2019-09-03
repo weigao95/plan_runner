@@ -76,9 +76,14 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     auto current_action = action_to_current_plan_;
     plan_construction_data_.valid = false;
     plan_construction_data_.switch_to_plan = nullptr;
-    plan_construction_data_.plan_number++;
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
     plan_start_time_second_ = input.latest_measurement->time_stamp.absolute_time_second;
+
+    // Need to construct keep current config plan
+    if(construction_data.switch_to_plan == nullptr || (!construction_data.valid))
+        plan_construction_data_.plan_number++;
+
+    // We do need plan_construct_data_ anymore
     switch_mutex_.unlock();
 
     // Do switching
