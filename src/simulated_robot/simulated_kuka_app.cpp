@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     PlanSupervisor supervisor(std::move(tree), std::move(robot_arm), nh);
 
     // The initialization
-    supervisor.Start();
+    supervisor.Initialize();
     ROS_INFO("Simulated robot fully started for %f sceonds!", simulation_time);
 
     // The counting
