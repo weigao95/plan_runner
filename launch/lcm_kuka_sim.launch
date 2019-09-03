@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+<!--The path to config file-->
+<arg name="pkg_name" default="arm_runner" />
+<arg name="config_path" default="$(eval find(arg('pkg_name')) +'/config/kuka_lcm/kuka_lcm_sim.yaml')" />
+
+<!--The simulated kuka robot-->
+<node name="plan_runner" pkg="$(arg pkg_name)" type="kuka_lcm_node" output="screen" args="$(arg config_path)">
+</node>
+
+</launch>
