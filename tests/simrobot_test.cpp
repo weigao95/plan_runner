@@ -35,7 +35,7 @@ TEST(SimRobotTest, SupervisorConstructTest) {
     PlanSupervisor supervisor(std::move(tree), std::move(robot_arm), nh);
 
     // The initialization
-    supervisor.Start();
+    supervisor.Initialize();
 
     // The main loop
     auto start_time = std::chrono::system_clock::now();
