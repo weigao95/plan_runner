@@ -17,6 +17,9 @@ arm_runner::KukaLCMInterface::KukaLCMInterface(
     // Set everything to invalid
     exchange_data_.measurement.set_invalid();
     quit_receiving_ = false;
+
+    // Can be ignored
+    measurement_cache.set_invalid();
 }
 
 
