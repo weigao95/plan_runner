@@ -102,10 +102,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     }
 
     // Initialize the new plan
-    if(rbt_active_plan_ != nullptr) {
-        ROS_INFO("Start new plan %d at time %f",
-                rbt_active_plan_->GetPlanNumber(), input.latest_measurement->time_stamp.absolute_time_second);
-        rbt_active_plan_->SetPlanNumber(construction_data.plan_number);
-        rbt_active_plan_->InitializePlan(input);
-    }
+    DRAKE_ASSERT(rbt_active_plan_ != nullptr);
+    rbt_active_plan_->SetPlanNumber(construction_data.plan_number);
+    rbt_active_plan_->InitializePlan(input);
 }
