@@ -54,13 +54,17 @@ namespace arm_runner {
     private:
         std::mutex switch_mutex_;
         ActionToCurrentPlan action_to_current_plan_;
-        struct PlanConstructionData {
+        class PlanConstructionData {
+        public:
+            explicit PlanConstructionData() : plan_number(0) {};
             // The flag
             bool valid;
-            int plan_number;
-
-            // The actual plan
             RobotPlanBase::Ptr switch_to_plan;
+
+            void increase_plan_number() { plan_number++; }
+            int next_plan_number() { return plan_number; }
+        private:
+            int plan_number;
         } plan_construction_data_;
         void initializeSwitchData();
 

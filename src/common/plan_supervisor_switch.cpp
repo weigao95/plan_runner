@@ -11,7 +11,6 @@
 void arm_runner::PlanSupervisor::initializeSwitchData() {
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
     plan_construction_data_.valid = false;
-    plan_construction_data_.plan_number = 0;
     plan_construction_data_.switch_to_plan = nullptr;
 }
 
@@ -80,8 +79,11 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     plan_start_time_second_ = input.latest_measurement->time_stamp.absolute_time_second;
 
     // Need to construct keep current config plan
-    if(construction_data.switch_to_plan == nullptr || (!construction_data.valid))
-        plan_construction_data_.plan_number++;
+    int kept_config_plan_number = -1;
+    if(construction_data.switch_to_plan == nullptr || (!construction_data.valid)){
+        kept_config_plan_number = plan_construction_data_.next_plan_number();
+        plan_construction_data_.increase_plan_number();
+    }
 
     // We do need plan_construct_data_ anymore
     switch_mutex_.unlock();
@@ -99,11 +101,11 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
         rbt_active_plan_ = construction_data.switch_to_plan;
     } else {
         rbt_active_plan_ = std::make_shared<KeepCurrentConfigurationPlan>();
+        rbt_active_plan_->SetPlanNumber(kept_config_plan_number);
     }
 
     // Initialize the new plan
     DRAKE_ASSERT(rbt_active_plan_ != nullptr);
-    rbt_active_plan_->SetPlanNumber(construction_data.plan_number);
     rbt_active_plan_->InitializePlan(input);
     ROS_INFO("Start new plan with number %d", rbt_active_plan_->GetPlanNumber());
 }

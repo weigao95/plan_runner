@@ -21,8 +21,9 @@ void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
     switch_mutex_.lock();
     plan_construction_data_.valid = true;
     plan_construction_data_.switch_to_plan = plan;
-    int current_plan_number = plan_construction_data_.plan_number;
-    plan_construction_data_.plan_number++;
+    int current_plan_number = plan_construction_data_.next_plan_number();
+    plan->SetPlanNumber(current_plan_number);
+    plan_construction_data_.increase_plan_number();
     switch_mutex_.unlock();
     ROS_INFO("New plan appended with plan number %d", current_plan_number);
 
@@ -50,6 +51,7 @@ void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
             }
             return;
         } else if ((!current_plan_in_queue) && new_plan_in_queue) {
+            ROS_INFO("Current plan %d preemted", current_plan_number);
             ResultT result;
             result.status.status = result.status.STOPPED_BY_EXTERNAL_TRIGGER;
             action_server->setPreempted(result);

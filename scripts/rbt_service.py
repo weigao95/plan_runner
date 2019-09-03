@@ -113,6 +113,7 @@ class RobotMovementService(object):
         # Check the result
         result = self.joint_space_trajectory_action.get_result()
         finished_normally = (result.status.status == result.status.FINISHED_NORMALLY)
+        print('Plan status', result.status.status)
         print('Has finish normally? ', finished_normally)
         return finished_normally
 
@@ -156,6 +157,7 @@ class RobotMovementService(object):
         # Check for result
         result = self.ee_trajectory_action.get_result()
         finished_normally = (result.status.status == result.status.FINISHED_NORMALLY)
+        print('Plan status', result.status.status)
         print('Has finish normally? ', finished_normally)
         return finished_normally
 
@@ -178,4 +180,4 @@ if __name__ == '__main__':
     rbt_movement = RobotMovementService()
     rbt_movement.move_home()
     #rbt_movement.move_ee_wrt_current_ee()
-    #rbt_movement.move_ee_wrt_world()
+    rbt_movement.move_ee_wrt_world()
