@@ -76,9 +76,6 @@ void arm_runner::KukaLCMInterface::sendRawCommand(
     command_cache.utime = int64_t(command.time_stamp.absolute_time_second * 1e6);
 
     // LOGGING
-    if(command_cache.utime % 100000 <= 10000) {
-        ROS_INFO("The command position 0 is %f", command.joint_position[0]);
-    }
 
     // Joint position should always work
     command_cache.num_joints = KUKA_IIWA_ARM_NUM_JOINT;
@@ -95,7 +92,10 @@ void arm_runner::KukaLCMInterface::sendRawCommand(
     }
 
     // Send to robot
-    //command_publisher_lcm_.publish(lcm_command_channel_, &command_cache);
+    if(command_cache.utime % 100000 <= 10000) {
+        ROS_INFO("The command position 0 is %f", command_cache.joint_position[0]);
+    }
+    command_publisher_lcm_.publish(lcm_command_channel_, &command_cache);
 }
 
 
