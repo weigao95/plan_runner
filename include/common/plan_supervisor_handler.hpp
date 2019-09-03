@@ -21,7 +21,6 @@ void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
     switch_mutex_.lock();
     plan_construction_data_.valid = true;
     plan_construction_data_.switch_to_plan = plan;
-    plan_construction_data_.plan_number++;
     int current_plan_number = plan_construction_data_.plan_number;
     switch_mutex_.unlock();
 
