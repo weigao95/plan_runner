@@ -53,10 +53,5 @@ namespace arm_runner {
             const std::string &,
             const lcmt_iiwa_status *status);
         void receiveRobotStatusThread();
-
-
-        // Caches
-    private:
-        RobotArmMeasurement measurement_cache;
     };
 }

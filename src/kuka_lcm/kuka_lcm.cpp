@@ -20,9 +20,6 @@ arm_runner::KukaLCMInterface::KukaLCMInterface(
     // Set everything to invalid
     exchange_data_.measurement.set_invalid();
     quit_receiving_ = false;
-
-    // Can be ignored
-    measurement_cache.set_invalid();
 }
 
 
@@ -98,7 +95,7 @@ void arm_runner::KukaLCMInterface::sendRawCommand(
     }
 
     // Send to robot
-    command_publisher_lcm_.publish(lcm_command_channel_, &command_cache);
+    //command_publisher_lcm_.publish(lcm_command_channel_, &command_cache);
 }
 
 
@@ -109,7 +106,7 @@ void arm_runner::KukaLCMInterface::handleReceiveIIWAStatus(
     const arm_runner::KukaLCMInterface::lcmt_iiwa_status *status_in
 ) {
     // Copy to cache
-    measurement_cache.set_invalid();
+    RobotArmMeasurement measurement_cache; measurement_cache.set_invalid();
     const auto& status = *status_in;
     const auto n_joint = KUKA_IIWA_ARM_NUM_JOINT;
     for(auto i = 0; i < n_joint; i++) {

@@ -67,8 +67,11 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_seco
     input.measured_state_cache = cache_measured_state.get();
     input.control_interval_second = control_peroid_second;
 
-    // Setup the command time
-    command_cache.time_stamp = measurement_cache.time_stamp;
+    // Debug
+    auto utime = int64_t(command_cache.time_stamp.absolute_time_second * 1e6);
+    if(utime % 100000 <= 10000) {
+        ROS_INFO("The measurement position 0 is %f", measurement_cache.joint_position[0]);
+    }
 
     // Compute command
     if(rbt_active_plan_ != nullptr) {
@@ -85,6 +88,7 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_seco
     }
 
     // Send to robot
+    command_cache.time_stamp = measurement_cache.time_stamp;
     rbt_communication_->SendCommand(command_cache);
 
     // Might need to switch the plan
