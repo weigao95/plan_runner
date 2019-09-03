@@ -60,8 +60,11 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     switch_mutex_.lock();
 
     // Command is unsafe
-    if(!command_safety)
-        action_to_current_plan_ = ActionToCurrentPlan::SafetyStop;
+    if(!command_safety) {
+        if(rbt_active_plan_ != nullptr
+        && rbt_active_plan_->GetPlanType() != PlanType::KeepCurrentConfigurationPlan)
+            action_to_current_plan_ = ActionToCurrentPlan::SafetyStop;
+    }
 
     // Check should I switch
     if (!shouldSwitchPlan(*input.latest_measurement, latest_command)) {
