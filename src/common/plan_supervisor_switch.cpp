@@ -12,6 +12,7 @@ void arm_runner::PlanSupervisor::initializeSwitchData() {
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
     plan_construction_data_.valid = false;
     plan_construction_data_.switch_to_plan = nullptr;
+    plan_construction_data_.plan_number = 0;
 }
 
 
@@ -81,8 +82,8 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     // Need to construct keep current config plan
     int kept_config_plan_number = -1;
     if(construction_data.switch_to_plan == nullptr || (!construction_data.valid)){
-        kept_config_plan_number = plan_construction_data_.next_plan_number();
-        plan_construction_data_.increase_plan_number();
+        kept_config_plan_number = plan_construction_data_.plan_number;
+        plan_construction_data_.plan_number++;
     }
 
     // We do need plan_construct_data_ anymore
