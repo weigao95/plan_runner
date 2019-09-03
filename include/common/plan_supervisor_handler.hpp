@@ -51,7 +51,6 @@ void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
             }
             return;
         } else if ((!current_plan_in_queue) && new_plan_in_queue) {
-            ROS_INFO("Current plan %d preemted", current_plan_number);
             ResultT result;
             result.status.status = result.status.STOPPED_BY_EXTERNAL_TRIGGER;
             action_server->setPreempted(result);
