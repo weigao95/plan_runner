@@ -10,6 +10,7 @@
 
 #include "common/plan_base.h"
 #include "common/plan_common_types.h"
+#include "common/switch_utility.h"
 #include "common/robot_communication.h"
 #include "common/safety_checker_interface.h"
 
@@ -56,37 +57,14 @@ namespace arm_runner {
             // The index of current plan
             int plan_number;
         } plan_construction_data_;
-        void initializeSwitchData();
 
-
+        // The queue of finished plans
+        FinishedPlanQueue finished_plan_queue_;
+    private:
         // These method would read the construction data and can only be accessed on main thread
+        void initializeSwitchData();
         bool shouldSwitchPlan(const RobotArmMeasurement& measurement, const RobotArmCommand& latest_command) const;
         void processPlanSwitch(const CommandInput& input, const RobotArmCommand& latest_command, bool command_safety);
-
-
-        // The member to maintain the queue of accomplished tasks
-    private:
-        struct FinishedPlanRecord {
-            int plan_number;
-            ActionToCurrentPlan action_to_plan;
-        };
-        struct FinishedPlanQueue {
-            std::mutex mutex;
-            std::vector<FinishedPlanRecord> queue;
-        } finished_task_queue_;
-        void lockAndCheckPlanStatus(
-                int plan_number,
-                bool& current_plan_in_queue,
-                bool& new_plan_in_queue,
-                ActionToCurrentPlan& action_to_plan);
-        void lockAndEnQueue(FinishedPlanRecord record);
-
-
-        // The cache
-    private:
-        mutable RobotArmMeasurement measurement_cache;
-        mutable RobotArmCommand command_cache;
-        mutable std::shared_ptr<KinematicsCache<double>> cache_measured_state;
 
 
         // Software safety check
@@ -116,6 +94,12 @@ namespace arm_runner {
             std::shared_ptr<actionlib::SimpleActionServer<ActionT>>& action_server,
             RobotPlanBase::Ptr plan,
             int wait_result_interval);
+
+        // The cache
+    private:
+        mutable RobotArmMeasurement measurement_cache;
+        mutable RobotArmCommand command_cache;
+        mutable std::shared_ptr<KinematicsCache<double>> cache_measured_state;
     };
 }
 

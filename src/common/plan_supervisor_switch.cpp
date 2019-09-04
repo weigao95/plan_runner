@@ -13,6 +13,7 @@ void arm_runner::PlanSupervisor::initializeSwitchData() {
     plan_construction_data_.valid = false;
     plan_construction_data_.switch_to_plan = nullptr;
     plan_construction_data_.plan_number = 0;
+    finished_plan_queue_.Initialize();
 }
 
 

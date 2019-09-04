@@ -12,8 +12,8 @@ void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
     // The construction is OK
     auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {
         // Push this task to result
-        FinishedPlanRecord record{robot_plan->GetPlanNumber(), action};
-        this->lockAndEnQueue(record);
+        FinishedPlanQueue::Record record{robot_plan->GetPlanNumber(), action};
+        this->finished_plan_queue_.LockAndAppend(record);
     };
     plan->AddStoppedCallback(finish_callback);
 
@@ -35,8 +35,11 @@ void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
         bool current_plan_in_queue = false;
         bool new_plan_in_queue = false;
         ActionToCurrentPlan action_to_current_plan = ActionToCurrentPlan::NoAction;
-        lockAndCheckPlanStatus(current_plan_number,
-                               current_plan_in_queue, new_plan_in_queue, action_to_current_plan);
+        finished_plan_queue_.LockAndCheckPlanStatus(
+            current_plan_number,
+            current_plan_in_queue,
+            new_plan_in_queue,
+            action_to_current_plan);
 
         // Determine the state
         if(current_plan_in_queue) {

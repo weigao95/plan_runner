@@ -28,30 +28,7 @@ void arm_runner::PlanSupervisor::initializeServiceActions() {
 }
 
 
-// Commonly used utils functions
-void arm_runner::PlanSupervisor::lockAndCheckPlanStatus(
-        int current_plan_number,
-        bool& current_plan_in_queue,
-        bool& new_plan_in_queue,
-        ActionToCurrentPlan& action_to_current_plan
-) {
-    std::lock_guard<std::mutex> guard(finished_task_queue_.mutex);
-    for(const auto& finished_plan : finished_task_queue_.queue) {
-        if(finished_plan.plan_number == current_plan_number) {
-            current_plan_in_queue = true;
-            action_to_current_plan = finished_plan.action_to_plan;
-        } else if(finished_plan.plan_number > current_plan_number)
-            new_plan_in_queue = true;
-    }
-}
-
-
-void arm_runner::PlanSupervisor::lockAndEnQueue(FinishedPlanRecord record) {
-    std::lock_guard<std::mutex> guard(finished_task_queue_.mutex);
-    finished_task_queue_.queue.emplace_back(record);
-}
-
-
+// The handler function for action and service
 void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(
         const robot_msgs::JointTrajectoryGoal::ConstPtr &goal){
     // Construct the plan
