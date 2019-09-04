@@ -148,7 +148,7 @@ class RobotMovementService(object):
         print('Has finish normally? ', finished_normally)
         return finished_normally
 
-    def move_ee_wrt_world(self, trajectory=[0.636498, 0.0157858, 0.617309]):
+    def move_ee_wrt_world(self, trajectory=[0.636498, 0.0157858, 0.607309]):
         goal_msg = make_cartesian_goal_trajectory_msg(trajectory, 'iiwa_link_ee', 'world', speed=0.05)
         self.ee_trajectory_action.send_goal(goal_msg)
         print('EE goal message sent. Wait for result!')
@@ -182,5 +182,5 @@ if __name__ == '__main__':
     rbt_movement.move_to([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
     rbt_movement.move_home()
     #rbt_movement.move_ee_wrt_current_ee()
-    #rospy.sleep(rospy.Duration(secs=1))
+    rospy.sleep(rospy.Duration(secs=1))
     rbt_movement.move_ee_wrt_world()
