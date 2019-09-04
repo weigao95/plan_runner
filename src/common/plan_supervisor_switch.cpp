@@ -10,9 +10,8 @@
 // The method for switching
 void arm_runner::PlanSupervisor::initializeSwitchData() {
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
-    plan_switch_data_.valid = false;
-    plan_switch_data_.switch_to_plan = nullptr;
-    plan_switch_data_.plan_number = 0;
+    switch_to_plan_ = nullptr;
+    plan_number_ = 0;
     finished_plan_queue_.Initialize();
 }
 
@@ -38,7 +37,7 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(
     // Current plan don't finish, and we have new plan
     if (rbt_active_plan_ != nullptr
         && !(will_plan_stop_internally(rbt_active_plan_->GetPlanType()))
-        && plan_switch_data_.valid) {
+        && switch_to_plan_ != nullptr) {
         return true;
     }
 
@@ -71,17 +70,16 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     }
 
     // Copy the data and release the lock
-    PlanSwitchData construction_data = plan_switch_data_;
+    auto switch_to_plan = switch_to_plan_;
     auto current_action = action_to_current_plan_;
-    plan_switch_data_.valid = false;
-    plan_switch_data_.switch_to_plan = nullptr;
+    switch_to_plan_ = nullptr;
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
 
     // Need to construct keep current config plan
     int kept_config_plan_number = -1;
-    if(construction_data.switch_to_plan == nullptr || (!construction_data.valid)){
-        kept_config_plan_number = plan_switch_data_.plan_number;
-        plan_switch_data_.plan_number++;
+    if(switch_to_plan == nullptr){
+        kept_config_plan_number = plan_number_;
+        plan_number_++;
     }
 
     // We do need plan_construct_data_ anymore
@@ -96,8 +94,8 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
 
     // Construct and switch to the new one
     // If no switch_to_plan, keep current position
-    if(construction_data.valid && (construction_data.switch_to_plan != nullptr)) {
-        rbt_active_plan_ = construction_data.switch_to_plan;
+    if(switch_to_plan != nullptr) {
+        rbt_active_plan_ = switch_to_plan;
     } else {
         DRAKE_ASSERT(kept_config_plan_number != -1);
         rbt_active_plan_ = std::make_shared<KeepCurrentConfigurationPlan>();

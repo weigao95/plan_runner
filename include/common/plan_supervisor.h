@@ -48,13 +48,8 @@ namespace arm_runner {
     private:
         std::mutex switch_mutex_;
         ActionToCurrentPlan action_to_current_plan_;
-        struct PlanSwitchData {
-            bool valid;
-            RobotPlanBase::Ptr switch_to_plan;
-
-            // The index of current plan
-            int plan_number;
-        } plan_switch_data_;
+        RobotPlanBase::Ptr switch_to_plan_;
+        int plan_number_;
 
         // The queue of finished plans
         FinishedPlanQueue finished_plan_queue_;

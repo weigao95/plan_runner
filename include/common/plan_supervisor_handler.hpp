@@ -9,7 +9,8 @@ void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
     RobotPlanBase::Ptr plan,
     int wait_result_interval
 ) {
-    // The construction is OK
+    // The construction should be OK
+    DRAKE_ASSERT(plan != nullptr);
     auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {
         // Push this task to result
         FinishedPlanQueue::Record record{robot_plan->GetPlanNumber(), action};
@@ -19,11 +20,10 @@ void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
 
     // Send to active task
     switch_mutex_.lock();
-    plan_switch_data_.valid = true;
-    plan_switch_data_.switch_to_plan = plan;
-    int current_plan_number = plan_switch_data_.plan_number;
+    switch_to_plan_ = plan;
+    int current_plan_number = plan_number_;
     plan->SetPlanNumber(current_plan_number);
-    plan_switch_data_.plan_number++;
+    plan_number_++;
     switch_mutex_.unlock();
     ROS_INFO("New plan appended with plan number %d", current_plan_number);
 
