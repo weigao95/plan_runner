@@ -16,36 +16,38 @@ namespace arm_runner {
     class RobotPlanBase {
     public:
         using Ptr = std::shared_ptr<RobotPlanBase>;
-        explicit RobotPlanBase() : plan_number_(-1) {};
+        explicit RobotPlanBase() : plan_number_(-1), plan_start_time_second_(0) {};
         virtual ~RobotPlanBase() = default;
 
         // The supervisor would call these methods at initialization, preempt and stopping
         // After calling these method, the plan should finish elegantly.
-        virtual void InitializePlan(const CommandInput& input) {  }
+        virtual void InitializePlan(const CommandInput& input) {
+            plan_start_time_second_ = input.latest_measurement->time_stamp.absolute_time_second;
+        }
         virtual void StopPlan(ActionToCurrentPlan action) {
             for(const auto& callback : stop_callbacks_)
                 callback(this, action);
         }
 
-        // The management of flags
+        // The accessing interface
         virtual PlanType GetPlanType() const = 0;
         virtual bool HasFinished(const RobotArmMeasurement& measurement) const = 0;
-
-
-        // The external and internal processing interface of supervisor
-    public:
         virtual void ComputeCommand(
             const CommandInput& input,
             RobotArmCommand& command) = 0;
 
 
-        // The plan number can be accessed outside
-        // While the status is internal
+        // The state shared by all the plan
+    private:
+        double plan_start_time_second_;
+        int plan_number_;
     public:
         void SetPlanNumber(int plan_number) { plan_number_ = plan_number; }
         int GetPlanNumber() const { return plan_number_; }
-    protected:
-        int plan_number_;
+        double GetPlanStartTimeSecond() const { return plan_start_time_second_; }
+        double GetTimeSincePlanStartSecond(double current_time_second) const {
+            return current_time_second - plan_start_time_second_;
+        }
 
 
         // The safety checking function

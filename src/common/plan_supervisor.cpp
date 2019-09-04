@@ -22,7 +22,6 @@ arm_runner::PlanSupervisor::PlanSupervisor(
 
 void arm_runner::PlanSupervisor::initializeKinematicAndCache() {
     rbt_active_plan_ = nullptr;
-    plan_start_time_second_ = 0;
     cache_measured_state = std::make_shared<KinematicsCache<double>>(tree_->CreateKinematicsCache());
 }
 
@@ -41,8 +40,6 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_seco
     // Get measurement
     // Use the time in measurement
     rbt_communication_->GetMeasurement(measurement_cache);
-    measurement_cache.time_stamp.since_plan_start_second = 
-            measurement_cache.time_stamp.absolute_time_second - plan_start_time_second_;
 
     // Do computation
     auto q_size = tree_->get_num_positions();

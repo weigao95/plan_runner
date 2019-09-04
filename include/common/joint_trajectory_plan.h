@@ -30,7 +30,7 @@ namespace arm_runner {
         PlanType GetPlanType() const override { return PlanType::JointTrajectory; }
         bool HasFinished(const RobotArmMeasurement& measurement) const override {
             constexpr double TRAJECTORY_TIME_SCALE_TRACKING_CONVERGE = 1.1;
-            return measurement.time_stamp.since_plan_start_second >=
+            return GetTimeSincePlanStartSecond(measurement.time_stamp.absolute_time_second) >=
                 TRAJECTORY_TIME_SCALE_TRACKING_CONVERGE * TrajectoryDuration();
         }
 

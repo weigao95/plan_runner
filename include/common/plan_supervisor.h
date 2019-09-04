@@ -40,7 +40,6 @@ namespace arm_runner {
         std::unique_ptr<RigidBodyTree<double>> tree_;
         std::unique_ptr<RobotCommunication> rbt_communication_;
         RobotPlanBase::Ptr rbt_active_plan_;
-        double plan_start_time_second_;
         void initializeKinematicAndCache();
 
 

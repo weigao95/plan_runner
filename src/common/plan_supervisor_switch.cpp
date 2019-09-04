@@ -76,7 +76,6 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     plan_construction_data_.valid = false;
     plan_construction_data_.switch_to_plan = nullptr;
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
-    plan_start_time_second_ = input.latest_measurement->time_stamp.absolute_time_second;
 
     // Need to construct keep current config plan
     int kept_config_plan_number = -1;

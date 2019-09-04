@@ -42,7 +42,7 @@ void arm_runner::EETrajectoryPlan::ComputeCommand(
     const int world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
     const RigidBodyTree<double>& tree = *input.robot_rbt;
     const auto& cache = *input.measured_state_cache;
-    auto t = input.latest_measurement->time_stamp.since_plan_start_second;
+    auto t = GetTimeSincePlanStartSecond(input.latest_measurement->time_stamp.absolute_time_second);
 
     // Compute the desired frame transformation
     Eigen::Vector3d ee_position_ref = ee_xyz_trajectory_.value(t);

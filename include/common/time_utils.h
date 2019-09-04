@@ -8,6 +8,6 @@ namespace arm_runner {
 
     struct TimeStamp {
         double absolute_time_second;
-        double since_plan_start_second;
+        //double since_plan_start_second;
     };
 }
