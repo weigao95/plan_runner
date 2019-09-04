@@ -17,7 +17,7 @@
 
 int main(int argc, char* argv[]) {
     // Get the simulation time
-    double simulation_time = 30.0;
+    double simulation_time = 50.0;
     if(argc == 2) {
         simulation_time = std::stod(argv[1]);
     }
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
     // The main loop
     auto start_time = std::chrono::system_clock::now();
-    double control_rate = 100.0;
+    double control_rate = 200.0;
     double control_interval = 1.0 / control_rate;
     ros::Rate rate(control_rate); // 100 hz
     while (!ros::isShuttingDown()) {
