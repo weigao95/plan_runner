@@ -21,6 +21,7 @@ namespace arm_runner {
     // The semantic of the plan
     // The download plan MUST stay at the final knot after the time of trajectory
     enum class PlanType {
+        KeepCurrentConfigurationPlan,
         JointTrajectory,
         JointPositionStreaming,
         JointTorqueStreaming,
@@ -43,6 +44,10 @@ namespace arm_runner {
                 || type == PlanType::EEConfigurationStreaming
                 || type == PlanType::EEVelocityStreaming 
                 || type == PlanType::EEForceStreaming;
+    }
+
+    inline bool will_plan_stop_internally(PlanType type) {
+        return (!is_streaming_plan(type)) && (type != PlanType::KeepCurrentConfigurationPlan);
     }
 
     // The input to command

@@ -1,5 +1,0 @@
-<launch>
-  <!--The simulated kuka robot-->
-  <node pkg="arm_runner" name="plan_runner" type="simulated_kuka_app" args="20">
-  </node>
-</launch>

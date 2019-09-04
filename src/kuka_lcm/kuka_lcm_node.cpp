@@ -26,14 +26,12 @@ std::unique_ptr<arm_runner::KukaLCMInterface> constructKukaLCMInterface(const YA
 
 
 int main(int argc, char *argv[]) {
-    // Init the ros staff
-    using namespace arm_runner;
-    ros::init(argc, argv, "plan_runner");
-    ros::NodeHandle nh("plan_runner");
-
-    // Get the config file
-    std::string config_file_path;
-    nh.getParam("param_filename", config_file_path);
+    // Check the config
+    if(argc < 2) {
+        ROS_INFO("Need the path to config file as the parameter");
+        std::exit(1);
+    }
+    std::string config_file_path = argv[1];
     YAML::Node config = YAML::LoadFile(config_file_path);
 
     // Construct the communication
@@ -43,15 +41,20 @@ int main(int argc, char *argv[]) {
         std::exit(1);
     }
 
+    // Init the ros staff
+    using namespace arm_runner;
+    ros::init(argc, argv, "plan_runner");
+    ros::NodeHandle nh("plan_runner");
+
     // The initialization
     auto tree = constructDefaultKukaRBT();
     PlanSupervisor supervisor(std::move(tree), std::move(robot_arm), nh);
     supervisor.Initialize();
-    ROS_INFO("Kuka lcm-interface started!");
+    ROS_INFO("Kuka lcm-interface supervisor started!");
 
     // Rate information
     double control_rate = 200.0;
-    double ros_rate = 250;
+    double ros_rate = 200;
     double control_interval = 1.0 / control_rate;
     ros::Rate rate(ros_rate); // 100 hz
 

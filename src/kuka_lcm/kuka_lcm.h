@@ -55,9 +55,9 @@ namespace arm_runner {
         void receiveRobotStatusThread();
 
 
-        // Caches
+        // The caches
     private:
-        RobotArmMeasurement measurement_cache;
         lcmt_iiwa_command command_cache;
+        RobotArmMeasurement measurement_cache;
     };
 }

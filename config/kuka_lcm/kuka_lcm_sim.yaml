@@ -1,0 +1,2 @@
+lcm_status_channel: "IIWA_STATUS"
+lcm_command_channel: "IIWA_COMMAND"

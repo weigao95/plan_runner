@@ -13,12 +13,12 @@ void arm_runner::RobotPlanBase::ComputeCommand(
         computeCommand(input, command);
     else {
         // Should not happen, send warning
-        KeepCurrentConfigurationCommand(*input.latest_measurement, command);
+        CopyConfigurationToCommand(*input.latest_measurement, command);
     }
 }
 
 
-void arm_runner::RobotPlanBase::KeepCurrentConfigurationCommand(
+void arm_runner::RobotPlanBase::CopyConfigurationToCommand(
         const arm_runner::RobotArmMeasurement &measurement,
         arm_runner::RobotArmCommand &command
 ) {
@@ -53,4 +53,25 @@ bool arm_runner::RobotPlanBase::CheckSafety(
 
     // No fail in the checkers
     return true;
+}
+
+
+// The method about keep current configuration
+arm_runner::KeepCurrentConfigurationPlan::KeepCurrentConfigurationPlan() {
+    kept_configuration_.set_invalid();
+}
+
+
+void arm_runner::KeepCurrentConfigurationPlan::InitializePlan(const arm_runner::CommandInput &input) {
+    kept_configuration_ = *input.latest_measurement;
+    RobotPlanBase::InitializePlan(input);
+}
+
+
+void arm_runner::KeepCurrentConfigurationPlan::computeCommand(
+    const arm_runner::CommandInput &input,
+    arm_runner::RobotArmCommand &command
+) {
+    RobotPlanBase::CopyConfigurationToCommand(kept_configuration_, command);
+    command.time_stamp = input.latest_measurement->time_stamp;
 }

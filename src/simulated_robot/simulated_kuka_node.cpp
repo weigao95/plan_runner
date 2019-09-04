@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 
         // Debug
         if(duration_ns > 1000000) {
-            ROS_INFO("SLOW Iteration! %d which take %ld", iteration, duration_ns);
+            //ROS_INFO("SLOW Iteration! %d which take %ld", iteration, duration_ns);
         }
 
         // Check time

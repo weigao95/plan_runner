@@ -113,6 +113,8 @@ class RobotMovementService(object):
         # Check the result
         result = self.joint_space_trajectory_action.get_result()
         finished_normally = (result.status.status == result.status.FINISHED_NORMALLY)
+        print('Plan status', result.status.status)
+        print('Has finish normally? ', finished_normally)
         return finished_normally
 
     def joint_state_from_vector(self, q):
@@ -155,6 +157,7 @@ class RobotMovementService(object):
         # Check for result
         result = self.ee_trajectory_action.get_result()
         finished_normally = (result.status.status == result.status.FINISHED_NORMALLY)
+        print('Plan status', result.status.status)
         print('Has finish normally? ', finished_normally)
         return finished_normally
 
@@ -176,5 +179,8 @@ if __name__ == '__main__':
     rospy.init_node("RobotMovementService")
     rbt_movement = RobotMovementService()
     rbt_movement.move_home()
+    rbt_movement.move_to([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+    rbt_movement.move_home()
     #rbt_movement.move_ee_wrt_current_ee()
+    #rospy.sleep(rospy.Duration(secs=1))
     rbt_movement.move_ee_wrt_world()

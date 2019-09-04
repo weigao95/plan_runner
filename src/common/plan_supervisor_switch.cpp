@@ -11,8 +11,8 @@
 void arm_runner::PlanSupervisor::initializeSwitchData() {
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
     plan_construction_data_.valid = false;
-    plan_construction_data_.plan_number = -1;
     plan_construction_data_.switch_to_plan = nullptr;
+    plan_construction_data_.plan_number = 0;
 }
 
 
@@ -20,23 +20,28 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(
     const RobotArmMeasurement& measurement,
     const RobotArmCommand& latest_command
 ) const {
-    // Commanded to stop
-    if (action_to_current_plan_ != ActionToCurrentPlan::NoAction) return true;
-
-    // Current plan has finished
-    if (rbt_active_plan_ != nullptr && rbt_active_plan_->HasFinished(measurement))
+    // Null plan is always unsafe
+    if(rbt_active_plan_ == nullptr)
         return true;
 
-    // Current plan don't finish, and we have new plan
-    if (rbt_active_plan_ != nullptr
-        && is_streaming_plan(rbt_active_plan_->GetPlanType())
-        && plan_construction_data_.valid) {
+    // Commanded to stop
+    if (action_to_current_plan_ != ActionToCurrentPlan::NoAction) {
+        ROS_INFO("Stop the plan as requested or it is not safe.");
         return true;
     }
 
-    // Current no plan, a new plan is valid
-    if (rbt_active_plan_ == nullptr && plan_construction_data_.valid)
+    // Current plan has finished
+    if (rbt_active_plan_ != nullptr && rbt_active_plan_->HasFinished(measurement)) {
+        ROS_INFO("Stop the plan as it finished.");
         return true;
+    }
+
+    // Current plan don't finish, and we have new plan
+    if (rbt_active_plan_ != nullptr
+        && !(will_plan_stop_internally(rbt_active_plan_->GetPlanType()))
+        && plan_construction_data_.valid) {
+        return true;
+    }
 
     // Other cases, just false
     return false;
@@ -52,8 +57,13 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     switch_mutex_.lock();
 
     // Command is unsafe
-    if(!command_safety)
-        action_to_current_plan_ = ActionToCurrentPlan::SafetyStop;
+    if(!command_safety) {
+        if(rbt_active_plan_ != nullptr
+        && rbt_active_plan_->GetPlanType() != PlanType::KeepCurrentConfigurationPlan) {
+            // That assumes keep current config is always safe, which might not be true
+            action_to_current_plan_ = ActionToCurrentPlan::SafetyStop;
+        }
+    }
 
     // Check should I switch
     if (!shouldSwitchPlan(*input.latest_measurement, latest_command)) {
@@ -68,17 +78,36 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     plan_construction_data_.switch_to_plan = nullptr;
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
     plan_start_time_second_ = input.latest_measurement->time_stamp.absolute_time_second;
+
+    // Need to construct keep current config plan
+    int kept_config_plan_number = -1;
+    if(construction_data.switch_to_plan == nullptr || (!construction_data.valid)){
+        kept_config_plan_number = plan_construction_data_.plan_number;
+        plan_construction_data_.plan_number++;
+    }
+
+    // We do need plan_construct_data_ anymore
     switch_mutex_.unlock();
 
     // Do switching
-    if(rbt_active_plan_ != nullptr)
+    if(rbt_active_plan_ != nullptr) {
+        ROS_INFO("Stop plan %d at time %f",
+                rbt_active_plan_->GetPlanNumber(), input.latest_measurement->time_stamp.absolute_time_second);
         rbt_active_plan_->StopPlan(current_action);
+    }
 
     // Construct and switch to the new one
-    rbt_active_plan_ = construction_data.switch_to_plan;
-    if(rbt_active_plan_ != nullptr) {
-        ROS_INFO("Start new plan %d", construction_data.plan_number);
-        rbt_active_plan_->SetPlanNumber(construction_data.plan_number);
-        rbt_active_plan_->InitializePlan(input);
+    // If no switch_to_plan, keep current position
+    if(construction_data.valid && (construction_data.switch_to_plan != nullptr)) {
+        rbt_active_plan_ = construction_data.switch_to_plan;
+    } else {
+        DRAKE_ASSERT(kept_config_plan_number != -1);
+        rbt_active_plan_ = std::make_shared<KeepCurrentConfigurationPlan>();
+        rbt_active_plan_->SetPlanNumber(kept_config_plan_number);
     }
+
+    // Initialize the new plan
+    DRAKE_ASSERT(rbt_active_plan_ != nullptr);
+    rbt_active_plan_->InitializePlan(input);
+    ROS_INFO("Start new plan with number %d", rbt_active_plan_->GetPlanNumber());
 }
