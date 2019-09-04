@@ -12,6 +12,7 @@
 namespace arm_runner {
 
     // The status of the plan
+    // This status only used internally
     enum class PlanStatus {
         Waiting,
         Running,

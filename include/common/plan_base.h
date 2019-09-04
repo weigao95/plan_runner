@@ -43,8 +43,8 @@ namespace arm_runner {
             RobotArmCommand& command);
     protected:
         virtual void computeCommand(
-                const CommandInput& input,
-                RobotArmCommand& command) = 0;
+            const CommandInput& input,
+            RobotArmCommand& command) = 0;
 
 
         // The plan number can be accessed outside
@@ -52,7 +52,6 @@ namespace arm_runner {
     public:
         void SetPlanNumber(int plan_number) { plan_number_ = plan_number; }
         int GetPlanNumber() const { return plan_number_; }
-        PlanStatus GetPlanStatue() const { return status_; }
     protected:
         PlanStatus status_;
         int plan_number_;
@@ -84,7 +83,7 @@ namespace arm_runner {
         ~KeepCurrentConfigurationPlan() override = default;
 
         // The interface
-        void InitializePlan(const CommandInput& input);
+        void InitializePlan(const CommandInput& input) override;
         PlanType GetPlanType() const override { return PlanType::KeepCurrentConfigurationPlan; }
         bool HasFinished(const RobotArmMeasurement& measurement) const override { return false; }
 
