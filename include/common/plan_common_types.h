@@ -33,10 +33,10 @@ namespace arm_runner {
 
     inline bool is_streaming_plan(PlanType type) {
         return type == PlanType::JointPositionStreaming 
-                || type == PlanType::JointTorqueStreaming
-                || type == PlanType::EEConfigurationStreaming
-                || type == PlanType::EEVelocityStreaming 
-                || type == PlanType::EEForceStreaming;
+            || type == PlanType::JointTorqueStreaming
+            || type == PlanType::EEConfigurationStreaming
+            || type == PlanType::EEVelocityStreaming
+            || type == PlanType::EEForceStreaming;
     }
 
     inline bool will_plan_stop_internally(PlanType type) {

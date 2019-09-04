@@ -27,13 +27,11 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(
 
     // Commanded to stop
     if (action_to_current_plan_ != ActionToCurrentPlan::NoAction) {
-        ROS_INFO("Stop the plan as requested or it is not safe.");
         return true;
     }
 
     // Current plan has finished
     if (rbt_active_plan_ != nullptr && rbt_active_plan_->HasFinished(measurement)) {
-        ROS_INFO("Stop the plan as it finished.");
         return true;
     }
 
