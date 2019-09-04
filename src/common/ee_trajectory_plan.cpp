@@ -74,12 +74,20 @@ void arm_runner::EETrajectoryPlan::ComputeCommand(
     svd.setThreshold(0.01);
     Eigen::VectorXd qdot_command = svd.solve(twist_pd);
 
+    // The forward integration position
+    const double* q_fwd_integration = nullptr;
+    const auto& command_history = input.robot_history->GetCommandHistory();
+    if(command_history.empty()) {
+        q_fwd_integration = input.latest_measurement->joint_position;
+    } else {
+        q_fwd_integration = command_history.back().joint_position;
+    }
+
     // Write to the result
     command.set_invalid();
     for(auto i = 0; i < qdot_command.size(); i++) {
         command.joint_velocities[i] = qdot_command[i];
-        command.joint_position[i] =
-                input.latest_measurement->joint_position[i] + qdot_command[i] * input.control_interval_second;
+        command.joint_position[i] = q_fwd_integration[i] + qdot_command[i] * input.control_interval_second;
     }
     command.velocity_validity = true;
     command.position_validity = true;
