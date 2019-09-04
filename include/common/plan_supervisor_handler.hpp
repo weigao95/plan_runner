@@ -19,11 +19,11 @@ void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
 
     // Send to active task
     switch_mutex_.lock();
-    plan_construction_data_.valid = true;
-    plan_construction_data_.switch_to_plan = plan;
-    int current_plan_number = plan_construction_data_.plan_number;
+    plan_switch_data_.valid = true;
+    plan_switch_data_.switch_to_plan = plan;
+    int current_plan_number = plan_switch_data_.plan_number;
     plan->SetPlanNumber(current_plan_number);
-    plan_construction_data_.plan_number++;
+    plan_switch_data_.plan_number++;
     switch_mutex_.unlock();
     ROS_INFO("New plan appended with plan number %d", current_plan_number);
 
