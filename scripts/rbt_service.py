@@ -180,4 +180,5 @@ if __name__ == '__main__':
     rbt_movement = RobotMovementService()
     rbt_movement.move_home()
     #rbt_movement.move_ee_wrt_current_ee()
+    #rospy.sleep(rospy.Duration(secs=1))
     rbt_movement.move_ee_wrt_world()

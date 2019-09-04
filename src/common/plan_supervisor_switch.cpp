@@ -101,6 +101,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     if(construction_data.valid && (construction_data.switch_to_plan != nullptr)) {
         rbt_active_plan_ = construction_data.switch_to_plan;
     } else {
+        DRAKE_ASSERT(kept_config_plan_number != -1);
         rbt_active_plan_ = std::make_shared<KeepCurrentConfigurationPlan>();
         rbt_active_plan_->SetPlanNumber(kept_config_plan_number);
     }

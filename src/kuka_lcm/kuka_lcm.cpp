@@ -72,7 +72,6 @@ void arm_runner::KukaLCMInterface::sendRawCommand(
     const arm_runner::RobotArmCommand &command
 ) {
     // The time from command
-    lcmt_iiwa_command command_cache;
     command_cache.utime = int64_t(command.time_stamp.absolute_time_second * 1e6);
 
     // LOGGING
@@ -88,13 +87,14 @@ void arm_runner::KukaLCMInterface::sendRawCommand(
     command_cache.num_torques = KUKA_IIWA_ARM_NUM_JOINT;
     command_cache.joint_torque.resize(KUKA_IIWA_ARM_NUM_JOINT);
     for(auto i = 0; i < KUKA_IIWA_ARM_NUM_JOINT; i++) {
-        command_cache.joint_torque[i] = 0.0;
+        if(command.torque_validity) {
+            command_cache.joint_torque[i] = command.joint_torque[i];
+        } else {
+            command_cache.joint_torque[i] = 0.0;
+        }
     }
 
     // Send to robot
-    if(command_cache.utime % 100000 <= 10000) {
-        ROS_INFO("The command position 0 is %f", command_cache.joint_position[0]);
-    }
     command_publisher_lcm_.publish(lcm_command_channel_, &command_cache);
 }
 
@@ -106,7 +106,7 @@ void arm_runner::KukaLCMInterface::handleReceiveIIWAStatus(
     const arm_runner::KukaLCMInterface::lcmt_iiwa_status *status_in
 ) {
     // Copy to cache
-    RobotArmMeasurement measurement_cache; measurement_cache.set_invalid();
+    measurement_cache.set_invalid();
     const auto& status = *status_in;
     const auto n_joint = KUKA_IIWA_ARM_NUM_JOINT;
     for(auto i = 0; i < n_joint; i++) {
