@@ -16,16 +16,15 @@ namespace arm_runner {
     class RobotPlanBase {
     public:
         using Ptr = std::shared_ptr<RobotPlanBase>;
-        explicit RobotPlanBase() : status_(PlanStatus::Waiting), plan_number_(-1) {};
+        explicit RobotPlanBase() : plan_number_(-1) {};
         virtual ~RobotPlanBase() = default;
 
         // The supervisor would call these methods at initialization, preempt and stopping
         // After calling these method, the plan should finish elegantly.
-        virtual void InitializePlan(const CommandInput& input) { status_ = PlanStatus::Running; }
+        virtual void InitializePlan(const CommandInput& input) {  }
         virtual void StopPlan(ActionToCurrentPlan action) {
             for(const auto& callback : stop_callbacks_)
                 callback(this, action);
-            status_ = PlanStatus::Stopped;
         }
 
         // The management of flags
@@ -53,7 +52,6 @@ namespace arm_runner {
         void SetPlanNumber(int plan_number) { plan_number_ = plan_number; }
         int GetPlanNumber() const { return plan_number_; }
     protected:
-        PlanStatus status_;
         int plan_number_;
 
 

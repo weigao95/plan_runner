@@ -11,14 +11,6 @@
 
 namespace arm_runner {
 
-    // The status of the plan
-    // This status only used internally
-    enum class PlanStatus {
-        Waiting,
-        Running,
-        Stopped
-    };
-
     // The semantic of the plan
     // The download plan MUST stay at the final knot after the time of trajectory
     enum class PlanType {

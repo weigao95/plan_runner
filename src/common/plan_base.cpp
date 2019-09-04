@@ -6,15 +6,11 @@
 
 
 void arm_runner::RobotPlanBase::ComputeCommand(
-        const CommandInput& input,
-        arm_runner::RobotArmCommand &command
+    const CommandInput& input,
+    arm_runner::RobotArmCommand &command
 ) {
-    if(status_ == PlanStatus::Running)
-        computeCommand(input, command);
-    else {
-        // Should not happen, send warning
-        CopyConfigurationToCommand(*input.latest_measurement, command);
-    }
+    computeCommand(input, command);
+    command.time_stamp = input.latest_measurement->time_stamp;
 }
 
 
