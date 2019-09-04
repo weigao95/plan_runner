@@ -52,8 +52,8 @@ void arm_runner::EETrajectoryPlan::ComputeCommand(
     ee_transform_ref.translation() = ee_position_ref;
 
     // Compute the actual transform
-    //Eigen::Isometry3d ee_transform = tree.relativeTransform(cache, world_frame, task_frame_index_);
-    Eigen::Isometry3d ee_transform = tree.CalcBodyPoseInWorldFrame(cache, tree.get_body(task_frame_index_));
+    Eigen::Isometry3d ee_transform = tree.relativeTransform(cache, world_frame, task_frame_index_);
+    //Eigen::Isometry3d ee_transform = tree.CalcBodyPoseInWorldFrame(cache, tree.get_body(task_frame_index_));
 
     // The rotation error term
     Eigen::Isometry3d transform_error = ee_transform.inverse() * ee_transform_ref;
