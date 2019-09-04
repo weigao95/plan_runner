@@ -42,7 +42,7 @@ void arm_runner::EETrajectoryPlan::ComputeCommand(
     const int world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
     const RigidBodyTree<double>& tree = *input.robot_rbt;
     const auto& cache = *input.measured_state_cache;
-    auto t = GetTimeSincePlanStartSecond(input.latest_measurement->time_stamp.absolute_time_second);
+    auto t = GetTimeSincePlanStartSecond(input.latest_measurement->time_stamp);
 
     // Compute the desired frame transformation
     Eigen::Vector3d ee_position_ref = ee_xyz_trajectory_.value(t);
@@ -53,7 +53,6 @@ void arm_runner::EETrajectoryPlan::ComputeCommand(
 
     // Compute the actual transform
     Eigen::Isometry3d ee_transform = tree.relativeTransform(cache, world_frame, task_frame_index_);
-    //Eigen::Isometry3d ee_transform = tree.CalcBodyPoseInWorldFrame(cache, tree.get_body(task_frame_index_));
 
     // The rotation error term
     Eigen::Isometry3d transform_error = ee_transform.inverse() * ee_transform_ref;

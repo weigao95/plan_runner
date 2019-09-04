@@ -88,7 +88,7 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     // Do switching
     if(rbt_active_plan_ != nullptr) {
         ROS_INFO("Stop plan %d at time %f",
-                rbt_active_plan_->GetPlanNumber(), input.latest_measurement->time_stamp.absolute_time_second);
+                rbt_active_plan_->GetPlanNumber(), input.latest_measurement->time_stamp.ToSecond());
         rbt_active_plan_->StopPlan(current_action);
     }
 

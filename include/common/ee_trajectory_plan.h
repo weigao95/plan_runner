@@ -39,7 +39,7 @@ namespace arm_runner {
         // Getters
         PlanType GetPlanType() const override { return PlanType::EETrajectory; }
         bool HasFinished(const RobotArmMeasurement& measurement) const override {
-            return GetTimeSincePlanStartSecond(measurement.time_stamp.absolute_time_second) >= TrajectoryDuration();
+            return GetTimeSincePlanStartSecond(measurement.time_stamp) >= TrajectoryDuration();
         }
 
         // The total time for the trajectory

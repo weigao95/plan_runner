@@ -16,13 +16,13 @@ namespace arm_runner {
     class RobotPlanBase {
     public:
         using Ptr = std::shared_ptr<RobotPlanBase>;
-        explicit RobotPlanBase() : plan_number_(-1), plan_start_time_second_(0) {};
+        explicit RobotPlanBase() : plan_number_(-1) {};
         virtual ~RobotPlanBase() = default;
 
         // The supervisor would call these methods at initialization, preempt and stopping
         // After calling these method, the plan should finish elegantly.
         virtual void InitializePlan(const CommandInput& input) {
-            plan_start_time_second_ = input.latest_measurement->time_stamp.absolute_time_second;
+            plan_start_time_ = input.latest_measurement->time_stamp;
         }
         virtual void StopPlan(ActionToCurrentPlan action) {
             for(const auto& callback : stop_callbacks_)
@@ -39,14 +39,14 @@ namespace arm_runner {
 
         // The state shared by all the plan
     private:
-        double plan_start_time_second_;
+        TimeStamp plan_start_time_;
         int plan_number_;
     public:
         void SetPlanNumber(int plan_number) { plan_number_ = plan_number; }
         int GetPlanNumber() const { return plan_number_; }
-        double GetPlanStartTimeSecond() const { return plan_start_time_second_; }
-        double GetTimeSincePlanStartSecond(double current_time_second) const {
-            return current_time_second - plan_start_time_second_;
+        double GetPlanStartTimeSecond() const { return plan_start_time_.ToSecond(); }
+        double GetTimeSincePlanStartSecond(const TimeStamp& current_time) const {
+            return current_time.SecondSince(plan_start_time_);
         }
 
 

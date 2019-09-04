@@ -92,7 +92,7 @@ void arm_runner::QpInverseDynamicsController::DoCalcDiscreteVariableUpdates(
     // Write to exchange
     auto& measurement = exchange_data_.latest_measurement;
     measurement.set_invalid();
-    measurement.time_stamp.absolute_time_second = current_time_second;
+    measurement.time_stamp.FromSecond(current_time_second);
     for(auto i = 0; i < nq_; i++) {
         measurement.joint_position[i] = q[i];
         measurement.joint_velocities[i] = v[i];

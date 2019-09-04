@@ -33,8 +33,8 @@ void arm_runner::JointTrajectoryPlan::ComputeCommand(
         arm_runner::RobotArmCommand &command
 ) {
     const auto& measurement = *input.latest_measurement;
-    auto t = GetTimeSincePlanStartSecond(input.latest_measurement->time_stamp.absolute_time_second);
-    DRAKE_ASSERT(t > 0);
+    auto t = GetTimeSincePlanStartSecond(input.latest_measurement->time_stamp);
+    DRAKE_ASSERT(t >= 0);
     q_command_cache = joint_trajectory_.value(t);
     v_command_cache = joint_velocity_trajectory_.value(t);
 

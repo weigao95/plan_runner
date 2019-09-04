@@ -21,7 +21,7 @@ void arm_runner::JointPublishProcessor::ProcessMeasurement(
 ) {
     sensor_msgs::JointState joint_state;
     // The time and name
-    joint_state.header.stamp.fromSec(measurement.time_stamp.absolute_time_second);
+    joint_state.header.stamp = measurement.time_stamp.GetROSTimeStamp();
     joint_state.name = joint_name_list_;
 
     // Other properties

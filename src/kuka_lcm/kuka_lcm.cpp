@@ -72,9 +72,7 @@ void arm_runner::KukaLCMInterface::sendRawCommand(
     const arm_runner::RobotArmCommand &command
 ) {
     // The time from command
-    command_cache.utime = int64_t(command.time_stamp.absolute_time_second * 1e6);
-
-    // LOGGING
+    command_cache.utime = command.time_stamp.ToMicrosecond();
 
     // Joint position should always work
     command_cache.num_joints = KUKA_IIWA_ARM_NUM_JOINT;
@@ -119,7 +117,7 @@ void arm_runner::KukaLCMInterface::handleReceiveIIWAStatus(
     measurement_cache.torque_validity = true;
 
     // The time of measurement
-    measurement_cache.time_stamp.absolute_time_second = double(status.utime) / 1e6;
+    measurement_cache.time_stamp.FromMicrosecond(status.utime);
 
     // Copy to exchange data
     exchange_data_.mutex.lock();
