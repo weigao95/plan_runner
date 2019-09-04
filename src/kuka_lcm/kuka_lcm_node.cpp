@@ -53,8 +53,8 @@ int main(int argc, char *argv[]) {
     ROS_INFO("Kuka lcm-interface supervisor started!");
 
     // Rate information
-    double control_rate = 200.0;
-    double ros_rate = 200;
+    double control_rate = 250.0;
+    double ros_rate = 250;
     double control_interval = 1.0 / control_rate;
     ros::Rate rate(ros_rate); // 100 hz
 
