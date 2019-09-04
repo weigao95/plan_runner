@@ -63,8 +63,7 @@ namespace arm_runner {
         // Construct the plan from msg
     public:
         static std::shared_ptr<JointTrajectoryPlan> ConstructFromMessage(
-            const std::map<std::string, int>& joint_name_to_idx,
-            int num_joints,
+            const RigidBodyTree<double>& tree,
             const robot_msgs::JointTrajectoryGoal::ConstPtr &goal);
     };
 }

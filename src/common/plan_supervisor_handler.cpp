@@ -55,7 +55,7 @@ void arm_runner::PlanSupervisor::lockAndEnQueue(FinishedPlanRecord record) {
 void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(
         const robot_msgs::JointTrajectoryGoal::ConstPtr &goal){
     // Construct the plan
-    auto plan = JointTrajectoryPlan::ConstructFromMessage(joint_name_to_idx_, num_joint_, goal);
+    auto plan = JointTrajectoryPlan::ConstructFromMessage(*tree_, goal);
     if(plan == nullptr) {
         robot_msgs::JointTrajectoryResult result;
         result.status.status = result.status.STOPPED_BY_SAFETY_CHECK;

@@ -24,8 +24,6 @@ void arm_runner::PlanSupervisor::initializeKinematicAndCache() {
     rbt_active_plan_ = nullptr;
     plan_start_time_second_ = 0;
     cache_measured_state = std::make_shared<KinematicsCache<double>>(tree_->CreateKinematicsCache());
-    joint_name_to_idx_ = tree_->computePositionNameToIndexMap();
-    num_joint_ = tree_->get_num_positions();
 }
 
 

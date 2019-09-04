@@ -50,15 +50,44 @@ void arm_runner::JointTrajectoryPlan::computeCommand(
 
 
 std::shared_ptr<arm_runner::JointTrajectoryPlan> arm_runner::JointTrajectoryPlan::ConstructFromMessage(
-    const std::map<std::string, int> &joint_name_to_idx, int num_joints,
+    const RigidBodyTree<double>& tree,
     const robot_msgs::JointTrajectoryGoal::ConstPtr &goal
 ) {
     // Basic info
-    int num_knot_points = goal->trajectory.points.size();
     const trajectory_msgs::JointTrajectory &trajectory = goal->trajectory;
-    std::vector<Eigen::MatrixXd> knots(num_knot_points, Eigen::MatrixXd::Zero(num_joints, 1));
+    int num_knot_points = goal->trajectory.points.size();
+    int num_joints = tree.get_num_positions();
+    auto joint_name_to_idx = tree.computePositionNameToIndexMap();
+
+    // Check the msg
+    for(auto i = 0; i < num_knot_points; i++) {
+        const auto &traj_point = trajectory.points[i];
+        if(traj_point.positions.size() != trajectory.joint_names.size()) {
+            ROS_INFO("The joint trajectory size is not correct");
+            return nullptr;
+        }
+    }
+
+    // Check the joint name
+    for(const auto& required_joint : joint_name_to_idx) {
+        // Check joint
+        bool found = false;
+        for(const auto& provided_joint : trajectory.joint_names) {
+            if(provided_joint == required_joint.first) {
+                found = true;
+                break;
+            }
+        }
+
+        // Not found
+        if(!found) {
+            ROS_INFO("The position for joint %s is not provided", required_joint.first.c_str());
+            return nullptr;
+        }
+    }
 
     // Iterate
+    std::vector<Eigen::MatrixXd> knots(num_knot_points, Eigen::MatrixXd::Zero(num_joints, 1));
     std::vector<double> input_time;
     for (int i = 0; i < num_knot_points; ++i) {
         const trajectory_msgs::JointTrajectoryPoint &traj_point =
@@ -83,7 +112,6 @@ std::shared_ptr<arm_runner::JointTrajectoryPlan> arm_runner::JointTrajectoryPlan
                 knots[i](joint_idx, 0) = traj_point.positions[j];
             }
         }
-
         input_time.push_back(traj_point.time_from_start.toSec());
     }
 

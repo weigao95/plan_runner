@@ -118,7 +118,7 @@ class RobotMovementService(object):
         return finished_normally
 
     def joint_state_from_vector(self, q):
-        assert len(q) == len(self._joint_names)
+        # assert len(q) == len(self._joint_names)
         joint_state = JointState()
         joint_state.name = self._joint_names
         joint_state.position = q
@@ -179,8 +179,8 @@ if __name__ == '__main__':
     rospy.init_node("RobotMovementService")
     rbt_movement = RobotMovementService()
     rbt_movement.move_home()
-    rbt_movement.move_to([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
-    rbt_movement.move_home()
+    rbt_movement.move_to([0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+    #rbt_movement.move_home()
     #rbt_movement.move_ee_wrt_current_ee()
     #rospy.sleep(rospy.Duration(secs=1))
-    rbt_movement.move_ee_wrt_world()
+    #rbt_movement.move_ee_wrt_world()

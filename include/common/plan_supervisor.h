@@ -43,12 +43,6 @@ namespace arm_runner {
         void initializeKinematicAndCache();
 
 
-        // Some constant data that can be accessed by all threads
-    private:
-        std::map<std::string, int> joint_name_to_idx_;
-        int num_joint_;
-
-
         // The members for switching, might be accessed by other thread
         // Protected by the lock
     private:
