@@ -88,7 +88,7 @@ class RobotMovementService(object):
         trajectory.header.stamp = rospy.Time.now()
 
         # The time
-        duration = 3
+        duration = 10
         start_time = rospy.Duration.from_sec(0)
         end_time = rospy.Duration.from_sec(duration)
 
@@ -178,9 +178,9 @@ class RobotMovementService(object):
 if __name__ == '__main__':
     rospy.init_node("RobotMovementService")
     rbt_movement = RobotMovementService()
+    # rbt_movement.move_home()
+    # rbt_movement.move_to([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
     rbt_movement.move_home()
-    #rbt_movement.move_to([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
-    #rbt_movement.move_home()
     #rbt_movement.move_ee_wrt_current_ee()
     #rospy.sleep(rospy.Duration(secs=1))
-    #rbt_movement.move_ee_wrt_world()
+    rbt_movement.move_ee_wrt_world()
