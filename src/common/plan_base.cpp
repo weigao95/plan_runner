@@ -5,36 +5,9 @@
 #include "common/plan_base.h"
 
 
-void arm_runner::RobotPlanBase::ComputeCommand(
-    const CommandInput& input,
-    arm_runner::RobotArmCommand &command
-) {
-    computeCommand(input, command);
-    command.time_stamp = input.latest_measurement->time_stamp;
-}
-
-
-void arm_runner::RobotPlanBase::CopyConfigurationToCommand(
-        const arm_runner::RobotArmMeasurement &measurement,
-        arm_runner::RobotArmCommand &command
-) {
-    // Seems OK
-    for(auto i = 0; i < MAX_NUM_JOINTS; i++) {
-        command.joint_position[i] = measurement.joint_position[i];
-        command.joint_torque[i] = 0;
-        command.joint_velocities[i] = 0;
-    }
-
-    // Setup the command validity flag
-    command.position_validity = true;
-    command.velocity_validity = true;
-    command.torque_validity = false;
-}
-
-
 bool arm_runner::RobotPlanBase::CheckSafety(
-    const arm_runner::CommandInput &input,
-    const arm_runner::RobotArmCommand &command
+        const arm_runner::CommandInput &input,
+        const arm_runner::RobotArmCommand &command
 ) {
     // Any fails of the checker will result in safety failed
     for(auto& checker : safety_checker_stack_) {
@@ -64,10 +37,28 @@ void arm_runner::KeepCurrentConfigurationPlan::InitializePlan(const arm_runner::
 }
 
 
-void arm_runner::KeepCurrentConfigurationPlan::computeCommand(
+void arm_runner::KeepCurrentConfigurationPlan::ComputeCommand(
     const arm_runner::CommandInput &input,
     arm_runner::RobotArmCommand &command
 ) {
-    RobotPlanBase::CopyConfigurationToCommand(kept_configuration_, command);
+    CopyConfigurationToCommand(kept_configuration_, command);
     command.time_stamp = input.latest_measurement->time_stamp;
+}
+
+
+void arm_runner::KeepCurrentConfigurationPlan::CopyConfigurationToCommand(
+        const arm_runner::RobotArmMeasurement &measurement,
+        arm_runner::RobotArmCommand &command
+) {
+    // Seems OK
+    for(auto i = 0; i < MAX_NUM_JOINTS; i++) {
+        command.joint_position[i] = measurement.joint_position[i];
+        command.joint_torque[i] = 0;
+        command.joint_velocities[i] = 0;
+    }
+
+    // Setup the command validity flag
+    command.position_validity = true;
+    command.velocity_validity = true;
+    command.torque_validity = false;
 }

@@ -34,14 +34,7 @@ namespace arm_runner {
 
         // The external and internal processing interface of supervisor
     public:
-        void ComputeCommand(
-                const CommandInput& input,
-                RobotArmCommand& command);
-        static void CopyConfigurationToCommand(
-            const RobotArmMeasurement& measurement,
-            RobotArmCommand& command);
-    protected:
-        virtual void computeCommand(
+        virtual void ComputeCommand(
             const CommandInput& input,
             RobotArmCommand& command) = 0;
 
@@ -85,9 +78,15 @@ namespace arm_runner {
         PlanType GetPlanType() const override { return PlanType::KeepCurrentConfigurationPlan; }
         bool HasFinished(const RobotArmMeasurement& measurement) const override { return false; }
 
+        // Copy the measurement to command
+        // This WILL CAUSE DRIFTING FOR A LONG HORIZON
+        static void CopyConfigurationToCommand(
+            const RobotArmMeasurement& measurement,
+            RobotArmCommand& command);
+
         // The command just copy kept_config
     protected:
-        void computeCommand(
+        void ComputeCommand(
             const CommandInput& input,
             RobotArmCommand& command) override;
     private:

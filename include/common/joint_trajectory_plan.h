@@ -43,10 +43,10 @@ namespace arm_runner {
             }
         }
 
-    protected:
-        void computeCommand(
-                const CommandInput& input,
-                RobotArmCommand& command) override;
+        // The computation interface
+        void ComputeCommand(
+            const CommandInput& input,
+            RobotArmCommand& command) override;
 
     private:
         // The data used to construct the trajectory

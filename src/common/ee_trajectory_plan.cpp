@@ -33,7 +33,7 @@ arm_runner::EETrajectoryPlan::EETrajectoryPlan(
 
 
 // The workforce function
-void arm_runner::EETrajectoryPlan::computeCommand(
+void arm_runner::EETrajectoryPlan::ComputeCommand(
     const arm_runner::CommandInput &input,
     arm_runner::RobotArmCommand &command
 ) {

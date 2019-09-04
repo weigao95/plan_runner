@@ -53,8 +53,7 @@ namespace arm_runner {
 
 
         // The actual computation
-    protected:
-        void computeCommand(
+        void ComputeCommand(
             const CommandInput& input,
             RobotArmCommand& command) override;
         static Eigen::Vector3d logSO3(const Eigen::Matrix3d& rotation);

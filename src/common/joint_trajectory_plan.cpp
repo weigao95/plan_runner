@@ -28,7 +28,7 @@ void arm_runner::JointTrajectoryPlan::InitializePlan(const arm_runner::CommandIn
 }
 
 
-void arm_runner::JointTrajectoryPlan::computeCommand(
+void arm_runner::JointTrajectoryPlan::ComputeCommand(
         const CommandInput& input,
         arm_runner::RobotArmCommand &command
 ) {

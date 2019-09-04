@@ -69,14 +69,14 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_seco
     if(rbt_active_plan_ != nullptr) {
         rbt_active_plan_->ComputeCommand(input, command_cache);
     } else {
-        RobotPlanBase::CopyConfigurationToCommand(measurement_cache, command_cache);
+        KeepCurrentConfigurationPlan::CopyConfigurationToCommand(measurement_cache, command_cache);
     }
 
     // Software safety check
     bool command_safe = checkCommandSafety(input, command_cache);
     if(!command_safe) {
         // Keep the current pose
-        RobotPlanBase::CopyConfigurationToCommand(measurement_cache, command_cache);
+        KeepCurrentConfigurationPlan::CopyConfigurationToCommand(measurement_cache, command_cache);
     }
 
     // Send to robot
