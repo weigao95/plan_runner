@@ -179,7 +179,7 @@ if __name__ == '__main__':
     rospy.init_node("RobotMovementService")
     rbt_movement = RobotMovementService()
     rbt_movement.move_home()
-    rbt_movement.move_to([0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+    rbt_movement.move_to([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
     #rbt_movement.move_home()
     #rbt_movement.move_ee_wrt_current_ee()
     #rospy.sleep(rospy.Duration(secs=1))
