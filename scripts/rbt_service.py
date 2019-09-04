@@ -170,7 +170,7 @@ class RobotMovementService(object):
         trajPoint.velocities = [0]*numJoints
         trajPoint.accelerations = [0]*numJoints
         trajPoint.effort = [0]*numJoints
-
+git co  
         trajPoint.time_from_start = timeFromStart
         return trajPoint
 
