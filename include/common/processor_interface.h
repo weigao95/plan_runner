@@ -5,6 +5,8 @@
 #pragma once
 
 #include <memory>
+
+#include "common/yaml_serializable.h"
 #include "common/communication_types.h"
 
 namespace arm_runner {
@@ -13,18 +15,18 @@ namespace arm_runner {
     class RobotCommunication;
 
     // The command processor
-    class CommandProcessor {
+    class CommandProcessor : public YamlSerializable {
     public:
         using Ptr = std::shared_ptr<CommandProcessor>;
-        virtual ~CommandProcessor() = default;
+        ~CommandProcessor() override = default;
         virtual void ProcessCommand(const RobotCommunication&, RobotArmCommand&) = 0;
     };
 
     // The measurement processor
-    class MeasurementProcessor {
+    class MeasurementProcessor : public YamlSerializable {
     public:
         using Ptr = std::shared_ptr<MeasurementProcessor>;
-        virtual ~MeasurementProcessor() = default;
+        ~MeasurementProcessor() override = default;
         virtual void ProcessMeasurement(const RobotCommunication&, RobotArmMeasurement&) = 0;
     };
 }

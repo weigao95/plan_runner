@@ -6,13 +6,14 @@
 
 #include <memory>
 
+#include "common/yaml_serializable.h"
 #include "common/communication_types.h"
 #include "common/plan_common_types.h"
 
 
 namespace arm_runner {
 
-    class SafetyChecker {
+    class SafetyChecker : public YamlSerializable {
     public:
         // Types
         using Ptr = std::shared_ptr<SafetyChecker>;
@@ -27,7 +28,7 @@ namespace arm_runner {
         };
 
         // Virtual class
-        virtual ~SafetyChecker() = default;
+        ~SafetyChecker() override = default;
 
         // The input and command might not have the measurement/command field required for this checker.
         // For instance, the force guard requires joint torque measurement, which is not provided on many robots

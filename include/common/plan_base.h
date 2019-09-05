@@ -13,11 +13,11 @@
 namespace arm_runner {
 
     // The base of the plan
-    class RobotPlanBase {
+    class RobotPlanBase : public YamlSerializable {
     public:
         using Ptr = std::shared_ptr<RobotPlanBase>;
         explicit RobotPlanBase() : plan_number_(-1) {};
-        virtual ~RobotPlanBase() = default;
+        ~RobotPlanBase() override = default;
 
         // The supervisor would call these methods at initialization, preempt and stopping
         // After calling these method, the plan should finish elegantly.
