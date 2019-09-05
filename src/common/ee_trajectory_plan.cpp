@@ -27,8 +27,8 @@ arm_runner::EETrajectoryPlan::EETrajectoryPlan(
     DRAKE_ASSERT(input_time_.size() == ee_quat_knots_.size());
 
     // The feedback gain
-    kp_rotation_.setConstant(10);
-    kp_translation_.setConstant(5);
+    kp_rotation_.setConstant(5);
+    kp_translation_.setConstant(10);
 }
 
 
