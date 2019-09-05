@@ -33,6 +33,11 @@ namespace arm_runner {
             std::string wrt_frame);
         ~EETrajectoryPlan() override = default;
 
+        // Construct from message
+        static std::shared_ptr<EETrajectoryPlan> ConstructFromMessage(
+            const RigidBodyTree<double>& tree,
+            const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal);
+
         // The initialization
         void InitializePlan(const CommandInput& input) override;
 
@@ -73,15 +78,17 @@ namespace arm_runner {
         int task_frame_index_;
         PiecewisePolynomial ee_xyz_trajectory_;
         PiecewiseQuaternionSlerp ee_orientation_trajectory_;
-        Eigen::Vector3d kp_rotation_;
-        Eigen::Vector3d kp_translation_;
 
         // The cache
         Eigen::MatrixXd ee_twist_jacobian_expressed_in_ee;
 
+        // The parameter
+    private:
+        Eigen::Vector3d kp_rotation_;
+        Eigen::Vector3d kp_translation_;
     public:
-        static std::shared_ptr<EETrajectoryPlan> ConstructFromMessage(
-            const RigidBodyTree<double>& tree,
-            const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal);
+        LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override;
+        void SaveParameterTo(YAML::Node& datamap) const override;
+        std::string DefaultClassParameterNameKey() const override { return "EETrajectoryPlanFeedbackGain"; }
     };
 }

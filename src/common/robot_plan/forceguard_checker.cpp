@@ -2,8 +2,8 @@
 // Created by wei on 9/2/19.
 //
 
-#include "common/forceguard_checker.h"
 #include "common/rbt_utils.h"
+#include "common/robot_plan/forceguard_checker.h"
 
 
 arm_runner::SafetyChecker::CheckResult arm_runner::TotalForceGuardChecker::CheckSafety(

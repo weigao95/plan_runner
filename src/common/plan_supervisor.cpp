@@ -3,16 +3,18 @@
 //
 
 #include "common/plan_supervisor.h"
-#include "common/joint_trajectory_plan.h"
+#include "common/robot_plan/joint_trajectory_plan.h"
 
 
 arm_runner::PlanSupervisor::PlanSupervisor(
     std::unique_ptr<RigidBodyTree<double>> tree,
     std::unique_ptr<RobotCommunication> robot_hw,
-    ros::NodeHandle nh
+    ros::NodeHandle nh,
+    const YAML::Node& parameter_map
 ) : tree_(std::move(tree)),
     rbt_communication_(std::move(robot_hw)),
-    node_handle_(nh)
+    node_handle_(nh),
+    parameter_map_(parameter_map)
 {
     initializeKinematicAndCache();
     initializeSwitchData();
