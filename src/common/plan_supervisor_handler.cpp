@@ -52,7 +52,10 @@ void arm_runner::PlanSupervisor::HandleEETrajectoryAction(
 ) {
     // Construct the plan
     auto plan = EETrajectoryPlan::ConstructFromMessage(*tree_, goal);
-    if(plan == nullptr) {
+
+    // Check failure
+    if( plan == nullptr
+    || (plan->LoadParameterFrom(parameter_map_) == LoadParameterStatus::FatalError)) {
         robot_msgs::CartesianTrajectoryResult result;
         result.status.status = result.status.STOPPED_BY_SAFETY_CHECK;
         ee_trajectory_action_->setAborted(result);

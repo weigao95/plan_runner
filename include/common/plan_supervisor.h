@@ -28,18 +28,22 @@ namespace arm_runner {
         PlanSupervisor(
             std::unique_ptr<RigidBodyTree<double>> tree,
             std::unique_ptr<RobotCommunication> robot_hw,
-            ros::NodeHandle nh);
+            ros::NodeHandle nh,
+            YAML::Node node = YAML::Node());
 
         // The main interface
         void Initialize();
         void Stop();
         void ProcessLoopIteration(double control_peroid_second);
 
-        // The real state that can only be mutated in main thread
+
+        // The state that can only be mutated in main thread
+        // Constant state can be accessed everywhere, of course
     private:
         std::unique_ptr<RigidBodyTree<double>> tree_;
         std::unique_ptr<RobotCommunication> rbt_communication_;
         RobotPlanBase::Ptr rbt_active_plan_;
+        const YAML::Node parameter_map_;
         void initializeKinematicAndCache();
 
 
