@@ -78,10 +78,17 @@ namespace arm_runner {
         int task_frame_index_;
         PiecewisePolynomial ee_xyz_trajectory_;
         PiecewiseQuaternionSlerp ee_orientation_trajectory_;
-        Eigen::Vector3d kp_rotation_;
-        Eigen::Vector3d kp_translation_;
 
         // The cache
         Eigen::MatrixXd ee_twist_jacobian_expressed_in_ee;
+
+        // The parameter
+    private:
+        Eigen::Vector3d kp_rotation_;
+        Eigen::Vector3d kp_translation_;
+    public:
+        void LoadParameterFrom(const YAML::Node& datamap) override;
+        void SaveParameterTo(YAML::Node& datamap) const override;
+        std::string DefaultClassParameterNameKey() const override { return "EETrajectoryPlanFeedbackGain"; }
     };
 }

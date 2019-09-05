@@ -21,6 +21,10 @@ namespace arm_runner {
 
         // Save the parameter to the give map
         // Can be LoadFrom after SaveTo
-        virtual void SaveParameterTo(YAML::Node& datamap) {};
+        virtual void SaveParameterTo(YAML::Node& datamap) const {};
+
+        // The default name
+        // Should be might be override for better readbility
+        virtual std::string DefaultClassParameterNameKey() const { return typeid(*this).name(); }
     };
 }

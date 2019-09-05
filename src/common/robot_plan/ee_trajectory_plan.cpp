@@ -212,3 +212,27 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
     // Set the flag
     RobotPlanBase::InitializePlan(input);
 }
+
+
+// The processing of parameter
+void arm_runner::EETrajectoryPlan::LoadParameterFrom(const YAML::Node &datamap) {
+    auto key = DefaultClassParameterNameKey();
+    kp_rotation_[0] = datamap[key]["rotation"][0].as<double>();
+    kp_rotation_[1] = datamap[key]["rotation"][1].as<double>();
+    kp_rotation_[2] = datamap[key]["rotation"][2].as<double>();
+
+    kp_translation_[0] = datamap[key]["translation"][0].as<double>();
+    kp_translation_[1] = datamap[key]["translation"][1].as<double>();
+    kp_translation_[2] = datamap[key]["translation"][2].as<double>();
+}
+
+void arm_runner::EETrajectoryPlan::SaveParameterTo(YAML::Node &datamap) const {
+    auto key = DefaultClassParameterNameKey();
+    datamap[key]["rotation"].push_back(kp_rotation_[0]);
+    datamap[key]["rotation"].push_back(kp_rotation_[1]);
+    datamap[key]["rotation"].push_back(kp_rotation_[2]);
+
+    datamap[key]["translation"].push_back(kp_translation_[0]);
+    datamap[key]["translation"].push_back(kp_translation_[1]);
+    datamap[key]["translation"].push_back(kp_translation_[2]);
+}
