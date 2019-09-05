@@ -10,7 +10,7 @@
 #include <drake/multibody/rigid_body_tree.h>
 
 #include "common/plan_supervisor.h"
-#include "common/joint_publish_processor.h"
+#include "common/robot_plan/joint_publish_processor.h"
 #include "simulated_robot/common_robot_model.h"
 #include "simulated_robot/simulated_robot.h"
 

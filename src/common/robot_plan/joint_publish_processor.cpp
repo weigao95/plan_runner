@@ -2,9 +2,9 @@
 // Created by wei on 8/29/19.
 //
 
-#include "common/joint_publish_processor.h"
-
 #include <sensor_msgs/JointState.h>
+#include "common/robot_plan/joint_publish_processor.h"
+
 
 arm_runner::JointPublishProcessor::JointPublishProcessor(
     ros::NodeHandle nh,

@@ -3,8 +3,8 @@
 //
 
 #include "common/plan_supervisor.h"
-#include "common/joint_trajectory_plan.h"
-#include "common/ee_trajectory_plan.h"
+#include "common/robot_plan/joint_trajectory_plan.h"
+#include "common/robot_plan/ee_trajectory_plan.h"
 
 
 // The handler for joint trajectory action

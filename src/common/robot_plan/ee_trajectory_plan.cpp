@@ -2,9 +2,9 @@
 // Created by wei on 8/30/19.
 //
 
-#include "common/ee_trajectory_plan.h"
 #include "common/rbt_utils.h"
-#include "common/forceguard_checker.h"
+#include "common/robot_plan/ee_trajectory_plan.h"
+#include "common/robot_plan/forceguard_checker.h"
 
 
 arm_runner::EETrajectoryPlan::EETrajectoryPlan(
