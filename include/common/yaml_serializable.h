@@ -25,7 +25,9 @@ namespace arm_runner {
         // The load from method would update itself from the datamap
         // Some parameter are optional, while others are required
         // This method can throw runtime_error if required parameter is not present
-        virtual LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) {};
+        virtual LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) {
+            return LoadParameterStatus::Success;
+        };
 
         // Save the parameter to the give map
         // Can be LoadFrom after SaveTo
