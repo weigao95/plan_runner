@@ -8,6 +8,14 @@
 
 namespace arm_runner {
 
+    // Depends on the result
+    // The upper-level processors have different actions
+    enum class LoadParameterStatus {
+        Success,  // Everything goes well
+        NonFatalError,  // Something wrong, but the object is still OK (default value provided)
+        FatalError,  // The object is not OK without given parameter
+    };
+
 
     // The Serializable to hold the parameter of an object
     class YamlSerializableParameter {
@@ -17,7 +25,7 @@ namespace arm_runner {
         // The load from method would update itself from the datamap
         // Some parameter are optional, while others are required
         // This method can throw runtime_error if required parameter is not present
-        virtual void LoadParameterFrom(const YAML::Node& datamap) {};
+        virtual LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) {};
 
         // Save the parameter to the give map
         // Can be LoadFrom after SaveTo

@@ -87,7 +87,7 @@ namespace arm_runner {
         Eigen::Vector3d kp_rotation_;
         Eigen::Vector3d kp_translation_;
     public:
-        void LoadParameterFrom(const YAML::Node& datamap) override;
+        LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override;
         void SaveParameterTo(YAML::Node& datamap) const override;
         std::string DefaultClassParameterNameKey() const override { return "EETrajectoryPlanFeedbackGain"; }
     };

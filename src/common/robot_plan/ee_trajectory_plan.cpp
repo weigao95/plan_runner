@@ -215,8 +215,15 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
 
 
 // The processing of parameter
-void arm_runner::EETrajectoryPlan::LoadParameterFrom(const YAML::Node &datamap) {
+arm_runner::LoadParameterStatus arm_runner::EETrajectoryPlan::LoadParameterFrom(const YAML::Node &datamap) {
+    // Check the key
     auto key = DefaultClassParameterNameKey();
+    if(!datamap[key]) {
+        // Keep current value
+        return LoadParameterStatus::NonFatalError;
+    }
+
+    // Load it
     kp_rotation_[0] = datamap[key]["rotation"][0].as<double>();
     kp_rotation_[1] = datamap[key]["rotation"][1].as<double>();
     kp_rotation_[2] = datamap[key]["rotation"][2].as<double>();
@@ -224,6 +231,7 @@ void arm_runner::EETrajectoryPlan::LoadParameterFrom(const YAML::Node &datamap) 
     kp_translation_[0] = datamap[key]["translation"][0].as<double>();
     kp_translation_[1] = datamap[key]["translation"][1].as<double>();
     kp_translation_[2] = datamap[key]["translation"][2].as<double>();
+    return LoadParameterStatus::Success;
 }
 
 void arm_runner::EETrajectoryPlan::SaveParameterTo(YAML::Node &datamap) const {
