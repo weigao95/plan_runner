@@ -10,17 +10,17 @@ namespace arm_runner {
 
 
     // The Serializable to hold the parameter of an object
-    class YamlSerializable {
+    class YamlSerializableParameter {
     public:
-        virtual ~YamlSerializable() = default;
+        virtual ~YamlSerializableParameter() = default;
 
         // The load from method would update itself from the datamap
         // Some parameter are optional, while others are required
         // This method can throw runtime_error if required parameter is not present
-        virtual void LoadFrom(const YAML::Node& datamap) {};
+        virtual void LoadParameterFrom(const YAML::Node& datamap) {};
 
         // Save the parameter to the give map
         // Can be LoadFrom after SaveTo
-        virtual void SaveTo(YAML::Node& datamap) {};
+        virtual void SaveParameterTo(YAML::Node& datamap) {};
     };
 }

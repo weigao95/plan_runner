@@ -13,7 +13,7 @@
 
 namespace arm_runner {
 
-    class SafetyChecker : public YamlSerializable {
+    class SafetyChecker : public YamlSerializableParameter {
     public:
         // Types
         using Ptr = std::shared_ptr<SafetyChecker>;

@@ -15,7 +15,7 @@ namespace arm_runner {
     class RobotCommunication;
 
     // The command processor
-    class CommandProcessor : public YamlSerializable {
+    class CommandProcessor : public YamlSerializableParameter {
     public:
         using Ptr = std::shared_ptr<CommandProcessor>;
         ~CommandProcessor() override = default;
@@ -23,7 +23,7 @@ namespace arm_runner {
     };
 
     // The measurement processor
-    class MeasurementProcessor : public YamlSerializable {
+    class MeasurementProcessor : public YamlSerializableParameter {
     public:
         using Ptr = std::shared_ptr<MeasurementProcessor>;
         ~MeasurementProcessor() override = default;

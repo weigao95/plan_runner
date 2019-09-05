@@ -13,7 +13,7 @@
 namespace arm_runner {
 
     // The base of the plan
-    class RobotPlanBase : public YamlSerializable {
+    class RobotPlanBase : public YamlSerializableParameter {
     public:
         using Ptr = std::shared_ptr<RobotPlanBase>;
         explicit RobotPlanBase() : plan_number_(-1) {};

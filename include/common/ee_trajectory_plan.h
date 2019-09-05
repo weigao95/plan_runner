@@ -33,6 +33,11 @@ namespace arm_runner {
             std::string wrt_frame);
         ~EETrajectoryPlan() override = default;
 
+        // Construct from message
+        static std::shared_ptr<EETrajectoryPlan> ConstructFromMessage(
+            const RigidBodyTree<double>& tree,
+            const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal);
+
         // The initialization
         void InitializePlan(const CommandInput& input) override;
 
@@ -78,10 +83,5 @@ namespace arm_runner {
 
         // The cache
         Eigen::MatrixXd ee_twist_jacobian_expressed_in_ee;
-
-    public:
-        static std::shared_ptr<EETrajectoryPlan> ConstructFromMessage(
-            const RigidBodyTree<double>& tree,
-            const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal);
     };
 }
