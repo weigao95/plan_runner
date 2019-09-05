@@ -10,11 +10,11 @@ arm_runner::PlanSupervisor::PlanSupervisor(
     std::unique_ptr<RigidBodyTree<double>> tree,
     std::unique_ptr<RobotCommunication> robot_hw,
     ros::NodeHandle nh,
-    YAML::Node parameter_map
+    const YAML::Node& parameter_map
 ) : tree_(std::move(tree)),
     rbt_communication_(std::move(robot_hw)),
     node_handle_(nh),
-    parameter_map_(std::move(parameter_map))
+    parameter_map_(parameter_map)
 {
     initializeKinematicAndCache();
     initializeSwitchData();

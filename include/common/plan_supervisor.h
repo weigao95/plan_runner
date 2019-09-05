@@ -29,7 +29,7 @@ namespace arm_runner {
             std::unique_ptr<RigidBodyTree<double>> tree,
             std::unique_ptr<RobotCommunication> robot_hw,
             ros::NodeHandle nh,
-            YAML::Node node = YAML::Node());
+            const YAML::Node& node = YAML::Node());
 
         // The main interface
         void Initialize();
