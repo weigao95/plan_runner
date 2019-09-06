@@ -92,6 +92,7 @@ namespace arm_runner {
             const CommandInput& input,
             RobotArmCommand& command) override;
     private:
-        RobotArmMeasurement kept_configuration_;
+        RobotArmMeasurement initialized_measurement_;
+        RobotArmCommand initialized_command_;
     };
 }

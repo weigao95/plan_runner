@@ -1,5 +1,6 @@
 lcm_status_channel: "IIWA_STATUS"
 lcm_command_channel: "IIWA_COMMAND"
+control_rate: 250
 lcm_plan_channel: "COMMITTED_ROBOT_PLAN"
 lcm_stop_channel: "STOP"
 num_joints: 7

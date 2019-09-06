@@ -11,11 +11,23 @@ arm_runner::JointTrajectoryPlan::JointTrajectoryPlan(
 
 
 void arm_runner::JointTrajectoryPlan::InitializePlan(const arm_runner::CommandInput &input) {
+    // Use which one to initialize
+    constexpr bool init_using_command = true;
+    
+    // Use measurement or command to fill the first knot
+    const double* q_init = nullptr;
+    const auto& history = input.robot_history->GetCommandHistory();
+    if(init_using_command && (!history.empty())) {
+        q_init =  history.back().joint_position;
+    } else {
+        q_init = input.latest_measurement->joint_position;
+    }
+
     // Fill the first knot
     auto nq = knots_[0].rows();
     DRAKE_ASSERT(nq == input.robot_rbt->get_num_positions());
     for(auto joint_idx = 0; joint_idx < nq; joint_idx++) {
-        knots_[0](joint_idx, 0) = input.latest_measurement->joint_position[joint_idx];
+        knots_[0](joint_idx, 0) = q_init[joint_idx];
     }
 
     // Compute the trajectory

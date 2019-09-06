@@ -27,12 +27,19 @@ bool arm_runner::RobotPlanBase::CheckSafety(
 
 // The method about keep current configuration
 arm_runner::KeepCurrentConfigurationPlan::KeepCurrentConfigurationPlan() {
-    kept_configuration_.set_invalid();
+    initialized_measurement_.set_invalid();
+    initialized_command_.set_invalid();
 }
 
 
 void arm_runner::KeepCurrentConfigurationPlan::InitializePlan(const arm_runner::CommandInput &input) {
-    kept_configuration_ = *input.latest_measurement;
+    // Keep both configuration and command
+    initialized_measurement_ = *input.latest_measurement;
+    const auto& history = input.robot_history->GetCommandHistory();
+    const auto& latest_command = history.back();
+    initialized_command_ = latest_command;
+
+    // The time initialization
     RobotPlanBase::InitializePlan(input);
 }
 
@@ -41,7 +48,9 @@ void arm_runner::KeepCurrentConfigurationPlan::ComputeCommand(
     const arm_runner::CommandInput &input,
     arm_runner::RobotArmCommand &command
 ) {
-    CopyConfigurationToCommand(kept_configuration_, command);
+    // Which one to use, latest measurement or command
+    //CopyConfigurationToCommand(kept_configuration_, command);
+    command = initialized_command_;
     command.time_stamp = input.latest_measurement->time_stamp;
 }
 

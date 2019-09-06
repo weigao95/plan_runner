@@ -48,13 +48,19 @@ int main(int argc, char *argv[]) {
 
     // The initialization
     auto tree = constructDefaultKukaRBT();
-    PlanSupervisor supervisor(std::move(tree), std::move(robot_arm), nh);
+    PlanSupervisor supervisor(std::move(tree), std::move(robot_arm), nh, config);
     supervisor.Initialize();
     ROS_INFO("Kuka lcm-interface supervisor started!");
 
     // Rate information
-    double control_rate = 200.0;
-    double ros_rate = 200;
+    double control_rate = 250.0;
+    double ros_rate = 250;
+    // Read from config
+    if(config["control_rate"]) {
+        control_rate = config["control_rate"].as<double>();
+        ros_rate = config["control_rate"].as<double>();
+    }
+
     double control_interval = 1.0 / control_rate;
     ros::Rate rate(ros_rate); // 100 hz
 
