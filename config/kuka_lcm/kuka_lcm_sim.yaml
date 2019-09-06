@@ -2,3 +2,13 @@ lcm_status_channel: "IIWA_STATUS"
 lcm_command_channel: "IIWA_COMMAND"
 JointTrajectoryPlanHyperparameter:
   initialize: False
+EETrajectoryPlanHyperparameter:
+  initialize: False
+  rotation:
+    - 5
+    - 5
+    - 5
+  translation:
+    - 10
+    - 10
+    - 10

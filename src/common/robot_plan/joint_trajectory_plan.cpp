@@ -138,14 +138,11 @@ arm_runner::LoadParameterStatus arm_runner::JointTrajectoryPlan::LoadParameterFr
     auto key = DefaultClassParameterNameKey();
     if(!datamap[key]) {
         // Keep current value
-        ROS_INFO("Don't have key in %s", key.c_str());
         return LoadParameterStatus::NonFatalError;
     }
 
     // Load it
     initialize_using_commanded_position_ = datamap[key]["initialize"].as<bool>();
-    ROS_INFO("Read the option about initialization using latest command %s",
-        initialize_using_commanded_position_ ? "true" : "false" );
     return LoadParameterStatus::Success;
 }
 

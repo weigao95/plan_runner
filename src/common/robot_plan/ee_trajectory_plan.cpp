@@ -221,10 +221,12 @@ arm_runner::LoadParameterStatus arm_runner::EETrajectoryPlan::LoadParameterFrom(
     auto key = DefaultClassParameterNameKey();
     if(!datamap[key]) {
         // Keep current value
+        ROS_INFO("Cannot find the config file for EETrajectoryPlan");
         return LoadParameterStatus::NonFatalError;
     }
 
     // Load it
+    ROS_INFO("Found the config file for EETrajectoryPlan");
     initialize_using_commanded_position_ = datamap[key]["initialize"].as<bool>();
 
     kp_rotation_[0] = datamap[key]["rotation"][0].as<double>();
