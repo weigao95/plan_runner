@@ -28,7 +28,7 @@ namespace arm_runner {
         PlanSupervisor(
             std::unique_ptr<RigidBodyTree<double>> tree,
             std::unique_ptr<RobotCommunication> robot_hw,
-            ros::NodeHandle nh,
+            const ros::NodeHandle& nh,
             const YAML::Node& node = YAML::Node());
 
         // The main interface
