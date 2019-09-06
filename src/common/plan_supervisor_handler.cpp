@@ -4,7 +4,7 @@
 
 #include "common/plan_supervisor.h"
 #include "common/robot_plan/joint_trajectory_plan.h"
-#include "common/robot_plan/ee_trajectory_plan.h"
+#include "common/robot_plan/ee_trajectory_velocity_command.h"
 
 
 // The handler for joint trajectory action
@@ -52,7 +52,7 @@ void arm_runner::PlanSupervisor::HandleEETrajectoryAction(
     const robot_msgs::CartesianTrajectoryGoal::ConstPtr& goal
 ) {
     // Construct the plan
-    auto plan = EETrajectoryPlan::ConstructFromMessage(*tree_, goal);
+    auto plan = EETrajectoryVelocityCommandPlan::ConstructFromMessage(*tree_, goal);
 
     // Check failure
     if( plan == nullptr
