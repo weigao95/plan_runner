@@ -33,7 +33,8 @@ void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(
         const robot_msgs::JointTrajectoryGoal::ConstPtr &goal){
     // Construct the plan
     auto plan = JointTrajectoryPlan::ConstructFromMessage(*tree_, goal);
-    if(plan == nullptr) {
+    if( plan == nullptr
+    || (plan->LoadParameterFrom(parameter_map_) == LoadParameterStatus::FatalError)) {
         robot_msgs::JointTrajectoryResult result;
         result.status.status = result.status.STOPPED_BY_SAFETY_CHECK;
         joint_trajectory_action_->setAborted(result);
