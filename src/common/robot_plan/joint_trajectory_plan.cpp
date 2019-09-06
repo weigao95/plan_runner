@@ -138,6 +138,7 @@ arm_runner::LoadParameterStatus arm_runner::JointTrajectoryPlan::LoadParameterFr
     auto key = DefaultClassParameterNameKey();
     if(!datamap[key]) {
         // Keep current value
+        ROS_INFO("Don't have key in %s", key.c_str());
         return LoadParameterStatus::NonFatalError;
     }
 

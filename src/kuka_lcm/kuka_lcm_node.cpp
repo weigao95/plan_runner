@@ -53,8 +53,8 @@ int main(int argc, char *argv[]) {
     ROS_INFO("Kuka lcm-interface supervisor started!");
 
     // Rate information
-    double control_rate = 250.0;
-    double ros_rate = 250;
+    double control_rate = 200.0;
+    double ros_rate = 200;
     // Read from config
     if(config["control_rate"]) {
         control_rate = config["control_rate"].as<double>();
