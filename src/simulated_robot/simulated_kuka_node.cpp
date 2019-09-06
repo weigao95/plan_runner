@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
     // The publisher
     JointPublishProcessor::Ptr publisher = std::make_shared<JointPublishProcessor>(
-        nh, "/iiwa/joint_states", getKukaJointNameList());
+        nh, "/joint_states", getKukaJointNameList());
     robot_arm->AddMeasurementProcessor(publisher);
 
     // The rigid body tree
