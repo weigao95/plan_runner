@@ -82,13 +82,14 @@ namespace arm_runner {
         // The cache
         Eigen::MatrixXd ee_twist_jacobian_expressed_in_ee;
 
-        // The parameter
+        // The hypter-parameter
     private:
+        bool initialize_using_commanded_position_;
         Eigen::Vector3d kp_rotation_;
         Eigen::Vector3d kp_translation_;
     public:
         LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override;
         void SaveParameterTo(YAML::Node& datamap) const override;
-        std::string DefaultClassParameterNameKey() const override { return "EETrajectoryPlanFeedbackGain"; }
+        std::string DefaultClassParameterNameKey() const override { return "EETrajectoryPlanHyperparameter"; }
     };
 }

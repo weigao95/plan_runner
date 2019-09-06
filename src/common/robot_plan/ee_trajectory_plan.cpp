@@ -26,7 +26,8 @@ arm_runner::EETrajectoryPlan::EETrajectoryPlan(
     DRAKE_ASSERT(input_time_.size() == ee_xyz_knots_.size());
     DRAKE_ASSERT(input_time_.size() == ee_quat_knots_.size());
 
-    // The feedback gain
+    // The hyper-parameters
+    initialize_using_commanded_position_ = true;
     kp_rotation_.setConstant(5);
     kp_translation_.setConstant(10);
 }
@@ -224,6 +225,8 @@ arm_runner::LoadParameterStatus arm_runner::EETrajectoryPlan::LoadParameterFrom(
     }
 
     // Load it
+    initialize_using_commanded_position_ = datamap[key]["initialize"].as<bool>();
+
     kp_rotation_[0] = datamap[key]["rotation"][0].as<double>();
     kp_rotation_[1] = datamap[key]["rotation"][1].as<double>();
     kp_rotation_[2] = datamap[key]["rotation"][2].as<double>();
@@ -236,10 +239,15 @@ arm_runner::LoadParameterStatus arm_runner::EETrajectoryPlan::LoadParameterFrom(
 
 void arm_runner::EETrajectoryPlan::SaveParameterTo(YAML::Node &datamap) const {
     auto key = DefaultClassParameterNameKey();
+    // The init option
+    datamap[key]["initialize"] = initialize_using_commanded_position_;
+
+    // The rotation gain
     datamap[key]["rotation"].push_back(kp_rotation_[0]);
     datamap[key]["rotation"].push_back(kp_rotation_[1]);
     datamap[key]["rotation"].push_back(kp_rotation_[2]);
 
+    // The translation gain
     datamap[key]["translation"].push_back(kp_translation_[0]);
     datamap[key]["translation"].push_back(kp_translation_[1]);
     datamap[key]["translation"].push_back(kp_translation_[2]);

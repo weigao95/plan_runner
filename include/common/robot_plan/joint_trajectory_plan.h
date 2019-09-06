@@ -24,6 +24,9 @@ namespace arm_runner {
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
         JointTrajectoryPlan(std::vector<double> input_time, std::vector<Eigen::MatrixXd> knots);
         ~JointTrajectoryPlan() override = default;
+        static std::shared_ptr<JointTrajectoryPlan> ConstructFromMessage(
+            const RigidBodyTree<double>& tree,
+            const robot_msgs::JointTrajectoryGoal::ConstPtr &goal);
 
         // The method in base class
         void InitializePlan(const CommandInput& input) override;
@@ -60,10 +63,12 @@ namespace arm_runner {
         // Cache
         Eigen::VectorXd q_command_cache, v_command_cache;
 
-        // Construct the plan from msg
+        // The hyper parameter
+    private:
+        bool initialize_using_commanded_position_;
     public:
-        static std::shared_ptr<JointTrajectoryPlan> ConstructFromMessage(
-            const RigidBodyTree<double>& tree,
-            const robot_msgs::JointTrajectoryGoal::ConstPtr &goal);
+        LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override;
+        void SaveParameterTo(YAML::Node& datamap) const override;
+        std::string DefaultClassParameterNameKey() const override { return "JointTrajectoryPlanHyperparameter"; }
     };
 }
