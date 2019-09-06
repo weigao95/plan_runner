@@ -112,73 +112,6 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
 }
 
 
-// The workforce function
-void arm_runner::EETrajectoryPlan::ComputeCommand(
-    const arm_runner::CommandInput &input,
-    arm_runner::RobotArmCommand &command
-) {
-    // Collect data
-    DRAKE_ASSERT(input.is_valid());
-    const int world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
-    const RigidBodyTree<double>& tree = *input.robot_rbt;
-    const auto& cache = *input.measured_state_cache;
-    auto t = GetTimeSincePlanStartSecond(input.latest_measurement->time_stamp);
-
-    // Compute the desired frame transformation
-    Eigen::Vector3d ee_position_ref = ee_xyz_trajectory_.value(t);
-    Eigen::Quaterniond ee_orientation_ref = ee_orientation_trajectory_.orientation(t);
-    Eigen::Isometry3d ee_transform_ref;
-    ee_transform_ref.linear() = ee_orientation_ref.toRotationMatrix();
-    ee_transform_ref.translation() = ee_position_ref;
-
-    // Compute the actual transform
-    Eigen::Isometry3d ee_transform = tree.relativeTransform(cache, world_frame, task_frame_index_);
-
-    // The rotation error term
-    Eigen::Isometry3d transform_error = ee_transform.inverse() * ee_transform_ref;
-    Eigen::Vector3d log_rotation_error = logSO3(transform_error.linear());
-
-    // The twist feedback
-    using TwistVector = drake::TwistVector<double>;
-    TwistVector twist_pd;
-    twist_pd.head(3) = kp_rotation_.array() * log_rotation_error.array();
-    twist_pd.tail(3) = kp_translation_.array() * transform_error.translation().array();
-
-    // The twist jacobian
-    ee_twist_jacobian_expressed_in_ee = tree.geometricJacobian(
-        cache, world_frame, task_frame_index_, task_frame_index_);
-
-    // Compute sudo-inverse
-    auto svd = ee_twist_jacobian_expressed_in_ee.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
-    svd.setThreshold(0.01);
-    Eigen::VectorXd qdot_command = svd.solve(twist_pd);
-
-    // The forward integration position
-    const double* q_fwd_integration = nullptr;
-    const auto& command_history = input.robot_history->GetCommandHistory();
-    if(command_history.empty()) {
-        q_fwd_integration = input.latest_measurement->joint_position;
-    } else {
-        q_fwd_integration = command_history.back().joint_position;
-    }
-
-    // Write to the result
-    command.set_invalid();
-    for(auto i = 0; i < qdot_command.size(); i++) {
-        command.joint_velocities[i] = qdot_command[i];
-        command.joint_position[i] = q_fwd_integration[i] + qdot_command[i] * input.control_interval_second;
-    }
-    command.velocity_validity = true;
-    command.position_validity = true;
-}
-
-
-Eigen::Vector3d arm_runner::EETrajectoryPlan::logSO3(const Eigen::Matrix3d& rotation) {
-    Eigen::AngleAxisd angle_axis(rotation);
-    return angle_axis.angle() * angle_axis.axis();
-}
-
-
 void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput &input) {
     // Get data
     const auto& tree = *input.robot_rbt;
@@ -208,10 +141,90 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
     // Compute the trajectory
     Eigen::MatrixXd knot_dot = Eigen::MatrixXd::Zero(3, 1);
     ee_xyz_trajectory_ = PiecewisePolynomial::Cubic(input_time_, ee_xyz_knots_, knot_dot, knot_dot);
+    ee_xyz_velocity_trajectory_ = ee_xyz_trajectory_.derivative(1);
     ee_orientation_trajectory_ = PiecewiseQuaternionSlerp(input_time_, ee_quat_knots_);
 
     // Set the flag
     RobotPlanBase::InitializePlan(input);
+}
+
+
+Eigen::Vector3d arm_runner::EETrajectoryPlan::logSO3(const Eigen::Matrix3d& rotation) {
+    Eigen::AngleAxisd angle_axis(rotation);
+    return angle_axis.angle() * angle_axis.axis();
+}
+
+
+// The workforce function
+void arm_runner::EETrajectoryPlan::ComputeCommand(
+    const arm_runner::CommandInput &input,
+    arm_runner::RobotArmCommand &command
+) {
+    // Collect data
+    DRAKE_ASSERT(input.is_valid());
+    const int world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
+    const RigidBodyTree<double>& tree = *input.robot_rbt;
+    const auto& cache = *input.measured_state_cache;
+    auto t = GetTimeSincePlanStartSecond(input.latest_measurement->time_stamp);
+
+    // Compute the desired frame transformation
+    Eigen::Vector3d ee_position_ref = ee_xyz_trajectory_.value(t);
+    Eigen::Quaterniond ee_orientation_ref = ee_orientation_trajectory_.orientation(t);
+    Eigen::Isometry3d ee_transform_ref;
+    ee_transform_ref.linear() = ee_orientation_ref.toRotationMatrix();
+    ee_transform_ref.translation() = ee_position_ref;
+
+    // Compute the actual transform ee_to_world
+    Eigen::Isometry3d ee_transform = tree.relativeTransform(cache, world_frame, task_frame_index_);
+    Eigen::Isometry3d world_to_ee = ee_transform.inverse();
+
+    // The rotation error term
+    Eigen::Isometry3d transform_error = world_to_ee * ee_transform_ref;
+    Eigen::Vector3d log_rotation_error = logSO3(transform_error.linear());
+
+    // The twist feedback
+    using TwistVector = drake::TwistVector<double>;
+    TwistVector twist_pd;
+    twist_pd.head(3) = kp_rotation_.array() * log_rotation_error.array();
+    twist_pd.tail(3) = kp_translation_.array() * transform_error.translation().array();
+
+    // The velocity information
+    // The linear and angular velocity are all expressed in world
+    Eigen::Vector3d ee_linear_velocity_ref = ee_xyz_velocity_trajectory_.value(t);
+    Eigen::Vector3d ee_angular_velocity_ref = ee_orientation_trajectory_.angular_velocity(t);
+    Eigen::Vector3d ee_linear_v_in_ee = world_to_ee.rotation() * ee_linear_velocity_ref;
+    Eigen::Vector3d ee_angular_v_in_ee = world_to_ee.rotation() * ee_angular_velocity_ref;
+    TwistVector twist_fwd;
+    twist_fwd.head(3) = ee_angular_v_in_ee;
+    twist_fwd.tail(3) = ee_linear_v_in_ee;
+
+    // The twist jacobian
+    ee_twist_jacobian_expressed_in_ee = tree.geometricJacobian(
+        cache, world_frame, task_frame_index_, task_frame_index_);
+
+    // Compute sudo-inverse
+    TwistVector desired_twist = twist_pd + twist_fwd;
+    auto svd = ee_twist_jacobian_expressed_in_ee.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+    svd.setThreshold(0.01);
+    Eigen::VectorXd qdot_command = svd.solve(desired_twist);
+
+    // The forward integration position
+    const double* q_fwd_integration = nullptr;
+    const auto& command_history = input.robot_history->GetCommandHistory();
+    if(command_history.empty()) {
+        q_fwd_integration = input.latest_measurement->joint_position;
+    } else {
+        q_fwd_integration = command_history.back().joint_position;
+    }
+
+    // Write to the result
+    command.set_invalid();
+    for(auto i = 0; i < qdot_command.size(); i++) {
+        command.joint_velocities[i] = qdot_command[i];
+        command.joint_position[i] = q_fwd_integration[i] + qdot_command[i] * input.control_interval_second;
+    }
+    command.velocity_validity = true;
+    command.position_validity = true;
 }
 
 

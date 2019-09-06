@@ -77,6 +77,7 @@ namespace arm_runner {
     private:
         int task_frame_index_;
         PiecewisePolynomial ee_xyz_trajectory_;
+        PiecewisePolynomial ee_xyz_velocity_trajectory_;
         PiecewiseQuaternionSlerp ee_orientation_trajectory_;
 
         // The cache
