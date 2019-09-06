@@ -136,7 +136,7 @@ void arm_runner::JointTrajectoryPlan::ComputeCommand(
 arm_runner::LoadParameterStatus arm_runner::JointTrajectoryPlan::LoadParameterFrom(const YAML::Node &datamap) {
     // Check the key
     auto key = DefaultClassParameterNameKey();
-    if(!datamap[key]) {
+    if(!datamap[key] || !datamap[key]["initialize"]) {
         // Keep current value
         return LoadParameterStatus::NonFatalError;
     }

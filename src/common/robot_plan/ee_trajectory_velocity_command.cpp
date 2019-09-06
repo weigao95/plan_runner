@@ -234,21 +234,24 @@ arm_runner::LoadParameterStatus arm_runner::EETrajectoryVelocityCommandPlan::Loa
     auto key = DefaultClassParameterNameKey();
     if(!datamap[key]) {
         // Keep current value
-        ROS_INFO("Cannot find the config file for EETrajectoryVelocityCommandPlan");
         return LoadParameterStatus::NonFatalError;
     }
 
     // Load it
-    ROS_INFO("Found the config file for EETrajectoryVelocityCommandPlan");
-    initialize_using_commanded_position_ = datamap[key]["initialize"].as<bool>();
+    if(datamap[key]["initialize"])
+        initialize_using_commanded_position_ = datamap[key]["initialize"].as<bool>();
 
-    kp_rotation_[0] = datamap[key]["rotation"][0].as<double>();
-    kp_rotation_[1] = datamap[key]["rotation"][1].as<double>();
-    kp_rotation_[2] = datamap[key]["rotation"][2].as<double>();
+    if(datamap[key]["rotation"]) {
+        kp_rotation_[0] = datamap[key]["rotation"][0].as<double>();
+        kp_rotation_[1] = datamap[key]["rotation"][1].as<double>();
+        kp_rotation_[2] = datamap[key]["rotation"][2].as<double>();
+    }
 
-    kp_translation_[0] = datamap[key]["translation"][0].as<double>();
-    kp_translation_[1] = datamap[key]["translation"][1].as<double>();
-    kp_translation_[2] = datamap[key]["translation"][2].as<double>();
+    if(datamap[key]["translation"]) {
+        kp_translation_[0] = datamap[key]["translation"][0].as<double>();
+        kp_translation_[1] = datamap[key]["translation"][1].as<double>();
+        kp_translation_[2] = datamap[key]["translation"][2].as<double>();
+    }
     return LoadParameterStatus::Success;
 }
 
