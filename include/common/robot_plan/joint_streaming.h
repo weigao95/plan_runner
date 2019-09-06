@@ -54,9 +54,9 @@ namespace arm_runner {
     class JointPositionStreamingPlan : public JointStreamingPlanBase {
     public:
         using Ptr = std::shared_ptr<JointPositionStreamingPlan>;
-        JointPositionStreamingPlan(
+        explicit JointPositionStreamingPlan(
             ros::NodeHandle& nh,
-            std::string topic="")
+            std::string topic="/plan_runner/joint_space_streaming_setpoint")
             : JointStreamingPlanBase(nh, std::move(topic)),
               command_valid_flag_(false) {};
         ~JointPositionStreamingPlan() final = default;
