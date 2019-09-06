@@ -36,9 +36,24 @@ void arm_runner::JointStreamingPlanBase::InitializePlan(const arm_runner::Comman
 }
 
 
+void arm_runner::JointStreamingPlanBase::StopPlan(arm_runner::ActionToCurrentPlan action) {
+    streaming_subscriber_->shutdown();
+    RobotPlanBase::StopPlan(action);
+}
+
+
 arm_runner::LoadParameterStatus arm_runner::JointStreamingPlanBase::LoadParameterFrom(const YAML::Node &datamap) {
     auto key = DefaultClassParameterNameKey();
+    if(!datamap[key] || !datamap[key]["topic"] ) {
+        if(topic_.empty())
+            return LoadParameterStatus::FatalError;
+        else
+            return LoadParameterStatus::NonFatalError;
+    }
+
+    // Load it
     topic_ = datamap[key]["topic"].as<std::string>();
+    return LoadParameterStatus::Success;
 }
 
 

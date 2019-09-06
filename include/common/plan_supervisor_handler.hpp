@@ -1,31 +1,15 @@
 #pragma once
 
-//#include "common/plan_supervisor.h"
-
 
 template<typename ActionT, typename ResultT>
 void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
     std::shared_ptr<actionlib::SimpleActionServer<ActionT>>& action_server,
-    RobotPlanBase::Ptr plan,
+    const RobotPlanBase::Ptr& plan,
     int wait_result_interval
 ) {
     // The construction should be OK
-    DRAKE_ASSERT(plan != nullptr);
-    auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {
-        // Push this task to result
-        FinishedPlanQueue::Record record{robot_plan->GetPlanNumber(), action};
-        this->finished_plan_queue_.LockAndAppend(record);
-    };
-    plan->AddStoppedCallback(finish_callback);
-
-    // Send to active task
-    switch_mutex_.lock();
-    switch_to_plan_ = plan;
-    int current_plan_number = plan_number_;
-    plan->SetPlanNumber(current_plan_number);
-    plan_number_++;
-    switch_mutex_.unlock();
-    ROS_INFO("New plan appended with plan number %d", current_plan_number);
+    int current_plan_number;
+    lockAndAppendPlan(plan, current_plan_number);
 
     // Wait for the task being accomplished
     do {

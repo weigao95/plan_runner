@@ -27,6 +27,7 @@ namespace arm_runner {
         // The finished interface
         bool HasFinished(const RobotArmMeasurement& measurement) const override { return false; }
         void InitializePlan(const CommandInput& input) override;
+        void StopPlan(ActionToCurrentPlan action) override;
 
         // The joint name to index of the plan
     public:
@@ -56,7 +57,7 @@ namespace arm_runner {
         using Ptr = std::shared_ptr<JointPositionStreamingPlan>;
         explicit JointPositionStreamingPlan(
             ros::NodeHandle& nh,
-            std::string topic="/plan_runner/joint_space_streaming_setpoint")
+            std::string topic)
             : JointStreamingPlanBase(nh, std::move(topic)),
               command_valid_flag_(false) {};
         ~JointPositionStreamingPlan() final = default;

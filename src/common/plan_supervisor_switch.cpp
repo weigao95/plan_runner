@@ -87,8 +87,8 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
 
     // Do switching
     if(rbt_active_plan_ != nullptr) {
-        ROS_INFO("Stop plan %d at time %f",
-                rbt_active_plan_->GetPlanNumber(), input.latest_measurement->time_stamp.ToSecond());
+        //ROS_INFO("Stop plan %d at time %f",
+        //        rbt_active_plan_->GetPlanNumber(), input.latest_measurement->time_stamp.ToSecond());
         rbt_active_plan_->StopPlan(current_action);
     }
 
@@ -105,5 +105,5 @@ void arm_runner::PlanSupervisor::processPlanSwitch(
     // Initialize the new plan
     DRAKE_ASSERT(rbt_active_plan_ != nullptr);
     rbt_active_plan_->InitializePlan(input);
-    ROS_INFO("Start new plan with number %d", rbt_active_plan_->GetPlanNumber());
+    //ROS_INFO("Start new plan with number %d", rbt_active_plan_->GetPlanNumber());
 }
