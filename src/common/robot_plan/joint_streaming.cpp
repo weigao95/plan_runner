@@ -118,9 +118,23 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
     // Setup the command position
     command.set_invalid();
     if(command_valid) {
+        // Basic safety check
+        const double max_dq = (max_joint_velocity_degree_second_ * M_PI / 180.0) * input.control_interval_second;
+        bool command_safe = true;
+        for(auto i = 0; i < num_joints_; i++) {
+            double dq_i = std::abs(streamed_command_position_cache[i] - input.latest_measurement->joint_position[i]);
+            if(dq_i > max_dq) {
+                command_safe = false;
+                break;
+            }
+        }
+
         // Directly apply the commanded position
         for(auto i = 0; i < num_joints_; i++) {
-            command.joint_position[i] = streamed_command_position_cache[i];
+            if(command_safe)
+                command.joint_position[i] = streamed_command_position_cache[i];
+            else
+                command.joint_position[i] = q_fwd[i];
         }
     } else {
         for(auto i = 0; i < num_joints_; i++) {
