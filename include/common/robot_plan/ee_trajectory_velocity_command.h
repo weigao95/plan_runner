@@ -19,22 +19,22 @@
 namespace arm_runner {
 
 
-    class EETrajectoryPlan : public RobotPlanBase {
+    class EETrajectoryVelocityCommandPlan : public RobotPlanBase {
     public:
-        using Ptr = std::shared_ptr<EETrajectoryPlan>;
+        using Ptr = std::shared_ptr<EETrajectoryVelocityCommandPlan>;
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
         using PiecewiseQuaternionSlerp = drake::trajectories::PiecewiseQuaternionSlerp<double>;
-        EETrajectoryPlan(
+        EETrajectoryVelocityCommandPlan(
             bool has_quaternion,
             std::string task_frame,
             std::vector<double> input_time,
             std::vector<Eigen::MatrixXd> ee_xyz_knots,
             std::vector<Eigen::Quaterniond> ee_quat_knots,
             std::string wrt_frame);
-        ~EETrajectoryPlan() override = default;
+        ~EETrajectoryVelocityCommandPlan() override = default;
 
         // Construct from message
-        static std::shared_ptr<EETrajectoryPlan> ConstructFromMessage(
+        static std::shared_ptr<EETrajectoryVelocityCommandPlan> ConstructFromMessage(
             const RigidBodyTree<double>& tree,
             const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal);
 

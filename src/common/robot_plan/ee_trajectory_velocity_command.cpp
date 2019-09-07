@@ -3,11 +3,11 @@
 //
 
 #include "common/rbt_utils.h"
-#include "common/robot_plan/ee_trajectory_plan.h"
+#include "common/robot_plan/ee_trajectory_velocity_command.h"
 #include "common/robot_plan/forceguard_checker.h"
 
 
-arm_runner::EETrajectoryPlan::EETrajectoryPlan(
+arm_runner::EETrajectoryVelocityCommandPlan::EETrajectoryVelocityCommandPlan(
     bool has_quaternion,
     std::string task_frame,
     std::vector<double> input_time,
@@ -33,7 +33,7 @@ arm_runner::EETrajectoryPlan::EETrajectoryPlan(
 }
 
 
-std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::ConstructFromMessage(
+std::shared_ptr<arm_runner::EETrajectoryVelocityCommandPlan> arm_runner::EETrajectoryVelocityCommandPlan::ConstructFromMessage(
     const RigidBodyTree<double>& tree,
     const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal
 ) {
@@ -90,7 +90,7 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
     }
 
     // Construct
-    auto plan = std::make_shared<EETrajectoryPlan>(
+    auto plan = std::make_shared<EETrajectoryVelocityCommandPlan>(
             has_quat,
             std::move(task_frame_name),
             std::move(input_time),
@@ -112,7 +112,7 @@ std::shared_ptr<arm_runner::EETrajectoryPlan> arm_runner::EETrajectoryPlan::Cons
 }
 
 
-void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput &input) {
+void arm_runner::EETrajectoryVelocityCommandPlan::InitializePlan(const arm_runner::CommandInput &input) {
     // Get data
     const auto& tree = *input.robot_rbt;
     const auto& cache = *input.measured_state_cache;
@@ -149,14 +149,14 @@ void arm_runner::EETrajectoryPlan::InitializePlan(const arm_runner::CommandInput
 }
 
 
-Eigen::Vector3d arm_runner::EETrajectoryPlan::logSO3(const Eigen::Matrix3d& rotation) {
+Eigen::Vector3d arm_runner::EETrajectoryVelocityCommandPlan::logSO3(const Eigen::Matrix3d& rotation) {
     Eigen::AngleAxisd angle_axis(rotation);
     return angle_axis.angle() * angle_axis.axis();
 }
 
 
 // The workforce function
-void arm_runner::EETrajectoryPlan::ComputeCommand(
+void arm_runner::EETrajectoryVelocityCommandPlan::ComputeCommand(
     const arm_runner::CommandInput &input,
     arm_runner::RobotArmCommand &command
 ) {
@@ -229,30 +229,33 @@ void arm_runner::EETrajectoryPlan::ComputeCommand(
 
 
 // The processing of parameter
-arm_runner::LoadParameterStatus arm_runner::EETrajectoryPlan::LoadParameterFrom(const YAML::Node &datamap) {
+arm_runner::LoadParameterStatus arm_runner::EETrajectoryVelocityCommandPlan::LoadParameterFrom(const YAML::Node &datamap) {
     // Check the key
     auto key = DefaultClassParameterNameKey();
     if(!datamap[key]) {
         // Keep current value
-        ROS_INFO("Cannot find the config file for EETrajectoryPlan");
         return LoadParameterStatus::NonFatalError;
     }
 
     // Load it
-    ROS_INFO("Found the config file for EETrajectoryPlan");
-    initialize_using_commanded_position_ = datamap[key]["initialize"].as<bool>();
+    if(datamap[key]["initialize"])
+        initialize_using_commanded_position_ = datamap[key]["initialize"].as<bool>();
 
-    kp_rotation_[0] = datamap[key]["rotation"][0].as<double>();
-    kp_rotation_[1] = datamap[key]["rotation"][1].as<double>();
-    kp_rotation_[2] = datamap[key]["rotation"][2].as<double>();
+    if(datamap[key]["rotation"]) {
+        kp_rotation_[0] = datamap[key]["rotation"][0].as<double>();
+        kp_rotation_[1] = datamap[key]["rotation"][1].as<double>();
+        kp_rotation_[2] = datamap[key]["rotation"][2].as<double>();
+    }
 
-    kp_translation_[0] = datamap[key]["translation"][0].as<double>();
-    kp_translation_[1] = datamap[key]["translation"][1].as<double>();
-    kp_translation_[2] = datamap[key]["translation"][2].as<double>();
+    if(datamap[key]["translation"]) {
+        kp_translation_[0] = datamap[key]["translation"][0].as<double>();
+        kp_translation_[1] = datamap[key]["translation"][1].as<double>();
+        kp_translation_[2] = datamap[key]["translation"][2].as<double>();
+    }
     return LoadParameterStatus::Success;
 }
 
-void arm_runner::EETrajectoryPlan::SaveParameterTo(YAML::Node &datamap) const {
+void arm_runner::EETrajectoryVelocityCommandPlan::SaveParameterTo(YAML::Node &datamap) const {
     auto key = DefaultClassParameterNameKey();
     // The init option
     datamap[key]["initialize"] = initialize_using_commanded_position_;

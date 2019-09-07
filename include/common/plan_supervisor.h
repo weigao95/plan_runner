@@ -28,7 +28,7 @@ namespace arm_runner {
         PlanSupervisor(
             std::unique_ptr<RigidBodyTree<double>> tree,
             std::unique_ptr<RobotCommunication> robot_hw,
-            ros::NodeHandle nh,
+            const ros::NodeHandle& nh,
             const YAML::Node& node = YAML::Node());
 
         // The main interface
@@ -78,18 +78,23 @@ namespace arm_runner {
         void HandleJointTrajectoryAction(const robot_msgs::JointTrajectoryGoal::ConstPtr& goal);
         void HandleEETrajectoryAction(const robot_msgs::CartesianTrajectoryGoal::ConstPtr& goal);
         bool HandleEndPlanService(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
+        bool HandleStartStreamingService(
+            robot_msgs::StartStreamingPlan::Request& request,
+            robot_msgs::StartStreamingPlan::Response& response);
     private:
         ros::NodeHandle node_handle_;
         std::shared_ptr<actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>> joint_trajectory_action_;
         std::shared_ptr<actionlib::SimpleActionServer<robot_msgs::CartesianTrajectoryAction>> ee_trajectory_action_;
         std::shared_ptr<ros::ServiceServer> plan_end_server_;
+        std::shared_ptr<ros::ServiceServer> start_streaming_server_;
         void initializeServiceActions();
+        void lockAndAppendPlan(const RobotPlanBase::Ptr& plan, int& plan_number);
 
         // Wait for the result
         template<typename ActionT, typename ResultT>
         void appendAndWaitForTrajectoryPlan(
             std::shared_ptr<actionlib::SimpleActionServer<ActionT>>& action_server,
-            RobotPlanBase::Ptr plan,
+            const RobotPlanBase::Ptr& plan,
             int wait_result_interval);
 
         // The cache

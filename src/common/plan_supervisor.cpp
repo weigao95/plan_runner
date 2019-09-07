@@ -9,7 +9,7 @@
 arm_runner::PlanSupervisor::PlanSupervisor(
     std::unique_ptr<RigidBodyTree<double>> tree,
     std::unique_ptr<RobotCommunication> robot_hw,
-    ros::NodeHandle nh,
+    const ros::NodeHandle& nh,
     const YAML::Node& parameter_map
 ) : tree_(std::move(tree)),
     rbt_communication_(std::move(robot_hw)),
@@ -36,6 +36,7 @@ void arm_runner::PlanSupervisor::Initialize() {
 void arm_runner::PlanSupervisor::Stop() {
     rbt_communication_->Stop();
     plan_end_server_->shutdown();
+    start_streaming_server_->shutdown();
 }
 
 void arm_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_second) {
