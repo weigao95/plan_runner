@@ -105,33 +105,41 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
     command_valid = command_valid_flag_;
     mutex_.unlock();
 
+    // The forward command
+    const double* q_fwd = nullptr;
+    const auto& history = input.robot_history->GetCommandHistory();
+    if(history.empty())
+        q_fwd = input.latest_measurement->joint_position;
+    else
+        q_fwd = history.back().joint_position;
+    DRAKE_ASSERT(q_fwd != nullptr);
+
     // Setup the command position
     command.set_invalid();
     if(command_valid) {
         double scale = 1.0;
+        bool need_scale = false;
         const double max_dq = (max_joint_velocity_degree_second_ * M_PI / 180.0) * input.control_interval_second;
         for(auto i = 0; i < num_joints_; i++) {
-            const auto dq =
+            const double dq =
                     std::abs(input.latest_measurement->joint_position[i] - streamed_command_position_cache[i]);
-            if(dq > max_dq)
+            if(dq > max_dq) {
                 scale = std::min(scale, (max_dq / dq));
+                need_scale = true;
+            }
         }
 
         // Should always be true
-        DRAKE_ASSERT(scale >= 0 && scale <= 1.0);
         for(auto i = 0; i < num_joints_; i++) {
-            double dq_i = streamed_command_position_cache[i] - input.latest_measurement->joint_position[i];
-            command.joint_position[i] = input.latest_measurement->joint_position[i] + scale * dq_i;
+            if(need_scale) {
+                DRAKE_ASSERT(scale >= 0 && scale <= 1.0);
+                double dq_i = streamed_command_position_cache[i] - input.latest_measurement->joint_position[i];
+                command.joint_position[i] = q_fwd[i] + scale * dq_i;
+            } else {
+                command.joint_position[i] = streamed_command_position_cache[i];
+            }
         }
     } else {
-        // The forward command
-        const double* q_fwd = nullptr;
-        const auto& history = input.robot_history->GetCommandHistory();
-        if(history.empty())
-            q_fwd = input.latest_measurement->joint_position;
-        else
-            q_fwd = history.back().joint_position;
-
         // Send to command
         DRAKE_ASSERT(q_fwd != nullptr);
         for(auto i = 0; i < num_joints_; i++) {
