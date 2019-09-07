@@ -94,7 +94,7 @@ void arm_runner::EEVelocityStreamingPlan::ComputeCommand(
 
     // The twist jacobian
     ee_twist_jacobian_expressed_in_ee = tree.geometricJacobian(
-            cache, world_frame, ee_frame_index, ee_frame_index);
+        cache, world_frame, ee_frame_index, ee_frame_index);
 
     // Compute sudo-inverse
     TwistVector desired_twist = twist_fwd;
