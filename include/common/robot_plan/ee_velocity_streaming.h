@@ -41,6 +41,12 @@ namespace arm_runner {
         std::string topic_;
         ros::NodeHandle node_handle_;
         std::shared_ptr<ros::Subscriber> streaming_subscriber_;
+
+        // Caches
+    private:
+        std::string ee_frame_id_cache;
+        Eigen::Vector3d ee_linear_velocity_cache, ee_angular_velocity_cache;
+        Eigen::MatrixXd ee_twist_jacobian_expressed_in_ee;
     };
 
 }
