@@ -17,6 +17,7 @@ namespace arm_runner {
         KeepCurrentConfigurationPlan,
         JointTrajectory,
         JointPositionStreaming,
+        JointVelocityStreaming,
         JointTorqueStreaming,
         EETrajectory,
         EEConfigurationStreaming,
@@ -32,7 +33,8 @@ namespace arm_runner {
     };
 
     inline bool is_streaming_plan(PlanType type) {
-        return type == PlanType::JointPositionStreaming 
+        return type == PlanType::JointPositionStreaming
+            || type == PlanType::JointVelocityStreaming
             || type == PlanType::JointTorqueStreaming
             || type == PlanType::EEConfigurationStreaming
             || type == PlanType::EEVelocityStreaming

@@ -132,3 +132,78 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
     command.position_validity = true;
     command.time_stamp = input.latest_measurement->time_stamp;
 }
+
+
+// The joint velocity streaming
+arm_runner::JointVelocityStreamingPlan::JointVelocityStreamingPlan(
+    ros::NodeHandle &nh,
+    std::string topic
+) : JointStreamingPlanBase(nh, std::move(topic))
+{
+    command_valid_flag_ = false;
+}
+
+
+void arm_runner::JointVelocityStreamingPlan::updateStreamedCommand(
+    const sensor_msgs::JointState::ConstPtr &message
+) {
+    std::lock_guard<std::mutex> guard(mutex_);
+    commanded_velocity_.resize(num_joints_);
+    for (unsigned i = 0; i < message->name.size(); i++) {
+        if (joint_name_to_index_.count(message->name[i]) == 0) {
+            continue;
+        }
+
+        // Copy to joint
+        int idx = joint_name_to_index_[message->name[i]];
+        if(idx < num_joints_) {
+            commanded_velocity_[idx] = message->velocity[i];
+        }
+    }
+
+    // Setup the flag
+    if(!command_valid_flag_) {
+        command_valid_flag_ = true;
+    }
+}
+
+
+void arm_runner::JointVelocityStreamingPlan::ComputeCommand(
+        const arm_runner::CommandInput &input,
+        arm_runner::RobotArmCommand &command
+) {
+    // Copy the position
+    bool command_valid;
+    mutex_.lock();
+    streamed_command_velocity_cache = commanded_velocity_;
+    command_valid = command_valid_flag_;
+    mutex_.unlock();
+
+    // Send to command
+    const double* q_fwd = nullptr;
+    const auto& history = input.robot_history->GetCommandHistory();
+    if(history.empty())
+        q_fwd = input.latest_measurement->joint_position;
+    else
+        q_fwd = history.back().joint_position;
+    DRAKE_ASSERT(q_fwd != nullptr);
+
+    // Setup the command position
+    command.set_invalid();
+    if(command_valid) {
+        for(auto i = 0; i < num_joints_; i++) {
+            command.joint_position[i] =  q_fwd[i] + streamed_command_velocity_cache[i] * input.control_interval_second;
+            command.joint_velocities[i] = streamed_command_velocity_cache[i];
+        }
+    } else {
+        for(auto i = 0; i < num_joints_; i++) {
+            command.joint_position[i] = q_fwd[i];
+            command.joint_velocities[i] = 0;
+        }
+    }
+
+    // Update flag
+    command.position_validity = true;
+    command.velocity_validity = true;
+    command.time_stamp = input.latest_measurement->time_stamp;
+}

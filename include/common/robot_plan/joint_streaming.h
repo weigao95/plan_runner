@@ -75,4 +75,27 @@ namespace arm_runner {
         // The cache
         Eigen::VectorXd streamed_command_position_cache;
     };
+
+
+    // The velocity streaming plan
+    class JointVelocityStreamingPlan : public JointStreamingPlanBase {
+    public:
+        using Ptr = std::shared_ptr<JointVelocityStreamingPlan>;
+        JointVelocityStreamingPlan(ros::NodeHandle& nh, std::string topic);
+        ~JointVelocityStreamingPlan() final = default;
+
+        // The interface
+        PlanType GetPlanType() const final { return PlanType::JointVelocityStreaming; }
+        void updateStreamedCommand(const sensor_msgs::JointState::ConstPtr& message) final;
+        void ComputeCommand(
+                const CommandInput& input,
+                RobotArmCommand& command) final;
+    private:
+        // The latest streamming velocity
+        std::mutex mutex_;
+        Eigen::VectorXd commanded_velocity_;
+        bool command_valid_flag_;
+        // The cache
+        Eigen::VectorXd streamed_command_velocity_cache;
+    };
 }

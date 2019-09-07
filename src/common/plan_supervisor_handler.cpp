@@ -100,6 +100,10 @@ bool arm_runner::PlanSupervisor::HandleStartStreamingService(
             plan = std::make_shared<JointPositionStreamingPlan>(
                     node_handle_, "/plan_runner/joint_space_streaming_setpoint");
             break;
+        case streaming_type.JOINT_VELOCITY_STREAMING:
+            plan = std::make_shared<JointVelocityStreamingPlan>(
+                    node_handle_, "/plan_runner/joint_space_streaming_setpoint");
+            break;
         default:
             break;
     }
