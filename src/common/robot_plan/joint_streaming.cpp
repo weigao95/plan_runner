@@ -123,7 +123,6 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
             command.joint_position[i] = streamed_command_position_cache[i];
         }
     } else {
-        ROS_INFO("The command is not valid!");
         for(auto i = 0; i < num_joints_; i++) {
             command.joint_position[i] = q_fwd[i];
         }
