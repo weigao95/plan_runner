@@ -64,6 +64,15 @@ void arm_runner::JointStreamingPlanBase::SaveParameterTo(YAML::Node &datamap) co
 
 
 // The joint position streaming
+arm_runner::JointPositionStreamingPlan::JointPositionStreamingPlan(
+   ros::NodeHandle &nh, std::string topic
+) : JointStreamingPlanBase(nh, std::move(topic))
+{
+    max_joint_velocity_degree_second_ = 30;
+    command_valid_flag_ = false;
+}
+
+
 void arm_runner::JointPositionStreamingPlan::updateStreamedCommand(
     const sensor_msgs::JointState::ConstPtr &message
 ) {
@@ -83,31 +92,44 @@ void arm_runner::JointPositionStreamingPlan::updateStreamedCommand(
     command_valid_flag_ = true;
 }
 
+
 void arm_runner::JointPositionStreamingPlan::ComputeCommand(
     const arm_runner::CommandInput &input,
     arm_runner::RobotArmCommand &command
 ) {
     // Copy the position
-    bool command_valid = false;
+    bool command_valid;
     mutex_.lock();
     streamed_command_position_cache = commanded_position_;
     command_valid = command_valid_flag_;
     mutex_.unlock();
 
+    // Check back
+    const double* q_fwd = nullptr;
+    const auto& history = input.robot_history->GetCommandHistory();
+    if(history.empty())
+        q_fwd = input.latest_measurement->joint_position;
+    else
+        q_fwd = history.back().joint_position;
+
     // Setup the command position
     command.set_invalid();
     if(command_valid) {
-        for(auto i = 0; i < num_joints_; i++)
-            command.joint_position[i] = streamed_command_position_cache[i];
-    } else {
-        // Check back
-        const double* q_fwd = nullptr;
-        const auto& history = input.robot_history->GetCommandHistory();
-        if(history.empty())
-            q_fwd = input.latest_measurement->joint_position;
-        else
-            q_fwd = history.back().joint_position;
+        double scale = 1.0;
+        const double max_dq = (max_joint_velocity_degree_second_ * M_PI / 180.0) * input.control_interval_second;
+        for(auto i = 0; i < num_joints_; i++) {
+            const auto dq = std::abs(q_fwd[i] - streamed_command_position_cache[i]);
+            if(dq > max_dq)
+                scale = std::min(scale, (max_dq / dq));
+        }
 
+        // Should always be true
+        DRAKE_ASSERT(scale >= 0 && scale <= 1.0);
+        for(auto i = 0; i < num_joints_; i++) {
+            double dq_i = streamed_command_position_cache[i] - q_fwd[i];
+            command.joint_position[i] = q_fwd[i] + scale * dq_i;
+        }
+    } else {
         // Send to command
         DRAKE_ASSERT(q_fwd != nullptr);
         for(auto i = 0; i < num_joints_; i++)
@@ -117,4 +139,24 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
     // Update flag
     command.position_validity = true;
     command.time_stamp = input.latest_measurement->time_stamp;
+}
+
+
+arm_runner::LoadParameterStatus arm_runner::JointPositionStreamingPlan::LoadParameterFrom(const YAML::Node &datamap) {
+    // Use the old key
+    auto key = JointStreamingPlanBase::DefaultClassParameterNameKey();
+
+    // Load the maximum joint velocity
+    if(datamap[key] && datamap[key]["max_joint_velocity_degree_second"])
+        max_joint_velocity_degree_second_ = datamap[key]["max_joint_velocity_degree_second"].as<double>();
+
+    // The basic types
+    return JointStreamingPlanBase::LoadParameterFrom(datamap);
+}
+
+
+void arm_runner::JointPositionStreamingPlan::SaveParameterTo(YAML::Node &datamap) const {
+    auto key = JointStreamingPlanBase::DefaultClassParameterNameKey();
+    datamap[key]["max_joint_velocity_degree_second"] = max_joint_velocity_degree_second_;
+    JointStreamingPlanBase::SaveParameterTo(datamap);
 }

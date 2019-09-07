@@ -55,11 +55,9 @@ namespace arm_runner {
     class JointPositionStreamingPlan : public JointStreamingPlanBase {
     public:
         using Ptr = std::shared_ptr<JointPositionStreamingPlan>;
-        explicit JointPositionStreamingPlan(
+        JointPositionStreamingPlan(
             ros::NodeHandle& nh,
-            std::string topic)
-            : JointStreamingPlanBase(nh, std::move(topic)),
-              command_valid_flag_(false) {};
+            std::string topic);
         ~JointPositionStreamingPlan() final = default;
 
         // The interface
@@ -76,5 +74,12 @@ namespace arm_runner {
         bool command_valid_flag_;
         // The cache
         Eigen::VectorXd streamed_command_position_cache;
+
+        // The parameter
+    private:
+        double max_joint_velocity_degree_second_;
+    public:
+        LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override;
+        void SaveParameterTo(YAML::Node& datamap) const override;
     };
 }
