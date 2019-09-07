@@ -68,7 +68,6 @@ arm_runner::JointPositionStreamingPlan::JointPositionStreamingPlan(
    ros::NodeHandle &nh, std::string topic
 ) : JointStreamingPlanBase(nh, std::move(topic))
 {
-    max_joint_velocity_degree_second_ = 20;
     command_valid_flag_ = false;
 }
 
@@ -91,7 +90,9 @@ void arm_runner::JointPositionStreamingPlan::updateStreamedCommand(
     }
 
     // Setup the flag
-    command_valid_flag_ = true;
+    if(!command_valid_flag_) {
+        command_valid_flag_ = true;
+    }
 }
 
 
@@ -130,24 +131,4 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
     // Update flag
     command.position_validity = true;
     command.time_stamp = input.latest_measurement->time_stamp;
-}
-
-
-arm_runner::LoadParameterStatus arm_runner::JointPositionStreamingPlan::LoadParameterFrom(const YAML::Node &datamap) {
-    // Use the old key
-    auto key = JointStreamingPlanBase::DefaultClassParameterNameKey();
-
-    // Load the maximum joint velocity
-    if(datamap[key] && datamap[key]["max_joint_velocity_degree_second"])
-        max_joint_velocity_degree_second_ = datamap[key]["max_joint_velocity_degree_second"].as<double>();
-
-    // The basic types
-    return JointStreamingPlanBase::LoadParameterFrom(datamap);
-}
-
-
-void arm_runner::JointPositionStreamingPlan::SaveParameterTo(YAML::Node &datamap) const {
-    auto key = JointStreamingPlanBase::DefaultClassParameterNameKey();
-    datamap[key]["max_joint_velocity_degree_second"] = max_joint_velocity_degree_second_;
-    JointStreamingPlanBase::SaveParameterTo(datamap);
 }

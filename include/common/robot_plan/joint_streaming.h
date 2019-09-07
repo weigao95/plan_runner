@@ -74,12 +74,5 @@ namespace arm_runner {
         bool command_valid_flag_;
         // The cache
         Eigen::VectorXd streamed_command_position_cache;
-
-        // The parameter
-    private:
-        double max_joint_velocity_degree_second_;
-    public:
-        LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override;
-        void SaveParameterTo(YAML::Node& datamap) const override;
     };
 }
