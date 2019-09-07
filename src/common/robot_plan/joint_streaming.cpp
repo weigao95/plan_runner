@@ -132,8 +132,9 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
     } else {
         // Send to command
         DRAKE_ASSERT(q_fwd != nullptr);
-        for(auto i = 0; i < num_joints_; i++)
+        for(auto i = 0; i < num_joints_; i++) {
             command.joint_position[i] = q_fwd[i];
+        }
     }
 
     // Update flag
