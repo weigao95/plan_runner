@@ -85,8 +85,9 @@ void arm_runner::JointPositionStreamingPlan::updateStreamedCommand(
 
         // Copy to joint
         int idx = joint_name_to_index_[message->name[i]];
-        if(idx < num_joints_)
+        if(idx < num_joints_) {
             commanded_position_[idx] = message->position[i];
+        }
     }
 
     // Setup the flag
@@ -105,32 +106,24 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
     command_valid = command_valid_flag_;
     mutex_.unlock();
 
+    // Send to command
+    const double* q_fwd = nullptr;
+    const auto& history = input.robot_history->GetCommandHistory();
+    if(history.empty())
+        q_fwd = input.latest_measurement->joint_position;
+    else
+        q_fwd = history.back().joint_position;
+    DRAKE_ASSERT(q_fwd != nullptr);
+
     // Setup the command position
     command.set_invalid();
-    bool command_safe = true;
-    const double max_dq = (max_joint_velocity_degree_second_ * M_PI / 180.0) * input.control_interval_second;
-    for(auto i = 0; i < num_joints_; i++) {
-        const auto dq_i = input.latest_measurement->joint_position[i] - streamed_command_position_cache[i];
-        if(std::abs(dq_i) > max_dq) {
-            command_safe = false;
-            break;
-        }
-    }
-
-    if(command_valid && command_safe) {
+    if(command_valid) {
         // Directly apply the commanded position
         for(auto i = 0; i < num_joints_; i++) {
             command.joint_position[i] = streamed_command_position_cache[i];
         }
     } else {
-        // Send to command
-        const double* q_fwd = nullptr;
-        const auto& history = input.robot_history->GetCommandHistory();
-        if(history.empty())
-            q_fwd = input.latest_measurement->joint_position;
-        else
-            q_fwd = history.back().joint_position;
-        DRAKE_ASSERT(q_fwd != nullptr);
+        ROS_INFO("The command is not valid!");
         for(auto i = 0; i < num_joints_; i++) {
             command.joint_position[i] = q_fwd[i];
         }
