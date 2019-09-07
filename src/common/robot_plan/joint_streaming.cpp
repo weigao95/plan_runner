@@ -68,7 +68,7 @@ arm_runner::JointPositionStreamingPlan::JointPositionStreamingPlan(
    ros::NodeHandle &nh, std::string topic
 ) : JointStreamingPlanBase(nh, std::move(topic))
 {
-    max_joint_velocity_degree_second_ = 30;
+    max_joint_velocity_degree_second_ = 20;
     command_valid_flag_ = false;
 }
 
@@ -77,6 +77,7 @@ void arm_runner::JointPositionStreamingPlan::updateStreamedCommand(
     const sensor_msgs::JointState::ConstPtr &message
 ) {
     std::lock_guard<std::mutex> guard(mutex_);
+    commanded_position_.resize(num_joints_);
     for (unsigned i = 0; i < message->name.size(); i++) {
         if (joint_name_to_index_.count(message->name[i]) == 0) {
             continue;
@@ -104,21 +105,14 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
     command_valid = command_valid_flag_;
     mutex_.unlock();
 
-    // Check back
-    const double* q_fwd = nullptr;
-    const auto& history = input.robot_history->GetCommandHistory();
-    if(history.empty())
-        q_fwd = input.latest_measurement->joint_position;
-    else
-        q_fwd = history.back().joint_position;
-
     // Setup the command position
     command.set_invalid();
     if(command_valid) {
         double scale = 1.0;
         const double max_dq = (max_joint_velocity_degree_second_ * M_PI / 180.0) * input.control_interval_second;
         for(auto i = 0; i < num_joints_; i++) {
-            const auto dq = std::abs(q_fwd[i] - streamed_command_position_cache[i]);
+            const auto dq =
+                    std::abs(input.latest_measurement->joint_position[i] - streamed_command_position_cache[i]);
             if(dq > max_dq)
                 scale = std::min(scale, (max_dq / dq));
         }
@@ -126,10 +120,18 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
         // Should always be true
         DRAKE_ASSERT(scale >= 0 && scale <= 1.0);
         for(auto i = 0; i < num_joints_; i++) {
-            double dq_i = streamed_command_position_cache[i] - q_fwd[i];
-            command.joint_position[i] = q_fwd[i] + scale * dq_i;
+            double dq_i = streamed_command_position_cache[i] - input.latest_measurement->joint_position[i];
+            command.joint_position[i] = input.latest_measurement->joint_position[i] + scale * dq_i;
         }
     } else {
+        // The forward command
+        const double* q_fwd = nullptr;
+        const auto& history = input.robot_history->GetCommandHistory();
+        if(history.empty())
+            q_fwd = input.latest_measurement->joint_position;
+        else
+            q_fwd = history.back().joint_position;
+
         // Send to command
         DRAKE_ASSERT(q_fwd != nullptr);
         for(auto i = 0; i < num_joints_; i++) {
