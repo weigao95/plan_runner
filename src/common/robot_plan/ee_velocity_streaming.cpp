@@ -19,11 +19,12 @@ arm_runner::EEVelocityStreamingPlan::EEVelocityStreamingPlan(
 void arm_runner::EEVelocityStreamingPlan::InitializePlan(const arm_runner::CommandInput &input) {
     // The startup of subscriber
     streaming_subscriber_ = std::make_shared<ros::Subscriber>(
-            node_handle_.subscribe(
-                    topic_,
-                    1,
-                    &EEVelocityStreamingPlan::updateStreamedCommand, this));
+        node_handle_.subscribe(
+            topic_,
+            1,
+            &EEVelocityStreamingPlan::updateStreamedCommand, this));
 
+    // Basic cases
     RobotPlanBase::InitializePlan(input);
 }
 
