@@ -30,7 +30,7 @@ void arm_runner::PlanSupervisor::initializeServiceActions() {
         &PlanSupervisor::HandleEndPlanService, this));
 
     // The plan-end service
-    plan_end_server_ = std::make_shared<ros::ServiceServer>(
+    start_streaming_server_ = std::make_shared<ros::ServiceServer>(
         node_handle_.advertiseService("/plan_runner/start_streaming",
         &PlanSupervisor::HandleStartStreamingService, this));
 }
