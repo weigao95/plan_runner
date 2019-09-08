@@ -29,8 +29,9 @@ namespace arm_runner {
     private:
         std::mutex mutex_;
         std::string ee_frame_id_;
-        Eigen::Vector3d ee_linear_velocity_;
-        Eigen::Vector3d ee_angular_velocity_;
+        Eigen::Vector3d cmd_frame_linear_velocity_;
+        Eigen::Vector3d cmd_frame_angular_velocity_;
+        Eigen::Isometry3d command_frame_to_ee_;
         bool command_valid_;
 
         // The ROS handler
@@ -45,7 +46,8 @@ namespace arm_runner {
         // Caches
     private:
         std::string ee_frame_id_cache;
-        Eigen::Vector3d ee_linear_velocity_cache, ee_angular_velocity_cache;
+        Eigen::Vector3d cmd_frame_linear_velocity_cache, cmd_frame_angular_velocity_cache;
+        Eigen::Isometry3d command_frame_to_ee_cache;
         Eigen::MatrixXd ee_twist_jacobian_expressed_in_ee;
     };
 

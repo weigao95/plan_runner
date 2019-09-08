@@ -41,9 +41,10 @@ void arm_runner::EEVelocityStreamingPlan::ComputeCommand(
 ) {
     // Collect info
     mutex_.lock();
-    ee_linear_velocity_cache = ee_linear_velocity_;
-    ee_angular_velocity_cache = ee_angular_velocity_;
+    cmd_frame_linear_velocity_cache = cmd_frame_linear_velocity_;
+    cmd_frame_angular_velocity_cache = cmd_frame_angular_velocity_;
     ee_frame_id_cache = ee_frame_id_;
+    command_frame_to_ee_cache = command_frame_to_ee_;
     bool command_valid = command_valid_;
     mutex_.unlock();
 
@@ -81,13 +82,20 @@ void arm_runner::EEVelocityStreamingPlan::ComputeCommand(
     auto world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
 
     // Compute the actual transform ee_to_world
-    Eigen::Isometry3d ee_transform = tree.relativeTransform(cache, world_frame, ee_frame_index);
-    Eigen::Isometry3d world_to_ee = ee_transform.inverse();
+    Eigen::Isometry3d ee_to_world = tree.relativeTransform(cache, world_frame, ee_frame_index);
+    Eigen::Isometry3d world_to_ee = ee_to_world.inverse();
 
-    // The velocity information
-    // The linear and angular velocity are all expressed in world
-    Eigen::Vector3d ee_linear_v_in_ee = world_to_ee.rotation() * ee_linear_velocity_cache;
-    Eigen::Vector3d ee_angular_v_in_ee = world_to_ee.rotation() * ee_angular_velocity_cache;
+    // The relative position
+    Eigen::Vector3d cmd2ee_in_ee = command_frame_to_ee_cache.translation();
+    Eigen::Vector3d cmd2ee_in_world = ee_to_world.rotation() * cmd2ee_in_ee;
+
+    // The velocity information of ee
+    Eigen::Vector3d ee_angular_velocity = cmd_frame_angular_velocity_cache;
+    Eigen::Vector3d ee_linear_velocity = cmd_frame_linear_velocity_cache + ee_angular_velocity.cross(cmd2ee_in_world);
+
+    // Expressed in ee frame
+    Eigen::Vector3d ee_linear_v_in_ee = world_to_ee.rotation() * ee_linear_velocity;
+    Eigen::Vector3d ee_angular_v_in_ee = world_to_ee.rotation() * ee_angular_velocity;
     using TwistVector = drake::TwistVector<double>;
     TwistVector twist_fwd;
     twist_fwd.head(3) = ee_angular_v_in_ee;
@@ -116,13 +124,25 @@ void arm_runner::EEVelocityStreamingPlan::updateStreamedCommand(const robot_msgs
     ee_frame_id_ = message->ee_frame_id;
 
     // The linear and angular velocity
-    ee_linear_velocity_[0] = message->linear_velocity.x;
-    ee_linear_velocity_[1] = message->linear_velocity.y;
-    ee_linear_velocity_[2] = message->linear_velocity.z;
+    cmd_frame_linear_velocity_[0] = message->linear_velocity.x;
+    cmd_frame_linear_velocity_[1] = message->linear_velocity.y;
+    cmd_frame_linear_velocity_[2] = message->linear_velocity.z;
 
-    ee_angular_velocity_[0] = message->angular_velocity.x;
-    ee_angular_velocity_[1] = message->angular_velocity.y;
-    ee_angular_velocity_[2] = message->angular_velocity.z;
+    cmd_frame_angular_velocity_[0] = message->angular_velocity.x;
+    cmd_frame_angular_velocity_[1] = message->angular_velocity.y;
+    cmd_frame_angular_velocity_[2] = message->angular_velocity.z;
+
+    // The command frame w.r.t ee
+    const auto& cmd_to_ee_orientation_msg = message->command_frame_to_ee.orientation;
+    const auto& cmd_to_ee_position_msg = message->command_frame_to_ee.position;
+    Eigen::Quaterniond cmd_to_ee_rotation(
+        cmd_to_ee_orientation_msg.w,
+        cmd_to_ee_orientation_msg.x,
+        cmd_to_ee_orientation_msg.y,
+        cmd_to_ee_orientation_msg.z);
+    Eigen::Vector3d cmd_to_ee_position(cmd_to_ee_position_msg.x, cmd_to_ee_position_msg.y, cmd_to_ee_position_msg.z);
+    command_frame_to_ee_.linear() = cmd_to_ee_rotation.toRotationMatrix();
+    command_frame_to_ee_.translation() = cmd_to_ee_position;
 
     // The flag
     if(!command_valid_)
