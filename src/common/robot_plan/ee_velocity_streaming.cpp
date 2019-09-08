@@ -86,12 +86,14 @@ void arm_runner::EEVelocityStreamingPlan::ComputeCommand(
     Eigen::Isometry3d world_to_ee = ee_to_world.inverse();
 
     // The relative position
-    Eigen::Vector3d cmd2ee_in_ee = command_frame_to_ee_cache.translation();
-    Eigen::Vector3d cmd2ee_in_world = ee_to_world.rotation() * cmd2ee_in_ee;
+    Eigen::Vector3d vector_ee2cmd_in_ee = command_frame_to_ee_cache.translation();
+    Eigen::Vector3d vector_ee2cmd_in_world = ee_to_world.rotation() * vector_ee2cmd_in_ee;
+    Eigen::Vector3d vector_cmd2ee_in_world = - vector_ee2cmd_in_world;
 
     // The velocity information of ee
     Eigen::Vector3d ee_angular_velocity = cmd_frame_angular_velocity_cache;
-    Eigen::Vector3d ee_linear_velocity = cmd_frame_linear_velocity_cache + ee_angular_velocity.cross(cmd2ee_in_world);
+    Eigen::Vector3d ee_linear_velocity =
+            cmd_frame_linear_velocity_cache + ee_angular_velocity.cross(vector_cmd2ee_in_world);
 
     // Expressed in ee frame
     Eigen::Vector3d ee_linear_v_in_ee = world_to_ee.rotation() * ee_linear_velocity;
