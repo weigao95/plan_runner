@@ -39,7 +39,9 @@ namespace arm_runner {
         ~ExternalForceGuardChecker() override = default;
 
         // The evaluation interface
-        bool HasRequiredField(const CommandInput& input, const RobotArmCommand& command) override;
+        bool HasRequiredField(const CommandInput& input, const RobotArmCommand& command) override {
+            return input.latest_measurement->torque_validity;
+        }
         CheckResult CheckSafety(const CommandInput& input, const RobotArmCommand& command) override;
 
         // Construct from message

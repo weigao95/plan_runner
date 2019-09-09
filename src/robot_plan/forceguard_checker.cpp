@@ -21,7 +21,7 @@ arm_runner::SafetyChecker::CheckResult arm_runner::TotalForceGuardChecker::Check
     // Check it
     CheckResult result; result.set_safe();
     result.violation = tau.norm() / threshold_;
-    result.is_safe = result.violation > 1.0;
+    result.is_safe = result.violation <= 1.0;
     return result;
 }
 
@@ -32,16 +32,6 @@ arm_runner::ExternalForceGuardChecker::ExternalForceGuardChecker(
 ) : body_idx_(body_idx), point_on_body_(std::move(point_in_body)),
     force_threshold_(std::move(force_threshold)), force_expressed_in_frame_(force_expressed_in_frame)
 {}
-
-
-bool arm_runner::ExternalForceGuardChecker::HasRequiredField(
-        const arm_runner::CommandInput &input,
-        const arm_runner::RobotArmCommand &command
-) {
-    // Should have force measurement
-    if(!input.latest_measurement->torque_validity)
-        return false;
-}
 
 
 arm_runner::SafetyChecker::CheckResult arm_runner::ExternalForceGuardChecker::CheckSafety(
@@ -71,7 +61,7 @@ arm_runner::SafetyChecker::CheckResult arm_runner::ExternalForceGuardChecker::Ch
     Eigen::Map<const Eigen::VectorXd> tau(input.latest_measurement->joint_torque, nq);
     CheckResult result; result.set_safe();
     result.violation = tau.norm() / (torque_threshold_cache.norm() + 1e-4);
-    result.is_safe = result.violation > 1.0;
+    result.is_safe = result.violation <= 1.0;
     return result;
 }
 
