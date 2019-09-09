@@ -5,7 +5,7 @@
 #include <ros/ros.h>
 #include <yaml-cpp/yaml.h>
 
-#include "common/plan_supervisor.h"
+#include "supervisor/plan_supervisor.h"
 #include "simulated_robot/common_robot_model.h"
 #include "kuka_lcm.h"
 

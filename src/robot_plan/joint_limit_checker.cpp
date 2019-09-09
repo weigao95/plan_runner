@@ -2,7 +2,7 @@
 // Created by wei on 9/4/19.
 //
 
-#include "common/robot_plan/joint_limit_checker.h"
+#include "robot_plan/joint_limit_checker.h"
 
 
 bool arm_runner::JointVelocityLimitChecker::HasRequiredField(

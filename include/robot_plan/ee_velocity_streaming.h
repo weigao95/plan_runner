@@ -6,7 +6,7 @@
 
 #include <mutex>
 #include "common/plan_base.h"
-#include "common/robot_plan/position_velocity_plan.h"
+#include "robot_plan/position_velocity_plan.h"
 #include "robot_msgs/EEVelocityGoal.h"
 
 

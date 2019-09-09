@@ -2,12 +2,12 @@
 // Created by wei on 8/30/19.
 //
 
-#include "common/plan_supervisor.h"
-#include "common/robot_plan/forceguard_checker.h"
-#include "common/robot_plan/joint_trajectory_plan.h"
-#include "common/robot_plan/ee_trajectory_velocity_command.h"
-#include "common/robot_plan/joint_streaming.h"
-#include "common/robot_plan/ee_velocity_streaming.h"
+#include "supervisor/plan_supervisor.h"
+#include "robot_plan/forceguard_checker.h"
+#include "robot_plan/joint_trajectory_plan.h"
+#include "robot_plan/ee_trajectory_velocity_command.h"
+#include "robot_plan/joint_streaming.h"
+#include "robot_plan/ee_velocity_streaming.h"
 
 
 // The handler for joint trajectory action

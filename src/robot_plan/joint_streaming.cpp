@@ -2,7 +2,7 @@
 // Created by wei on 9/6/19.
 //
 
-#include "common/robot_plan/joint_streaming.h"
+#include "robot_plan/joint_streaming.h"
 
 
 // The method in command base

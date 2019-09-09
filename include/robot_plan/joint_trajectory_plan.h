@@ -12,7 +12,7 @@
 
 #include <ros/ros.h>
 
-#include "common/robot_plan/position_velocity_plan.h"
+#include "robot_plan/position_velocity_plan.h"
 #include "robot_msgs/JointTrajectoryAction.h"
 
 

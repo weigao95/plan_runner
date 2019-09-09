@@ -1,5 +1,4 @@
-file(GLOB COMMON_SRC *.h *.hpp *.cpp ./robot_plan/*.cpp)
-source_group("src" FILES ${COMMON_SRC})
+file(GLOB COMMON_SRC *.h *.hpp *.cpp)
 add_library(runner_common_lib ${COMMON_SRC} ${HEADER_FILES})
 target_link_libraries(runner_common_lib ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries(runner_common_lib drake::drake)

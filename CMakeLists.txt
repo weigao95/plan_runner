@@ -141,7 +141,8 @@ include_directories(
 # The include files
 file(GLOB HEADER_FILES
     include/common/*.h include/common/*.hpp
-    include/common/robot_plan/*.h
+    include/robot_plan/*.h
+    include/supervisor/*.h
     include/simulated_robot/*.h
 )
 
@@ -244,6 +245,7 @@ foreach(test_src ${RUNNER_TEST_SRC})
     get_filename_component(test_name ${test_src} NAME_WE)
     catkin_add_gtest(${test_name} "${test_src}")
     target_link_libraries(${test_name} runner_common_lib)
+    target_link_libraries(${test_name} runner_supervisor_lib)
     target_link_libraries(${test_name} runner_simrobot_lib)
     target_link_libraries(${test_name} ${catkin_LIBRARIES})
     target_link_libraries(${test_name} ${GTEST_BOTH_LIBRARIES})
