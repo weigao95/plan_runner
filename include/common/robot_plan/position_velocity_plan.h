@@ -9,6 +9,9 @@
 
 namespace arm_runner {
 
+    // These types of plan typically output a desired joint-space velocity, which
+    // can be further integrated into commanded position.
+    // Primary for robots that are NOT torque-control
     class PositionVelocityPlan : public RobotPlanBase {
     protected:
         explicit PositionVelocityPlan(bool use_commaned_fwd_integration = true)
