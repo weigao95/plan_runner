@@ -11,7 +11,7 @@ namespace arm_runner {
 
     class PositionVelocityPlan : public RobotPlanBase {
     protected:
-        explicit PositionVelocityPlan(bool use_commaned_fwd_integration)
+        explicit PositionVelocityPlan(bool use_commaned_fwd_integration = true)
         : use_commanded_fwd_integration_(use_commaned_fwd_integration) {};
         ~PositionVelocityPlan() override = default;
 

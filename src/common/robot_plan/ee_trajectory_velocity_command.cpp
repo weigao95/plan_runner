@@ -27,7 +27,6 @@ arm_runner::EETrajectoryVelocityCommandPlan::EETrajectoryVelocityCommandPlan(
     DRAKE_ASSERT(input_time_.size() == ee_quat_knots_.size());
 
     // The hyper-parameters
-    initialize_using_commanded_position_ = true;
     kp_rotation_.setConstant(5);
     kp_translation_.setConstant(10);
 }
@@ -209,13 +208,7 @@ void arm_runner::EETrajectoryVelocityCommandPlan::ComputeCommand(
     Eigen::VectorXd qdot_command = svd.solve(desired_twist);
 
     // The forward integration position
-    const double* q_fwd_integration = nullptr;
-    const auto& command_history = input.robot_history->GetCommandHistory();
-    if(command_history.empty()) {
-        q_fwd_integration = input.latest_measurement->joint_position;
-    } else {
-        q_fwd_integration = command_history.back().joint_position;
-    }
+    const double* q_fwd_integration = GetForwardIntegrationJointPosition(input);
 
     // Write to the result
     command.set_invalid();
@@ -230,17 +223,17 @@ void arm_runner::EETrajectoryVelocityCommandPlan::ComputeCommand(
 
 // The processing of parameter
 arm_runner::LoadParameterStatus arm_runner::EETrajectoryVelocityCommandPlan::LoadParameterFrom(const YAML::Node &datamap) {
+    // The base class
+    auto base_load_result = PositionVelocityPlan::LoadParameterFrom(datamap);
+
     // Check the key
     auto key = DefaultClassParameterNameKey();
     if(!datamap[key]) {
         // Keep current value
-        return LoadParameterStatus::NonFatalError;
+        return StatusAnd(base_load_result, LoadParameterStatus::NonFatalError);
     }
 
     // Load it
-    if(datamap[key]["initialize"])
-        initialize_using_commanded_position_ = datamap[key]["initialize"].as<bool>();
-
     if(datamap[key]["rotation"]) {
         kp_rotation_[0] = datamap[key]["rotation"][0].as<double>();
         kp_rotation_[1] = datamap[key]["rotation"][1].as<double>();
@@ -252,15 +245,15 @@ arm_runner::LoadParameterStatus arm_runner::EETrajectoryVelocityCommandPlan::Loa
         kp_translation_[1] = datamap[key]["translation"][1].as<double>();
         kp_translation_[2] = datamap[key]["translation"][2].as<double>();
     }
-    return LoadParameterStatus::Success;
+    return StatusAnd(base_load_result, LoadParameterStatus::Success);
 }
 
 void arm_runner::EETrajectoryVelocityCommandPlan::SaveParameterTo(YAML::Node &datamap) const {
-    auto key = DefaultClassParameterNameKey();
-    // The init option
-    datamap[key]["initialize"] = initialize_using_commanded_position_;
+    // The base class
+    PositionVelocityPlan::SaveParameterTo(datamap);
 
     // The rotation gain
+    auto key = DefaultClassParameterNameKey();
     datamap[key]["rotation"].push_back(kp_rotation_[0]);
     datamap[key]["rotation"].push_back(kp_rotation_[1]);
     datamap[key]["rotation"].push_back(kp_rotation_[2]);
