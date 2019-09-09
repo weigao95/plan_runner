@@ -54,12 +54,7 @@ void arm_runner::EEVelocityStreamingPlan::ComputeCommand(
     auto num_joints = tree.get_num_positions();
 
     // Command fwd
-    const double* q_fwd = nullptr;
-    const auto& history = input.robot_history->GetCommandHistory();
-    if(history.empty())
-        q_fwd = input.latest_measurement->joint_position;
-    else
-        q_fwd = history.back().joint_position;
+    const double* q_fwd = GetForwardIntegrationJointPosition(input);
     DRAKE_ASSERT(q_fwd != nullptr);
 
     // The common flag

@@ -6,13 +6,14 @@
 
 #include <mutex>
 #include "common/plan_base.h"
+#include "common/robot_plan/position_velocity_plan.h"
 #include "robot_msgs/EEVelocityGoal.h"
 
 
 namespace arm_runner {
 
     // The plan that receives end-effector velocity and transform it into joint command
-    class EEVelocityStreamingPlan : public RobotPlanBase {
+    class EEVelocityStreamingPlan : public PositionVelocityPlan {
     public:
         using Ptr = std::shared_ptr<EEVelocityStreamingPlan>;
         EEVelocityStreamingPlan(ros::NodeHandle& nh, std::string topic);
