@@ -3,7 +3,7 @@
 //
 
 #include "common/rbt_utils.h"
-#include "common/robot_plan/forceguard_checker.h"
+#include "robot_plan/forceguard_checker.h"
 
 
 arm_runner::SafetyChecker::CheckResult arm_runner::TotalForceGuardChecker::CheckSafety(

@@ -3,7 +3,7 @@
 //
 
 #include <sensor_msgs/JointState.h>
-#include "common/robot_plan/joint_publish_processor.h"
+#include "robot_plan/joint_publish_processor.h"
 
 
 arm_runner::JointPublishProcessor::JointPublishProcessor(

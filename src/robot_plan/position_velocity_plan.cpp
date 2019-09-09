@@ -2,7 +2,7 @@
 // Created by wei on 9/9/19.
 //
 
-#include "common/robot_plan/position_velocity_plan.h"
+#include "robot_plan/position_velocity_plan.h"
 
 
 const double* arm_runner::PositionVelocityPlan::GetForwardIntegrationJointPosition(

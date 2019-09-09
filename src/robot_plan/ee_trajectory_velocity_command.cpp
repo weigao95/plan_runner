@@ -3,8 +3,8 @@
 //
 
 #include "common/rbt_utils.h"
-#include "common/robot_plan/ee_trajectory_velocity_command.h"
-#include "common/robot_plan/forceguard_checker.h"
+#include "robot_plan/ee_trajectory_velocity_command.h"
+#include "robot_plan/forceguard_checker.h"
 
 
 arm_runner::EETrajectoryVelocityCommandPlan::EETrajectoryVelocityCommandPlan(

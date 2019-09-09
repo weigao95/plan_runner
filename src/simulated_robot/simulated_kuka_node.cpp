@@ -9,8 +9,8 @@
 #include <drake/common/find_resource.h>
 #include <drake/multibody/rigid_body_tree.h>
 
-#include "common/plan_supervisor.h"
-#include "common/robot_plan/joint_publish_processor.h"
+#include "supervisor/plan_supervisor.h"
+#include "robot_plan/joint_publish_processor.h"
 #include "simulated_robot/common_robot_model.h"
 #include "simulated_robot/simulated_robot.h"
 

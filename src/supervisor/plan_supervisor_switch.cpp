@@ -2,8 +2,8 @@
 // Created by wei on 8/28/19.
 //
 
-#include "common/plan_supervisor.h"
-#include "common/robot_plan/joint_trajectory_plan.h"
+#include "supervisor/plan_supervisor.h"
+#include "robot_plan/joint_trajectory_plan.h"
 #include <chrono>
 
 

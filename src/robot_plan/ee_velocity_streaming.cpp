@@ -3,7 +3,7 @@
 //
 
 #include "common/rbt_utils.h"
-#include "common/robot_plan/ee_velocity_streaming.h"
+#include "robot_plan/ee_velocity_streaming.h"
 
 
 arm_runner::EEVelocityStreamingPlan::EEVelocityStreamingPlan(
