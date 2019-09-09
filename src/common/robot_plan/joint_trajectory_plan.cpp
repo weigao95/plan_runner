@@ -8,9 +8,8 @@
 arm_runner::JointTrajectoryPlan::JointTrajectoryPlan(
     std::vector<double> input_time, std::vector<Eigen::MatrixXd> knots
 ) : input_time_(std::move(input_time)),
-    knots_(std::move(knots)),
-    initialize_using_commanded_position_(true)
-    {}
+    knots_(std::move(knots))
+{}
 
 
 std::shared_ptr<arm_runner::JointTrajectoryPlan> arm_runner::JointTrajectoryPlan::ConstructFromMessage(
@@ -89,7 +88,7 @@ void arm_runner::JointTrajectoryPlan::InitializePlan(const arm_runner::CommandIn
     // Use measurement or command to fill the first knot
     const double* q_init = nullptr;
     const auto& history = input.robot_history->GetCommandHistory();
-    if(initialize_using_commanded_position_ && (!history.empty())) {
+    if(use_commanded_fwd_integration_ && (!history.empty())) {
         q_init =  history.back().joint_position;
     } else {
         q_init = input.latest_measurement->joint_position;
@@ -130,24 +129,4 @@ void arm_runner::JointTrajectoryPlan::ComputeCommand(
     }
     command.position_validity = true;
     command.velocity_validity = true;
-}
-
-
-arm_runner::LoadParameterStatus arm_runner::JointTrajectoryPlan::LoadParameterFrom(const YAML::Node &datamap) {
-    // Check the key
-    auto key = DefaultClassParameterNameKey();
-    if(!datamap[key] || !datamap[key]["initialize"]) {
-        // Keep current value
-        return LoadParameterStatus::NonFatalError;
-    }
-
-    // Load it
-    initialize_using_commanded_position_ = datamap[key]["initialize"].as<bool>();
-    return LoadParameterStatus::Success;
-}
-
-
-void arm_runner::JointTrajectoryPlan::SaveParameterTo(YAML::Node &datamap) const {
-    auto key = DefaultClassParameterNameKey();
-    datamap[key]["initialize"] = initialize_using_commanded_position_;
 }

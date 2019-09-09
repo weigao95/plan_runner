@@ -12,13 +12,13 @@
 
 #include <ros/ros.h>
 
-#include "common/plan_base.h"
+#include "common/robot_plan/position_velocity_plan.h"
 #include "robot_msgs/JointTrajectoryAction.h"
 
 
 namespace arm_runner {
 
-    class JointTrajectoryPlan : public RobotPlanBase {
+    class JointTrajectoryPlan : public PositionVelocityPlan {
     public:
         using Ptr = std::shared_ptr<JointTrajectoryPlan>;
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
@@ -62,13 +62,5 @@ namespace arm_runner {
 
         // Cache
         Eigen::VectorXd q_command_cache, v_command_cache;
-
-        // The hyper parameter
-    private:
-        bool initialize_using_commanded_position_;
-    public:
-        LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override;
-        void SaveParameterTo(YAML::Node& datamap) const override;
-        std::string DefaultClassParameterNameKey() const override { return "JointTrajectoryPlanHyperparameter"; }
     };
 }
