@@ -36,5 +36,22 @@ namespace arm_runner {
         // The default name
         // Should be might be override for better readbility
         virtual std::string DefaultClassParameterNameKey() const { return typeid(*this).name(); }
+
+        // The AND operator on LoadParameterStatus
+    protected:
+        // Is status A strictly better than status B
+        inline static bool IsStatusBetterThan(LoadParameterStatus a, LoadParameterStatus b) {
+            if(a == LoadParameterStatus::NonFatalError && b == LoadParameterStatus::FatalError)
+                return true;
+            if(a == LoadParameterStatus::Success && (b != LoadParameterStatus::Success))
+                return true;
+            return false;
+        }
+        inline static LoadParameterStatus StatusAnd(LoadParameterStatus a, LoadParameterStatus b) {
+            if(IsStatusBetterThan(a ,b))
+                return b;
+            else
+                return a;
+        }
     };
 }
