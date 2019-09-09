@@ -29,8 +29,10 @@ arm_runner::SafetyChecker::CheckResult arm_runner::TotalForceGuardChecker::Check
 arm_runner::ExternalForceGuardChecker::ExternalForceGuardChecker(
         int body_idx, Eigen::Vector3d point_in_body,
         Eigen::Vector3d force_threshold, int force_expressed_in_frame
-) : body_idx_(body_idx), point_on_body_(std::move(point_in_body)),
-    force_threshold_(std::move(force_threshold)), force_expressed_in_frame_(force_expressed_in_frame)
+) : body_idx_(body_idx), 
+    point_on_body_(std::move(point_in_body)),
+    force_threshold_(std::move(force_threshold)), 
+    force_expressed_in_frame_(force_expressed_in_frame)
 {}
 
 
@@ -67,7 +69,7 @@ arm_runner::SafetyChecker::CheckResult arm_runner::ExternalForceGuardChecker::Ch
     if(!result.is_safe) {
         ROS_INFO("The command is stopped by external torque");
         ROS_INFO("The force threshold in world is (%f, %f, %f)", 
-            force_threshold_in_world[3], force_threshold_in_world[4], force_threshold_in_world[5]);
+            force_threshold_in_world[0], force_threshold_in_world[1], force_threshold_in_world[2]);
         for(auto i = 0; i < nq; i++) {
             ROS_INFO("Joint %d measured: %f, computed %f", i, input.latest_measurement->joint_torque[i], torque_threshold_cache[i]);
         }
