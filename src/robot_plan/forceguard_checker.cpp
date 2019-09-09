@@ -42,7 +42,7 @@ arm_runner::SafetyChecker::CheckResult arm_runner::ExternalForceGuardChecker::Ch
     const RigidBodyTree<double>& tree = *input.robot_rbt;
     const auto& cache = *input.measured_state_cache;
 
-    // Transform the force into world
+    // Transform the force into body frame
     int world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
     Eigen::Isometry3d force_transform = tree.relativeTransform(cache, world_frame, force_expressed_in_frame_);
     Eigen::Matrix3d force_rotation = force_transform.linear();
@@ -62,6 +62,16 @@ arm_runner::SafetyChecker::CheckResult arm_runner::ExternalForceGuardChecker::Ch
     CheckResult result; result.set_safe();
     result.violation = tau.norm() / (torque_threshold_cache.norm() + 1e-4);
     result.is_safe = result.violation <= 1.0;
+
+    // Logging when not safe
+    if(!result.is_safe) {
+        ROS_INFO("The command is stopped by external torque");
+        ROS_INFO("The force threshold in world is (%f, %f, %f)", 
+            force_threshold_in_world[3], force_threshold_in_world[4], force_threshold_in_world[5]);
+        for(auto i = 0; i < nq; i++) {
+            ROS_INFO("Joint %d measured: %f, computed %f", i, input.latest_measurement->joint_torque[i], torque_threshold_cache[i]);
+        }
+    }
     return result;
 }
 

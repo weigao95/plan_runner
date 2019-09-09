@@ -110,7 +110,7 @@ void arm_runner::KukaLCMInterface::handleReceiveIIWAStatus(
     for(auto i = 0; i < n_joint; i++) {
         measurement_cache.joint_position[i] = status.joint_position_measured[i];
         measurement_cache.joint_velocities[i] = status.joint_velocity_estimated[i];
-        measurement_cache.joint_torque[i] = status.joint_torque_measured[i];
+        measurement_cache.joint_torque[i] = status.joint_torque_external[i];
     }
     measurement_cache.position_validity = true;
     measurement_cache.velocity_validity = true;
