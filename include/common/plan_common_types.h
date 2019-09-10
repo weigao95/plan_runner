@@ -9,7 +9,7 @@
 #include <drake/multibody/rigid_body_tree.h>
 #include <drake/multibody/kinematics_cache.h>
 
-namespace arm_runner {
+namespace plan_runner {
 
     // The semantic of the plan
     // The download plan MUST stay at the final knot after the time of trajectory

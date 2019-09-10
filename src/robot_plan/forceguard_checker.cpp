@@ -6,9 +6,9 @@
 #include "robot_plan/forceguard_checker.h"
 
 
-arm_runner::SafetyChecker::CheckResult arm_runner::TotalForceGuardChecker::CheckSafety(
-        const arm_runner::CommandInput &input,
-        const arm_runner::RobotArmCommand &command
+plan_runner::SafetyChecker::CheckResult plan_runner::TotalForceGuardChecker::CheckSafety(
+        const plan_runner::CommandInput &input,
+        const plan_runner::RobotArmCommand &command
 ) {
     // When it comes here the measurement should be valid
     DRAKE_ASSERT(input.is_valid());
@@ -26,7 +26,7 @@ arm_runner::SafetyChecker::CheckResult arm_runner::TotalForceGuardChecker::Check
 }
 
 
-arm_runner::ExternalForceGuardChecker::ExternalForceGuardChecker(
+plan_runner::ExternalForceGuardChecker::ExternalForceGuardChecker(
         int body_idx, Eigen::Vector3d point_in_body,
         Eigen::Vector3d force_threshold, int force_expressed_in_frame
 ) : body_idx_(body_idx), 
@@ -36,9 +36,9 @@ arm_runner::ExternalForceGuardChecker::ExternalForceGuardChecker(
 {}
 
 
-arm_runner::SafetyChecker::CheckResult arm_runner::ExternalForceGuardChecker::CheckSafety(
-    const arm_runner::CommandInput &input,
-    const arm_runner::RobotArmCommand &command
+plan_runner::SafetyChecker::CheckResult plan_runner::ExternalForceGuardChecker::CheckSafety(
+    const plan_runner::CommandInput &input,
+    const plan_runner::RobotArmCommand &command
 ) {
     // Unpack the data
     const RigidBodyTree<double>& tree = *input.robot_rbt;
@@ -78,7 +78,7 @@ arm_runner::SafetyChecker::CheckResult arm_runner::ExternalForceGuardChecker::Ch
 }
 
 
-arm_runner::ExternalForceGuardChecker::Ptr arm_runner::ExternalForceGuardChecker::ConstructFromMessage(
+plan_runner::ExternalForceGuardChecker::Ptr plan_runner::ExternalForceGuardChecker::ConstructFromMessage(
     const RigidBodyTree<double> &tree,
     const robot_msgs::ExternalForceGuard &message
 ) {
@@ -110,12 +110,12 @@ arm_runner::ExternalForceGuardChecker::Ptr arm_runner::ExternalForceGuardChecker
 }
 
 
-std::vector<arm_runner::SafetyChecker::Ptr> arm_runner::ExternalForceGuardChecker::ConstructCheckersFromForceGuardMessage(
+std::vector<plan_runner::SafetyChecker::Ptr> plan_runner::ExternalForceGuardChecker::ConstructCheckersFromForceGuardMessage(
     const RigidBodyTree<double> &tree,
     const robot_msgs::ForceGuard &message
 ) {
     // The total force guard
-    std::vector<arm_runner::SafetyChecker::Ptr> checker_vec;
+    std::vector<plan_runner::SafetyChecker::Ptr> checker_vec;
     if(!message.joint_torque_external_l2_norm.empty()) {
         double threshold = message.joint_torque_external_l2_norm[0];
         auto guard = std::make_shared<TotalForceGuardChecker>(threshold);

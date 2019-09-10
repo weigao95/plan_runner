@@ -16,7 +16,7 @@
 #include "robot_plan/position_velocity_plan.h"
 
 
-namespace arm_runner {
+namespace plan_runner {
 
 
     class EETrajectoryVelocityCommandPlan : public PositionVelocityPlan {

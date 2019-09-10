@@ -4,11 +4,11 @@
 
 #include "common/robot_communication.h"
 
-arm_runner::RobotCommunication::RobotCommunication()
+plan_runner::RobotCommunication::RobotCommunication()
 : measurement_history_(RobotCommunication::HISTORY_HORIZON),
   command_history_(RobotCommunication::HISTORY_HORIZON) {}
 
-void arm_runner::RobotCommunication::GetMeasurement(RobotArmMeasurement& measurement) {
+void plan_runner::RobotCommunication::GetMeasurement(RobotArmMeasurement& measurement) {
     // Get the raw measurement
     getRawMeasurement(measurement);
 
@@ -21,7 +21,7 @@ void arm_runner::RobotCommunication::GetMeasurement(RobotArmMeasurement& measure
     measurement_history_.push_back(measurement);
 }
 
-void arm_runner::RobotCommunication::SendCommand(const RobotArmCommand & command_in) {
+void plan_runner::RobotCommunication::SendCommand(const RobotArmCommand & command_in) {
     // Copy and add time
     auto command = command_in;
 

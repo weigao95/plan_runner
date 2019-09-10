@@ -8,7 +8,7 @@
 
 #include <ros/ros.h>
 
-namespace arm_runner {
+namespace plan_runner {
 
 
     class JointPublishProcessor : public MeasurementProcessor {

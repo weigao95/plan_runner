@@ -10,7 +10,7 @@
 #include "simulated_robot/simulated_robot.h"
 
 
-namespace arm_runner {
+namespace plan_runner {
 
     // The kuka model
     // Note that the RobotCommunication must send msg following the name of getKukaJointNameList()

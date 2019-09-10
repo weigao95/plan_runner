@@ -5,7 +5,7 @@
 #include "simulated_robot/inverse_dynamic_controller.h"
 
 
-arm_runner::QpInverseDynamicsController::QpInverseDynamicsController(
+plan_runner::QpInverseDynamicsController::QpInverseDynamicsController(
     std::unique_ptr<RigidBodyTree<double>> tree,
     SimulationExchangeData& exchange_data,
     const drake::VectorX<double> &kp,
@@ -40,7 +40,7 @@ arm_runner::QpInverseDynamicsController::QpInverseDynamicsController(
 }
 
 
-void arm_runner::QpInverseDynamicsController::DoCalcDiscreteVariableUpdates(
+void plan_runner::QpInverseDynamicsController::DoCalcDiscreteVariableUpdates(
     const drake::systems::Context<double> &context,
     const std::vector<const drake::systems::DiscreteUpdateEvent<double> *> &,
     drake::systems::DiscreteValues<double> *discrete_state
@@ -104,7 +104,7 @@ void arm_runner::QpInverseDynamicsController::DoCalcDiscreteVariableUpdates(
 }
 
 
-void arm_runner::QpInverseDynamicsController::SetPositionControlledDefaultGains(
+void plan_runner::QpInverseDynamicsController::SetPositionControlledDefaultGains(
     Eigen::VectorXd *Kp,
     Eigen::VectorXd *Kd
 ) {

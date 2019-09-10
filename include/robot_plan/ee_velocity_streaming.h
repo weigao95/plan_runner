@@ -10,7 +10,7 @@
 #include "robot_msgs/EEVelocityGoal.h"
 
 
-namespace arm_runner {
+namespace plan_runner {
 
     // The plan that receives end-effector velocity and transform it into joint command
     class EEVelocityStreamingPlan : public PositionVelocityPlan {

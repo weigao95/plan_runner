@@ -8,7 +8,7 @@
 
 #include "common/plan_common_types.h"
 
-namespace arm_runner {
+namespace plan_runner {
 
 
     // The queue of finished plan

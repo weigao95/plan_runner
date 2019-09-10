@@ -7,7 +7,7 @@
 #include <drake/multibody/rigid_body_tree.h>
 
 
-namespace arm_runner {
+namespace plan_runner {
 
     // Check the status of containment
     bool bodyOrFrameContainedInTree(

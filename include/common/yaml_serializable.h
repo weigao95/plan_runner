@@ -6,7 +6,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace arm_runner {
+namespace plan_runner {
 
     // Depends on the result
     // The upper-level processors have different actions

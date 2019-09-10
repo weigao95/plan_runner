@@ -13,7 +13,7 @@
 
 
 TEST(SimRobotTest, ConstructTest) {
-    using namespace arm_runner;
+    using namespace plan_runner;
     auto robot_arm = constructSimulatedKukaDefault(10);
     robot_arm->Start();
     robot_arm->Stop();
@@ -21,7 +21,7 @@ TEST(SimRobotTest, ConstructTest) {
 
 
 TEST(SimRobotTest, SupervisorConstructTest) {
-    using namespace arm_runner;
+    using namespace plan_runner;
     constexpr double simulation_time = 1.0;
     std::unique_ptr<RobotCommunication> robot_arm = constructSimulatedKukaDefault(simulation_time);
 

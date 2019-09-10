@@ -10,7 +10,7 @@
 #include "common/safety_checker_interface.h"
 
 
-namespace arm_runner {
+namespace plan_runner {
 
     // The base of the plan that computes command that will be sent to the robot
     // The plan may has some parameter, which can be loaded from yaml in the plan-supervisor

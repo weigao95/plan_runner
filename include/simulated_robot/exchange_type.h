@@ -9,7 +9,7 @@
 
 #include <mutex>
 
-namespace arm_runner {
+namespace plan_runner {
 
     // The exchanged data between drake simulation and robot communication
     struct SimulationExchangeData {

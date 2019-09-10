@@ -7,7 +7,7 @@
 #include "robot_plan/forceguard_checker.h"
 
 
-arm_runner::EETrajectoryVelocityCommandPlan::EETrajectoryVelocityCommandPlan(
+plan_runner::EETrajectoryVelocityCommandPlan::EETrajectoryVelocityCommandPlan(
     bool has_quaternion,
     std::string task_frame,
     std::vector<double> input_time,
@@ -32,7 +32,7 @@ arm_runner::EETrajectoryVelocityCommandPlan::EETrajectoryVelocityCommandPlan(
 }
 
 
-std::shared_ptr<arm_runner::EETrajectoryVelocityCommandPlan> arm_runner::EETrajectoryVelocityCommandPlan::ConstructFromMessage(
+std::shared_ptr<plan_runner::EETrajectoryVelocityCommandPlan> plan_runner::EETrajectoryVelocityCommandPlan::ConstructFromMessage(
     const RigidBodyTree<double>& tree,
     const robot_msgs::CartesianTrajectoryGoal::ConstPtr &goal
 ) {
@@ -111,7 +111,7 @@ std::shared_ptr<arm_runner::EETrajectoryVelocityCommandPlan> arm_runner::EETraje
 }
 
 
-void arm_runner::EETrajectoryVelocityCommandPlan::InitializePlan(const arm_runner::CommandInput &input) {
+void plan_runner::EETrajectoryVelocityCommandPlan::InitializePlan(const plan_runner::CommandInput &input) {
     // Get data
     const auto& tree = *input.robot_rbt;
     const auto& cache = *input.measured_state_cache;
@@ -148,16 +148,16 @@ void arm_runner::EETrajectoryVelocityCommandPlan::InitializePlan(const arm_runne
 }
 
 
-Eigen::Vector3d arm_runner::EETrajectoryVelocityCommandPlan::logSO3(const Eigen::Matrix3d& rotation) {
+Eigen::Vector3d plan_runner::EETrajectoryVelocityCommandPlan::logSO3(const Eigen::Matrix3d& rotation) {
     Eigen::AngleAxisd angle_axis(rotation);
     return angle_axis.angle() * angle_axis.axis();
 }
 
 
 // The workforce function
-void arm_runner::EETrajectoryVelocityCommandPlan::ComputeCommand(
-    const arm_runner::CommandInput &input,
-    arm_runner::RobotArmCommand &command
+void plan_runner::EETrajectoryVelocityCommandPlan::ComputeCommand(
+    const plan_runner::CommandInput &input,
+    plan_runner::RobotArmCommand &command
 ) {
     // Collect data
     DRAKE_ASSERT(input.is_valid());
@@ -222,7 +222,7 @@ void arm_runner::EETrajectoryVelocityCommandPlan::ComputeCommand(
 
 
 // The processing of parameter
-arm_runner::LoadParameterStatus arm_runner::EETrajectoryVelocityCommandPlan::LoadParameterFrom(const YAML::Node &datamap) {
+plan_runner::LoadParameterStatus plan_runner::EETrajectoryVelocityCommandPlan::LoadParameterFrom(const YAML::Node &datamap) {
     // The base class
     auto base_load_result = PositionVelocityPlan::LoadParameterFrom(datamap);
 
@@ -248,7 +248,7 @@ arm_runner::LoadParameterStatus arm_runner::EETrajectoryVelocityCommandPlan::Loa
     return StatusAnd(base_load_result, LoadParameterStatus::Success);
 }
 
-void arm_runner::EETrajectoryVelocityCommandPlan::SaveParameterTo(YAML::Node &datamap) const {
+void plan_runner::EETrajectoryVelocityCommandPlan::SaveParameterTo(YAML::Node &datamap) const {
     // The base class
     PositionVelocityPlan::SaveParameterTo(datamap);
 

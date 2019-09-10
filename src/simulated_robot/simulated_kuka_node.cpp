@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     }
 
     // The simulated robot model
-    using namespace arm_runner;
+    using namespace plan_runner;
     std::unique_ptr<RobotCommunication> robot_arm = constructSimulatedKukaDefault(simulation_time);
 
     // Empty init of node

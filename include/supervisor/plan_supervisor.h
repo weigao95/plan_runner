@@ -21,7 +21,7 @@
 #include "std_srvs/Trigger.h"
 
 
-namespace arm_runner {
+namespace plan_runner {
 
     class PlanSupervisor {
     public:

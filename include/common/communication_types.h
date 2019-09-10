@@ -8,7 +8,7 @@
 
 #include "common/time_utils.h"
 
-namespace arm_runner {
+namespace plan_runner {
 
     // The max number of joints for a robot arm
     constexpr int MAX_NUM_JOINTS = 10;

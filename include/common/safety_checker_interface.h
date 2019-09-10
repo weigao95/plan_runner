@@ -11,7 +11,7 @@
 #include "common/plan_common_types.h"
 
 
-namespace arm_runner {
+namespace plan_runner {
 
     class SafetyChecker : public YamlSerializableParameter {
     public:

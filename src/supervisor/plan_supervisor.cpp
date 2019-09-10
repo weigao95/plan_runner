@@ -6,7 +6,7 @@
 #include "robot_plan/joint_trajectory_plan.h"
 
 
-arm_runner::PlanSupervisor::PlanSupervisor(
+plan_runner::PlanSupervisor::PlanSupervisor(
     std::unique_ptr<RigidBodyTree<double>> tree,
     std::unique_ptr<RobotCommunication> robot_hw,
     const ros::NodeHandle& nh,
@@ -22,24 +22,24 @@ arm_runner::PlanSupervisor::PlanSupervisor(
 }
 
 
-void arm_runner::PlanSupervisor::initializeKinematicAndCache() {
+void plan_runner::PlanSupervisor::initializeKinematicAndCache() {
     rbt_active_plan_ = nullptr;
     cache_measured_state = std::make_shared<KinematicsCache<double>>(tree_->CreateKinematicsCache());
 }
 
 
 // The main interface
-void arm_runner::PlanSupervisor::Initialize() {
+void plan_runner::PlanSupervisor::Initialize() {
     rbt_communication_->Start();
 }
 
-void arm_runner::PlanSupervisor::Stop() {
+void plan_runner::PlanSupervisor::Stop() {
     rbt_communication_->Stop();
     plan_end_server_->shutdown();
     start_streaming_server_->shutdown();
 }
 
-void arm_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_second) {
+void plan_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_second) {
     // Get measurement
     // Use the time in measurement
     rbt_communication_->GetMeasurement(measurement_cache);
@@ -89,9 +89,9 @@ void arm_runner::PlanSupervisor::ProcessLoopIteration(double control_peroid_seco
 
 
 // For safety check
-bool arm_runner::PlanSupervisor::checkCommandSafety(
-    const arm_runner::CommandInput &input,
-    const arm_runner::RobotArmCommand &command
+bool plan_runner::PlanSupervisor::checkCommandSafety(
+    const plan_runner::CommandInput &input,
+    const plan_runner::RobotArmCommand &command
 ) {
     // Plan-specific check
     if(rbt_active_plan_ != nullptr) {

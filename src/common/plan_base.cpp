@@ -5,9 +5,9 @@
 #include "common/plan_base.h"
 
 
-bool arm_runner::RobotPlanBase::CheckSafety(
-        const arm_runner::CommandInput &input,
-        const arm_runner::RobotArmCommand &command
+bool plan_runner::RobotPlanBase::CheckSafety(
+        const plan_runner::CommandInput &input,
+        const plan_runner::RobotArmCommand &command
 ) {
     // Any fails of the checker will result in safety failed
     for(auto& checker : safety_checker_stack_) {
@@ -26,13 +26,13 @@ bool arm_runner::RobotPlanBase::CheckSafety(
 
 
 // The method about keep current configuration
-arm_runner::KeepCurrentConfigurationPlan::KeepCurrentConfigurationPlan() {
+plan_runner::KeepCurrentConfigurationPlan::KeepCurrentConfigurationPlan() {
     initialized_measurement_.set_invalid();
     initialized_command_.set_invalid();
 }
 
 
-void arm_runner::KeepCurrentConfigurationPlan::InitializePlan(const arm_runner::CommandInput &input) {
+void plan_runner::KeepCurrentConfigurationPlan::InitializePlan(const plan_runner::CommandInput &input) {
     // Keep both configuration and command
     initialized_measurement_ = *input.latest_measurement;
     const auto& history = input.robot_history->GetCommandHistory();
@@ -44,9 +44,9 @@ void arm_runner::KeepCurrentConfigurationPlan::InitializePlan(const arm_runner::
 }
 
 
-void arm_runner::KeepCurrentConfigurationPlan::ComputeCommand(
-    const arm_runner::CommandInput &input,
-    arm_runner::RobotArmCommand &command
+void plan_runner::KeepCurrentConfigurationPlan::ComputeCommand(
+    const plan_runner::CommandInput &input,
+    plan_runner::RobotArmCommand &command
 ) {
     // Which one to use, latest measurement or command
     //CopyConfigurationToCommand(kept_configuration_, command);
@@ -55,9 +55,9 @@ void arm_runner::KeepCurrentConfigurationPlan::ComputeCommand(
 }
 
 
-void arm_runner::KeepCurrentConfigurationPlan::CopyConfigurationToCommand(
-        const arm_runner::RobotArmMeasurement &measurement,
-        arm_runner::RobotArmCommand &command
+void plan_runner::KeepCurrentConfigurationPlan::CopyConfigurationToCommand(
+        const plan_runner::RobotArmMeasurement &measurement,
+        plan_runner::RobotArmCommand &command
 ) {
     // Seems OK
     for(auto i = 0; i < MAX_NUM_JOINTS; i++) {

@@ -4,7 +4,7 @@
 
 #include "common/rbt_utils.h"
 
-bool arm_runner::bodyOrFrameContainedInTree(
+bool plan_runner::bodyOrFrameContainedInTree(
     const RigidBodyTree<double> &tree,
     const std::string &body_or_frame_name
 ) {
@@ -33,7 +33,7 @@ bool arm_runner::bodyOrFrameContainedInTree(
 }
 
 
-int arm_runner::getBodyOrFrameIndex(
+int plan_runner::getBodyOrFrameIndex(
     const RigidBodyTree<double> &tree,
     const std::string &body_or_frame_name
 ) {

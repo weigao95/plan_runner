@@ -10,7 +10,7 @@
 #include "kuka_lcm.h"
 
 
-std::unique_ptr<arm_runner::KukaLCMInterface> constructKukaLCMInterface(const YAML::Node& config) {
+std::unique_ptr<plan_runner::KukaLCMInterface> constructKukaLCMInterface(const YAML::Node& config) {
     if (!config["lcm_status_channel"] || !config["lcm_command_channel"]) {
         return nullptr;
     }
@@ -18,7 +18,7 @@ std::unique_ptr<arm_runner::KukaLCMInterface> constructKukaLCMInterface(const YA
     // Construct the interface
     std::string lcm_status_channel = config["lcm_status_channel"].as<std::string>();
     std::string lcm_command_channel = config["lcm_command_channel"].as<std::string>();
-    return std::make_unique<arm_runner::KukaLCMInterface>(
+    return std::make_unique<plan_runner::KukaLCMInterface>(
         std::move(lcm_status_channel),
         std::move(lcm_command_channel)
     );
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Init the ros staff
-    using namespace arm_runner;
+    using namespace plan_runner;
     ros::init(argc, argv, "plan_runner");
     ros::NodeHandle nh("plan_runner");
 

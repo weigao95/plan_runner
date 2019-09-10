@@ -8,7 +8,7 @@
 
 
 // The method for switching
-void arm_runner::PlanSupervisor::initializeSwitchData() {
+void plan_runner::PlanSupervisor::initializeSwitchData() {
     action_to_current_plan_ = ActionToCurrentPlan::NoAction;
     switch_to_plan_ = nullptr;
     plan_number_ = 0;
@@ -16,7 +16,7 @@ void arm_runner::PlanSupervisor::initializeSwitchData() {
 }
 
 
-bool arm_runner::PlanSupervisor::shouldSwitchPlan(
+bool plan_runner::PlanSupervisor::shouldSwitchPlan(
     const RobotArmMeasurement& measurement,
     const RobotArmCommand& latest_command
 ) const {
@@ -46,7 +46,7 @@ bool arm_runner::PlanSupervisor::shouldSwitchPlan(
 }
 
 
-void arm_runner::PlanSupervisor::processPlanSwitch(
+void plan_runner::PlanSupervisor::processPlanSwitch(
     const CommandInput& input,
     const RobotArmCommand& latest_command,
     bool command_safety

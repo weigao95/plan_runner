@@ -5,14 +5,14 @@
 #include "robot_plan/joint_trajectory_plan.h"
 
 
-arm_runner::JointTrajectoryPlan::JointTrajectoryPlan(
+plan_runner::JointTrajectoryPlan::JointTrajectoryPlan(
     std::vector<double> input_time, std::vector<Eigen::MatrixXd> knots
 ) : input_time_(std::move(input_time)),
     knots_(std::move(knots))
 {}
 
 
-std::shared_ptr<arm_runner::JointTrajectoryPlan> arm_runner::JointTrajectoryPlan::ConstructFromMessage(
+std::shared_ptr<plan_runner::JointTrajectoryPlan> plan_runner::JointTrajectoryPlan::ConstructFromMessage(
     const RigidBodyTree<double>& tree,
     const robot_msgs::JointTrajectoryGoal::ConstPtr &goal
 ) {
@@ -84,7 +84,7 @@ std::shared_ptr<arm_runner::JointTrajectoryPlan> arm_runner::JointTrajectoryPlan
 }
 
 
-void arm_runner::JointTrajectoryPlan::InitializePlan(const arm_runner::CommandInput &input) {
+void plan_runner::JointTrajectoryPlan::InitializePlan(const plan_runner::CommandInput &input) {
     // Use measurement or command to fill the first knot
     const double* q_init = nullptr;
     const auto& history = input.robot_history->GetCommandHistory();
@@ -111,9 +111,9 @@ void arm_runner::JointTrajectoryPlan::InitializePlan(const arm_runner::CommandIn
 }
 
 
-void arm_runner::JointTrajectoryPlan::ComputeCommand(
+void plan_runner::JointTrajectoryPlan::ComputeCommand(
         const CommandInput& input,
-        arm_runner::RobotArmCommand &command
+        plan_runner::RobotArmCommand &command
 ) {
     const auto& measurement = *input.latest_measurement;
     auto t = GetTimeSincePlanStartSecond(input.latest_measurement->time_stamp);

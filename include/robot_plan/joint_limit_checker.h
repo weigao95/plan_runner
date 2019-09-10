@@ -10,7 +10,7 @@
 #include <memory>
 
 
-namespace arm_runner {
+namespace plan_runner {
 
     // Check the command velocity shouldn't be too large
     // Also check that the command is not nan

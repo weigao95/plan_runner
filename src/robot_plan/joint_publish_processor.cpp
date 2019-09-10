@@ -6,7 +6,7 @@
 #include "robot_plan/joint_publish_processor.h"
 
 
-arm_runner::JointPublishProcessor::JointPublishProcessor(
+plan_runner::JointPublishProcessor::JointPublishProcessor(
     ros::NodeHandle nh,
     const std::string &topic,
     std::vector<std::string> joint_name_list,
@@ -15,9 +15,9 @@ arm_runner::JointPublishProcessor::JointPublishProcessor(
     joint_state_publisher_ = node_handle_.advertise<sensor_msgs::JointState>(topic, queue_size);
 }
 
-void arm_runner::JointPublishProcessor::ProcessMeasurement(
-    const arm_runner::RobotCommunication &,
-    arm_runner::RobotArmMeasurement & measurement
+void plan_runner::JointPublishProcessor::ProcessMeasurement(
+    const plan_runner::RobotCommunication &,
+    plan_runner::RobotArmMeasurement & measurement
 ) {
     sensor_msgs::JointState joint_state;
     // The time and name

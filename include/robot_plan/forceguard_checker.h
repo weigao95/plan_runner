@@ -11,7 +11,7 @@
 #include "common/safety_checker_interface.h"
 
 
-namespace arm_runner {
+namespace plan_runner {
 
     class TotalForceGuardChecker : public SafetyChecker {
     public:

@@ -7,7 +7,7 @@
 #include "common/plan_base.h"
 
 
-namespace arm_runner {
+namespace plan_runner {
 
     // These types of plan typically output a desired joint-space velocity, which
     // can be further integrated into commanded position.
@@ -21,7 +21,7 @@ namespace arm_runner {
         // Use which position as the one in forward integration
     protected:
         bool use_commanded_fwd_integration_;
-        const double* GetForwardIntegrationJointPosition(const arm_runner::CommandInput &input) const;
+        const double* GetForwardIntegrationJointPosition(const plan_runner::CommandInput &input) const;
     public:
         LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override;
         void SaveParameterTo(YAML::Node& datamap) const override;

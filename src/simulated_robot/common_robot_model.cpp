@@ -7,7 +7,7 @@
 #include <drake/multibody/parsers/urdf_parser.h>
 
 
-std::vector<std::string> arm_runner::getKukaJointNameList() {
+std::vector<std::string> plan_runner::getKukaJointNameList() {
     return {
         "iiwa_joint_1",
         "iiwa_joint_2",
@@ -20,7 +20,7 @@ std::vector<std::string> arm_runner::getKukaJointNameList() {
 }
 
 
-std::unique_ptr<RigidBodyTree<double>> arm_runner::constructDefaultKukaRBT() {
+std::unique_ptr<RigidBodyTree<double>> plan_runner::constructDefaultKukaRBT() {
     const char* kModelPath =
             "drake/manipulation/models/iiwa_description/"
             "urdf/iiwa14_polytope_collision.urdf";
@@ -32,7 +32,7 @@ std::unique_ptr<RigidBodyTree<double>> arm_runner::constructDefaultKukaRBT() {
 }
 
 
-std::unique_ptr<arm_runner::SimulatedRobotArm> arm_runner::constructSimulatedKukaDefault(double simulation_time_second) {
+std::unique_ptr<plan_runner::SimulatedRobotArm> plan_runner::constructSimulatedKukaDefault(double simulation_time_second) {
     // The rigid body tree
     auto robot = constructDefaultKukaRBT();
     return std::make_unique<SimulatedRobotArm>(std::move(robot), simulation_time_second);

@@ -16,7 +16,7 @@
 #include "robot_msgs/JointTrajectoryAction.h"
 
 
-namespace arm_runner {
+namespace plan_runner {
 
     class JointTrajectoryPlan : public PositionVelocityPlan {
     public:

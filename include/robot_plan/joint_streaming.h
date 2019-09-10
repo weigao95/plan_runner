@@ -12,7 +12,7 @@
 
 #include "common/plan_base.h"
 
-namespace arm_runner {
+namespace plan_runner {
 
 
     // The base of all joint-space streaming plan

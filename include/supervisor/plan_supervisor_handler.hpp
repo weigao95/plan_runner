@@ -2,7 +2,7 @@
 
 
 template<typename ActionT, typename ResultT>
-void arm_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
+void plan_runner::PlanSupervisor::appendAndWaitForTrajectoryPlan(
     std::shared_ptr<actionlib::SimpleActionServer<ActionT>>& action_server,
     const RobotPlanBase::Ptr& plan,
     int wait_result_interval

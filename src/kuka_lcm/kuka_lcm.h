@@ -13,7 +13,7 @@
 #include "common/robot_communication.h"
 
 
-namespace arm_runner {
+namespace plan_runner {
 
 
     class KukaLCMInterface : public RobotCommunication {

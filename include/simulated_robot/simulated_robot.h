@@ -9,7 +9,7 @@
 #include <thread>
 #include <drake/multibody/rigid_body_tree.h>
 
-namespace arm_runner {
+namespace plan_runner {
 
     // This call will start a drake simulation from another thread
     // The communication is by the exchange data struct.

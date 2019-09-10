@@ -11,7 +11,7 @@
 
 #include "simulated_robot/exchange_type.h"
 
-namespace arm_runner {
+namespace plan_runner {
 
 
 class QpInverseDynamicsController : public drake::systems::LeafSystem<double> {

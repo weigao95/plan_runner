@@ -11,7 +11,7 @@
 #include <functional>
 #include <boost/circular_buffer.hpp>
 
-namespace arm_runner {
+namespace plan_runner {
 
     class RobotCommunication {
     public:

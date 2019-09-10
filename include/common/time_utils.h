@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <ros/ros.h>
 
-namespace arm_runner {
+namespace plan_runner {
 
     class TimeStamp {
     public:

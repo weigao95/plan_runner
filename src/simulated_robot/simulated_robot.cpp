@@ -20,7 +20,7 @@
 #include <thread>
 
 
-arm_runner::SimulatedRobotArm::SimulatedRobotArm(
+plan_runner::SimulatedRobotArm::SimulatedRobotArm(
     const std::string &model_urdf,
     double simulation_time_second
 ) : simulation_time_second_(simulation_time_second)
@@ -36,7 +36,7 @@ arm_runner::SimulatedRobotArm::SimulatedRobotArm(
 }
 
 
-arm_runner::SimulatedRobotArm::SimulatedRobotArm(
+plan_runner::SimulatedRobotArm::SimulatedRobotArm(
     std::unique_ptr<RigidBodyTree<double>> robot,
     double simulation_time_second
 ) : simulation_time_second_(simulation_time_second), tree_(std::move(robot))
@@ -47,21 +47,21 @@ arm_runner::SimulatedRobotArm::SimulatedRobotArm(
 }
 
 
-void arm_runner::SimulatedRobotArm::getRawMeasurement(RobotArmMeasurement &measurement) {
+void plan_runner::SimulatedRobotArm::getRawMeasurement(RobotArmMeasurement &measurement) {
     std::lock_guard<std::mutex> guard(exchanged_data_.mutex);
     DRAKE_ASSERT(exchanged_data_.latest_measurement.is_valid());
     measurement = exchanged_data_.latest_measurement;
 }
 
 
-void arm_runner::SimulatedRobotArm::sendRawCommand(const arm_runner::RobotArmCommand &command) {
+void plan_runner::SimulatedRobotArm::sendRawCommand(const plan_runner::RobotArmCommand &command) {
     std::lock_guard<std::mutex> guard(exchanged_data_.mutex);
     DRAKE_ASSERT(command.is_valid());
     exchanged_data_.latest_command = command;
 }
 
 
-void arm_runner::SimulatedRobotArm::Start() {
+void plan_runner::SimulatedRobotArm::Start() {
     // Launch the simulation thread
     simulation_thread_ = std::thread(&SimulatedRobotArm::runSimulation, this);
 
@@ -83,13 +83,13 @@ void arm_runner::SimulatedRobotArm::Start() {
 }
 
 
-void arm_runner::SimulatedRobotArm::Stop() {
+void plan_runner::SimulatedRobotArm::Stop() {
     if(simulation_thread_.joinable())
         simulation_thread_.join();
 }
 
 
-void arm_runner::SimulatedRobotArm::runSimulation() {
+void plan_runner::SimulatedRobotArm::runSimulation() {
     // Use drake namespace
     using namespace drake;
     drake::lcm::DrakeLcm lcm;

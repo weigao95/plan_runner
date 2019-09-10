@@ -11,7 +11,7 @@
 constexpr int KUKA_IIWA_ARM_NUM_JOINT = 7;
 
 
-arm_runner::KukaLCMInterface::KukaLCMInterface(
+plan_runner::KukaLCMInterface::KukaLCMInterface(
     std::string lcm_status_channel,
     std::string lcm_command_channel
 ) : lcm_status_channel_(std::move(lcm_status_channel)),
@@ -23,7 +23,7 @@ arm_runner::KukaLCMInterface::KukaLCMInterface(
 }
 
 
-void arm_runner::KukaLCMInterface::Start() {
+void plan_runner::KukaLCMInterface::Start() {
     // Invoke the subscriber thread
     exchange_data_.measurement.set_invalid();
     quit_receiving_ = false;
@@ -51,7 +51,7 @@ void arm_runner::KukaLCMInterface::Start() {
 }
 
 
-void arm_runner::KukaLCMInterface::Stop() {
+void plan_runner::KukaLCMInterface::Stop() {
     quit_receiving_ = true;
     if(receive_rbt_status_thread_.joinable())
         receive_rbt_status_thread_.join();
@@ -59,8 +59,8 @@ void arm_runner::KukaLCMInterface::Stop() {
 
 
 // The interface for upper-level
-void arm_runner::KukaLCMInterface::getRawMeasurement(
-        arm_runner::RobotArmMeasurement &measurement
+void plan_runner::KukaLCMInterface::getRawMeasurement(
+        plan_runner::RobotArmMeasurement &measurement
 ) {
     // Just copy the measurement
     std::lock_guard<std::mutex> guard(exchange_data_.mutex);
@@ -68,8 +68,8 @@ void arm_runner::KukaLCMInterface::getRawMeasurement(
 }
 
 
-void arm_runner::KukaLCMInterface::sendRawCommand(
-    const arm_runner::RobotArmCommand &command
+void plan_runner::KukaLCMInterface::sendRawCommand(
+    const plan_runner::RobotArmCommand &command
 ) {
     // The time from command
     command_cache.utime = command.time_stamp.ToMicrosecond();
@@ -98,10 +98,10 @@ void arm_runner::KukaLCMInterface::sendRawCommand(
 
 
 // The handler for measurement
-void arm_runner::KukaLCMInterface::handleReceiveIIWAStatus(
+void plan_runner::KukaLCMInterface::handleReceiveIIWAStatus(
     const lcm::ReceiveBuffer *,
     const std::string &,
-    const arm_runner::KukaLCMInterface::lcmt_iiwa_status *status_in
+    const plan_runner::KukaLCMInterface::lcmt_iiwa_status *status_in
 ) {
     // Copy to cache
     measurement_cache.set_invalid();
@@ -126,7 +126,7 @@ void arm_runner::KukaLCMInterface::handleReceiveIIWAStatus(
 }
 
 
-void arm_runner::KukaLCMInterface::receiveRobotStatusThread() {
+void plan_runner::KukaLCMInterface::receiveRobotStatusThread() {
     // Construct the receiver
     lcm::LCM receiver_lcm;
     receiver_lcm.subscribe(

@@ -5,17 +5,17 @@
 #include "common/switch_utility.h"
 
 
-void arm_runner::FinishedPlanQueue::LockAndAppend(arm_runner::FinishedPlanQueue::Record record) {
+void plan_runner::FinishedPlanQueue::LockAndAppend(plan_runner::FinishedPlanQueue::Record record) {
     std::lock_guard<std::mutex> guard(mutex);
     queue.emplace_back(record);
 }
 
 
-void arm_runner::FinishedPlanQueue::LockAndCheckPlanStatus(
+void plan_runner::FinishedPlanQueue::LockAndCheckPlanStatus(
     int plan_number,
     bool &current_plan_in_queue,
     bool &new_plan_in_queue,
-    arm_runner::ActionToCurrentPlan &action_to_plan
+    plan_runner::ActionToCurrentPlan &action_to_plan
 ) {
     std::lock_guard<std::mutex> guard(mutex);
     for(const auto& finished_plan : queue) {

@@ -2,7 +2,7 @@
 <launch>
 
 <!--The path to config file-->
-<arg name="pkg_name" default="arm_runner" />
+<arg name="pkg_name" default="plan_runner" />
 <arg name="config_path" default="$(eval find(arg('pkg_name')) +'/config/kuka_lcm/kuka_lcm_sim.yaml')" />
 
 <!--The simulated kuka robot-->

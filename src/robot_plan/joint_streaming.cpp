@@ -6,7 +6,7 @@
 
 
 // The method in command base
-arm_runner::JointStreamingPlanBase::JointStreamingPlanBase(
+plan_runner::JointStreamingPlanBase::JointStreamingPlanBase(
     ros::NodeHandle& nh,
     std::string topic
 ) : node_handle_(nh),
@@ -18,7 +18,7 @@ arm_runner::JointStreamingPlanBase::JointStreamingPlanBase(
 }
 
 
-void arm_runner::JointStreamingPlanBase::InitializePlan(const arm_runner::CommandInput &input) {
+void plan_runner::JointStreamingPlanBase::InitializePlan(const plan_runner::CommandInput &input) {
     // Get information from the tree
     const auto& tree = *input.robot_rbt;
     num_joints_ = tree.get_num_positions();
@@ -36,13 +36,13 @@ void arm_runner::JointStreamingPlanBase::InitializePlan(const arm_runner::Comman
 }
 
 
-void arm_runner::JointStreamingPlanBase::StopPlan(arm_runner::ActionToCurrentPlan action) {
+void plan_runner::JointStreamingPlanBase::StopPlan(plan_runner::ActionToCurrentPlan action) {
     streaming_subscriber_->shutdown();
     RobotPlanBase::StopPlan(action);
 }
 
 
-arm_runner::LoadParameterStatus arm_runner::JointStreamingPlanBase::LoadParameterFrom(const YAML::Node &datamap) {
+plan_runner::LoadParameterStatus plan_runner::JointStreamingPlanBase::LoadParameterFrom(const YAML::Node &datamap) {
     auto key = DefaultClassParameterNameKey();
     if(!datamap[key] || !datamap[key]["topic"] ) {
         if(topic_.empty())
@@ -57,14 +57,14 @@ arm_runner::LoadParameterStatus arm_runner::JointStreamingPlanBase::LoadParamete
 }
 
 
-void arm_runner::JointStreamingPlanBase::SaveParameterTo(YAML::Node &datamap) const {
+void plan_runner::JointStreamingPlanBase::SaveParameterTo(YAML::Node &datamap) const {
     auto key = DefaultClassParameterNameKey();
     datamap[key]["topic"] = topic_;
 }
 
 
 // The joint position streaming
-arm_runner::JointPositionStreamingPlan::JointPositionStreamingPlan(
+plan_runner::JointPositionStreamingPlan::JointPositionStreamingPlan(
    ros::NodeHandle &nh, std::string topic
 ) : JointStreamingPlanBase(nh, std::move(topic))
 {
@@ -72,7 +72,7 @@ arm_runner::JointPositionStreamingPlan::JointPositionStreamingPlan(
 }
 
 
-void arm_runner::JointPositionStreamingPlan::updateStreamedCommand(
+void plan_runner::JointPositionStreamingPlan::updateStreamedCommand(
     const sensor_msgs::JointState::ConstPtr &message
 ) {
     std::lock_guard<std::mutex> guard(mutex_);
@@ -96,9 +96,9 @@ void arm_runner::JointPositionStreamingPlan::updateStreamedCommand(
 }
 
 
-void arm_runner::JointPositionStreamingPlan::ComputeCommand(
-    const arm_runner::CommandInput &input,
-    arm_runner::RobotArmCommand &command
+void plan_runner::JointPositionStreamingPlan::ComputeCommand(
+    const plan_runner::CommandInput &input,
+    plan_runner::RobotArmCommand &command
 ) {
     // Copy the position
     bool command_valid;
@@ -135,7 +135,7 @@ void arm_runner::JointPositionStreamingPlan::ComputeCommand(
 
 
 // The joint velocity streaming
-arm_runner::JointVelocityStreamingPlan::JointVelocityStreamingPlan(
+plan_runner::JointVelocityStreamingPlan::JointVelocityStreamingPlan(
     ros::NodeHandle &nh,
     std::string topic
 ) : JointStreamingPlanBase(nh, std::move(topic))
@@ -144,7 +144,7 @@ arm_runner::JointVelocityStreamingPlan::JointVelocityStreamingPlan(
 }
 
 
-void arm_runner::JointVelocityStreamingPlan::updateStreamedCommand(
+void plan_runner::JointVelocityStreamingPlan::updateStreamedCommand(
     const sensor_msgs::JointState::ConstPtr &message
 ) {
     std::lock_guard<std::mutex> guard(mutex_);
@@ -168,9 +168,9 @@ void arm_runner::JointVelocityStreamingPlan::updateStreamedCommand(
 }
 
 
-void arm_runner::JointVelocityStreamingPlan::ComputeCommand(
-        const arm_runner::CommandInput &input,
-        arm_runner::RobotArmCommand &command
+void plan_runner::JointVelocityStreamingPlan::ComputeCommand(
+        const plan_runner::CommandInput &input,
+        plan_runner::RobotArmCommand &command
 ) {
     // Copy the position
     bool command_valid;

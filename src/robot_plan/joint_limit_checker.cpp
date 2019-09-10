@@ -5,18 +5,18 @@
 #include "robot_plan/joint_limit_checker.h"
 
 
-bool arm_runner::JointVelocityLimitChecker::HasRequiredField(
-    const arm_runner::CommandInput &input,
-    const arm_runner::RobotArmCommand &command
+bool plan_runner::JointVelocityLimitChecker::HasRequiredField(
+    const plan_runner::CommandInput &input,
+    const plan_runner::RobotArmCommand &command
 ) {
     // Always true
     return true;
 }
 
 
-arm_runner::SafetyChecker::CheckResult arm_runner::JointVelocityLimitChecker::CheckSafety(
-    const arm_runner::CommandInput &input,
-    const arm_runner::RobotArmCommand &command
+plan_runner::SafetyChecker::CheckResult plan_runner::JointVelocityLimitChecker::CheckSafety(
+    const plan_runner::CommandInput &input,
+    const plan_runner::RobotArmCommand &command
 ) {
     // The functor to check nan
     const int num_joint = input.robot_rbt->get_num_positions();

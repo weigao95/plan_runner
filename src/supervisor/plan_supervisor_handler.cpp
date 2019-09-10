@@ -11,7 +11,7 @@
 
 
 // The handler for joint trajectory action
-void arm_runner::PlanSupervisor::initializeServiceActions() {
+void plan_runner::PlanSupervisor::initializeServiceActions() {
     // The joint trajectory action
     joint_trajectory_action_ = std::make_shared<actionlib::SimpleActionServer<robot_msgs::JointTrajectoryAction>>(
         node_handle_, "/plan_runner/JointTrajectory",
@@ -37,7 +37,7 @@ void arm_runner::PlanSupervisor::initializeServiceActions() {
 
 
 // The handler function for action and service
-void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(
+void plan_runner::PlanSupervisor::HandleJointTrajectoryAction(
         const robot_msgs::JointTrajectoryGoal::ConstPtr &goal){
     // Construct the plan
     auto plan = JointTrajectoryPlan::ConstructFromMessage(*tree_, goal);
@@ -56,7 +56,7 @@ void arm_runner::PlanSupervisor::HandleJointTrajectoryAction(
 }
 
 
-void arm_runner::PlanSupervisor::HandleEETrajectoryAction(
+void plan_runner::PlanSupervisor::HandleEETrajectoryAction(
     const robot_msgs::CartesianTrajectoryGoal::ConstPtr& goal
 ) {
     // Construct the plan
@@ -78,7 +78,7 @@ void arm_runner::PlanSupervisor::HandleEETrajectoryAction(
 }
 
 
-bool arm_runner::PlanSupervisor::HandleEndPlanService(
+bool plan_runner::PlanSupervisor::HandleEndPlanService(
     std_srvs::Trigger::Request &req,
     std_srvs::Trigger::Response &res
 ) {
@@ -89,7 +89,7 @@ bool arm_runner::PlanSupervisor::HandleEndPlanService(
 }
 
 
-bool arm_runner::PlanSupervisor::HandleStartStreamingService(
+bool plan_runner::PlanSupervisor::HandleStartStreamingService(
     robot_msgs::StartStreamingPlan::Request &request,
     robot_msgs::StartStreamingPlan::Response &response
 ) {
@@ -140,7 +140,7 @@ bool arm_runner::PlanSupervisor::HandleStartStreamingService(
 }
 
 
-void arm_runner::PlanSupervisor::lockAndAppendPlan(const arm_runner::RobotPlanBase::Ptr& plan, int& plan_number) {
+void plan_runner::PlanSupervisor::lockAndAppendPlan(const plan_runner::RobotPlanBase::Ptr& plan, int& plan_number) {
     // The construction should be OK
     DRAKE_ASSERT(plan != nullptr);
     auto finish_callback = [this](RobotPlanBase* robot_plan, ActionToCurrentPlan action) -> void {

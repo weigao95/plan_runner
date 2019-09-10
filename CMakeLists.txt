@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(arm_runner)
+project(plan_runner)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -122,7 +122,7 @@ find_package(drake REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES arm_runner
+#  LIBRARIES plan_runner
 #  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
@@ -151,7 +151,7 @@ add_subdirectory(src)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/arm_runner.cpp
+#   src/${PROJECT_NAME}/plan_runner.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -162,7 +162,7 @@ add_subdirectory(src)
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/arm_runner_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/plan_runner_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -236,10 +236,6 @@ install(DIRECTORY
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_arm_runner.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
 file(GLOB RUNNER_TEST_SRC tests/*_test.cpp)
 foreach(test_src ${RUNNER_TEST_SRC})
     get_filename_component(test_name ${test_src} NAME_WE)

@@ -9,7 +9,7 @@
 #include "common/yaml_serializable.h"
 #include "common/communication_types.h"
 
-namespace arm_runner {
+namespace plan_runner {
 
     // FWD declaration
     class RobotCommunication;

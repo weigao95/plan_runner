@@ -5,8 +5,8 @@
 #include "robot_plan/position_velocity_plan.h"
 
 
-const double* arm_runner::PositionVelocityPlan::GetForwardIntegrationJointPosition(
-        const arm_runner::CommandInput &input
+const double* plan_runner::PositionVelocityPlan::GetForwardIntegrationJointPosition(
+        const plan_runner::CommandInput &input
 ) const {
     // Use either measured or latest commanded
     const double* q_fwd_integration = nullptr;
@@ -21,7 +21,7 @@ const double* arm_runner::PositionVelocityPlan::GetForwardIntegrationJointPositi
     return q_fwd_integration;
 }
 
-arm_runner::LoadParameterStatus arm_runner::PositionVelocityPlan::LoadParameterFrom(const YAML::Node &datamap) {
+plan_runner::LoadParameterStatus plan_runner::PositionVelocityPlan::LoadParameterFrom(const YAML::Node &datamap) {
     const std::string key = "use_command_position_streaming";
     if(datamap[key]) {
         use_commanded_fwd_integration_ = datamap[key].as<bool>();
@@ -31,7 +31,7 @@ arm_runner::LoadParameterStatus arm_runner::PositionVelocityPlan::LoadParameterF
     }
 }
 
-void arm_runner::PositionVelocityPlan::SaveParameterTo(YAML::Node &datamap) const {
+void plan_runner::PositionVelocityPlan::SaveParameterTo(YAML::Node &datamap) const {
     const std::string key = "use_command_position_streaming";
      datamap[key] = use_commanded_fwd_integration_;
 }
