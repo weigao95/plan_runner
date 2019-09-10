@@ -12,3 +12,5 @@ EETrajectoryPlanHyperparameter:
     - 10
     - 10
     - 10
+lcm_plan_channel: "COMMITTED_ROBOT_PLAN"
+lcm_stop_channel: "STOP"
