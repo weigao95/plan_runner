@@ -51,7 +51,7 @@ namespace plan_runner {
         LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override {return integrator_option_.LoadParameterFrom(datamap);};
         void SaveParameterTo(YAML::Node& datamap) const override { integrator_option_.SaveParameterTo(datamap); };
 
-        // Caches
+        // Cache: assign before use, only in ComputeCommand
     private:
         std::string ee_frame_id_cache;
         Eigen::Vector3d cmd_frame_linear_velocity_cache, cmd_frame_angular_velocity_cache;

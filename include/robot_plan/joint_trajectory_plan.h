@@ -68,7 +68,8 @@ namespace plan_runner {
         LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override {return integrator_option_.LoadParameterFrom(datamap);};
         void SaveParameterTo(YAML::Node& datamap) const override { integrator_option_.SaveParameterTo(datamap); };
 
-        // Cache
+        // Cache: assign before use, only in ComputeCommand
+    protected:
         Eigen::VectorXd q_command_cache, v_command_cache;
     };
 }

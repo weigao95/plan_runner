@@ -82,10 +82,7 @@ namespace plan_runner {
         PiecewisePolynomial ee_xyz_velocity_trajectory_;
         PiecewiseQuaternionSlerp ee_orientation_trajectory_;
 
-        // The cache
-        Eigen::MatrixXd ee_twist_jacobian_expressed_in_ee;
-
-        // The hypter-parameter
+        // The hyper-parameter
     private:
         PositionIntegratorOption integrate_option_;
         Eigen::Vector3d kp_rotation_;
@@ -94,5 +91,9 @@ namespace plan_runner {
         LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override;
         void SaveParameterTo(YAML::Node& datamap) const override;
         std::string DefaultClassParameterNameKey() const override { return "EETrajectoryPlanHyperparameter"; }
+
+        // Cache: assign before use, only in ComputeCommand
+    protected:
+        Eigen::MatrixXd ee_twist_jacobian_expressed_in_ee;
     };
 }
