@@ -58,7 +58,6 @@ void plan_runner::KukaPlanDispatcherLCM::handleJointTrajectoryPlan(
         trajectory_msgs::JointTrajectoryPoint point;
         for(size_t j = 0; j < state_i.joint_position.size(); j++) {
             point.positions.push_back(state_i.joint_position[j]);
-            point.time_from_start.fromSec(double(state_i.utime) / 1e6);
 
             // Other properties are zero
             point.velocities.push_back(0);
@@ -67,6 +66,7 @@ void plan_runner::KukaPlanDispatcherLCM::handleJointTrajectoryPlan(
         }
 
         // Append this point
+        point.time_from_start.fromSec(double(state_i.utime) / 1e6);
         goal_msg.trajectory.points.emplace_back(std::move(point));
     }
 
