@@ -4,7 +4,7 @@
 
 #include "supervisor/plan_supervisor.h"
 #include "robot_plan/forceguard_checker.h"
-#include "robot_plan/joint_trajectory_plan.h"
+#include "robot_plan/joint_trajectory_velocity_command.h"
 #include "robot_plan/ee_trajectory_velocity_command.h"
 #include "robot_plan/joint_streaming.h"
 #include "robot_plan/ee_velocity_streaming.h"

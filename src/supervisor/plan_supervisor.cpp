@@ -3,7 +3,6 @@
 //
 
 #include "supervisor/plan_supervisor.h"
-#include "robot_plan/joint_trajectory_plan.h"
 
 
 plan_runner::PlanSupervisor::PlanSupervisor(
