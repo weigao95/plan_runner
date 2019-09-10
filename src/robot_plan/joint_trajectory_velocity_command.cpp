@@ -5,14 +5,14 @@
 #include "robot_plan/joint_trajectory_velocity_command.h"
 
 
-plan_runner::JointTrajectoryPlan::JointTrajectoryPlan(
+plan_runner::JointTrajectoryVelocityCommandPlan::JointTrajectoryVelocityCommandPlan(
     std::vector<double> input_time, std::vector<Eigen::MatrixXd> knots
 ) : input_time_(std::move(input_time)),
     knots_(std::move(knots))
 {}
 
 
-std::shared_ptr<plan_runner::JointTrajectoryPlan> plan_runner::JointTrajectoryPlan::ConstructFromMessage(
+std::shared_ptr<plan_runner::JointTrajectoryVelocityCommandPlan> plan_runner::JointTrajectoryVelocityCommandPlan::ConstructFromMessage(
     const RigidBodyTree<double>& tree,
     const robot_msgs::JointTrajectoryGoal::ConstPtr &goal
 ) {
@@ -79,12 +79,12 @@ std::shared_ptr<plan_runner::JointTrajectoryPlan> plan_runner::JointTrajectoryPl
     }
 
     // OK
-    auto plan = std::make_shared<JointTrajectoryPlan>(std::move(input_time), std::move(knots));
+    auto plan = std::make_shared<JointTrajectoryVelocityCommandPlan>(std::move(input_time), std::move(knots));
     return plan;
 }
 
 
-void plan_runner::JointTrajectoryPlan::InitializePlan(const plan_runner::CommandInput &input) {
+void plan_runner::JointTrajectoryVelocityCommandPlan::InitializePlan(const plan_runner::CommandInput &input) {
     // Use measurement or command to fill the first knot
     const double* q_init = nullptr;
     const auto& history = input.robot_history->GetCommandHistory();
@@ -103,7 +103,7 @@ void plan_runner::JointTrajectoryPlan::InitializePlan(const plan_runner::Command
 
     // Compute the trajectory
     const Eigen::MatrixXd knot_dot = Eigen::MatrixXd::Zero(nq, 1);
-    joint_trajectory_ = JointTrajectoryPlan::PiecewisePolynomial::Cubic(input_time_, knots_, knot_dot, knot_dot);
+    joint_trajectory_ = JointTrajectoryVelocityCommandPlan::PiecewisePolynomial::Cubic(input_time_, knots_, knot_dot, knot_dot);
     joint_velocity_trajectory_ = joint_trajectory_.derivative(1);
 
     // Setup the flag
@@ -111,9 +111,9 @@ void plan_runner::JointTrajectoryPlan::InitializePlan(const plan_runner::Command
 }
 
 
-void plan_runner::JointTrajectoryPlan::ComputeCommand(
-        const CommandInput& input,
-        plan_runner::RobotArmCommand &command
+void plan_runner::JointTrajectoryVelocityCommandPlan::ComputeCommand(
+    const CommandInput& input,
+    plan_runner::RobotArmCommand &command
 ) {
     const auto& measurement = *input.latest_measurement;
     auto t = GetTimeSincePlanStartSecond(input.latest_measurement->time_stamp);

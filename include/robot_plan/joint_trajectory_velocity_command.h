@@ -19,13 +19,13 @@
 
 namespace plan_runner {
 
-    class JointTrajectoryPlan : public RobotPlanBase {
+    class JointTrajectoryVelocityCommandPlan : public RobotPlanBase {
     public:
-        using Ptr = std::shared_ptr<JointTrajectoryPlan>;
+        using Ptr = std::shared_ptr<JointTrajectoryVelocityCommandPlan>;
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
-        JointTrajectoryPlan(std::vector<double> input_time, std::vector<Eigen::MatrixXd> knots);
-        ~JointTrajectoryPlan() override = default;
-        static std::shared_ptr<JointTrajectoryPlan> ConstructFromMessage(
+        JointTrajectoryVelocityCommandPlan(std::vector<double> input_time, std::vector<Eigen::MatrixXd> knots);
+        ~JointTrajectoryVelocityCommandPlan() override = default;
+        static std::shared_ptr<JointTrajectoryVelocityCommandPlan> ConstructFromMessage(
             const RigidBodyTree<double>& tree,
             const robot_msgs::JointTrajectoryGoal::ConstPtr &goal);
 

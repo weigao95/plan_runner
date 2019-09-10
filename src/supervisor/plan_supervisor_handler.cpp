@@ -40,7 +40,7 @@ void plan_runner::PlanSupervisor::initializeServiceActions() {
 void plan_runner::PlanSupervisor::HandleJointTrajectoryAction(
         const robot_msgs::JointTrajectoryGoal::ConstPtr &goal){
     // Construct the plan
-    auto plan = JointTrajectoryPlan::ConstructFromMessage(*tree_, goal);
+    auto plan = JointTrajectoryVelocityCommandPlan::ConstructFromMessage(*tree_, goal);
     if( plan == nullptr
     || (plan->LoadParameterFrom(parameter_map_) == LoadParameterStatus::FatalError)) {
         robot_msgs::JointTrajectoryResult result;
