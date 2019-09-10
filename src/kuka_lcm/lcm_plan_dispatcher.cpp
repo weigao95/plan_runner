@@ -80,7 +80,7 @@ void plan_runner::KukaPlanDispatcherLCM::handleStopPlan(
     const std::string &,
     const robotlocomotion::robot_plan_t *
 ) {
-    std_srvs::TriggerRequest request;
+    std_srvs::Trigger request;
     std::lock_guard<std::mutex> guard(mutex_);
     stop_plan_client_->call(request);
 }
