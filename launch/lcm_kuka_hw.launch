@@ -9,8 +9,4 @@
 <node name="plan_runner" pkg="$(arg pkg_name)" type="kuka_lcm_node" output="screen" args="$(arg config_path)">
 </node>
 
-<!--The LCM command dispatcher-->
-<node name="lcm_command_bridge" pkg="$(arg pkg_name)" type="lcm_dispatcher_node" output="screen" args="$(arg config_path)">
-</node>
-
 </launch>
