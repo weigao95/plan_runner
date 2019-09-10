@@ -36,8 +36,8 @@ void plan_runner::EEVelocityStreamingPlan::StopPlan(plan_runner::ActionToCurrent
 
 
 void plan_runner::EEVelocityStreamingPlan::ComputeCommand(
-        const plan_runner::CommandInput &input,
-        plan_runner::RobotArmCommand &command
+    const plan_runner::CommandInput &input,
+    plan_runner::RobotArmCommand &command
 ) {
     // Collect info
     mutex_.lock();
@@ -54,7 +54,7 @@ void plan_runner::EEVelocityStreamingPlan::ComputeCommand(
     auto num_joints = tree.get_num_positions();
 
     // Command fwd
-    const double* q_fwd = GetForwardIntegrationJointPosition(input);
+    const double* q_fwd = integrator_option_.GetForwardIntegrationJointPosition(input);
     DRAKE_ASSERT(q_fwd != nullptr);
 
     // The common flag

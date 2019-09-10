@@ -6,14 +6,14 @@
 
 #include <mutex>
 #include "common/plan_base.h"
-#include "robot_plan/position_velocity_plan.h"
+#include "robot_plan/position_integrate_option.h"
 #include "robot_msgs/EEVelocityGoal.h"
 
 
 namespace plan_runner {
 
     // The plan that receives end-effector velocity and transform it into joint command
-    class EEVelocityStreamingPlan : public PositionVelocityPlan {
+    class EEVelocityStreamingPlan : public RobotPlanBase {
     public:
         using Ptr = std::shared_ptr<EEVelocityStreamingPlan>;
         EEVelocityStreamingPlan(ros::NodeHandle& nh, std::string topic);
@@ -43,6 +43,13 @@ namespace plan_runner {
         std::string topic_;
         ros::NodeHandle node_handle_;
         std::shared_ptr<ros::Subscriber> streaming_subscriber_;
+
+        // Parameters
+    private:
+        PositionIntegratorOption integrator_option_;
+    public:
+        LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override {return integrator_option_.LoadParameterFrom(datamap);};
+        void SaveParameterTo(YAML::Node& datamap) const override { integrator_option_.SaveParameterTo(datamap); };
 
         // Caches
     private:

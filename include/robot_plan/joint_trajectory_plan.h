@@ -12,13 +12,14 @@
 
 #include <ros/ros.h>
 
-#include "robot_plan/position_velocity_plan.h"
+#include "common/plan_base.h"
+#include "robot_plan/position_integrate_option.h"
 #include "robot_msgs/JointTrajectoryAction.h"
 
 
 namespace plan_runner {
 
-    class JointTrajectoryPlan : public PositionVelocityPlan {
+    class JointTrajectoryPlan : public RobotPlanBase {
     public:
         using Ptr = std::shared_ptr<JointTrajectoryPlan>;
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
@@ -59,6 +60,13 @@ namespace plan_runner {
         // The trajectory
         PiecewisePolynomial joint_trajectory_;
         PiecewisePolynomial joint_velocity_trajectory_;
+
+        // The parameter is only the integrator option
+    private:
+        PositionIntegratorOption integrator_option_;
+    public:
+        LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override {return integrator_option_.LoadParameterFrom(datamap);};
+        void SaveParameterTo(YAML::Node& datamap) const override { integrator_option_.SaveParameterTo(datamap); };
 
         // Cache
         Eigen::VectorXd q_command_cache, v_command_cache;

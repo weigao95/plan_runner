@@ -88,7 +88,7 @@ void plan_runner::JointTrajectoryPlan::InitializePlan(const plan_runner::Command
     // Use measurement or command to fill the first knot
     const double* q_init = nullptr;
     const auto& history = input.robot_history->GetCommandHistory();
-    if(use_commanded_fwd_integration_ && (!history.empty())) {
+    if(integrator_option_.UseCommandForwardIntegration() && (!history.empty())) {
         q_init =  history.back().joint_position;
     } else {
         q_init = input.latest_measurement->joint_position;

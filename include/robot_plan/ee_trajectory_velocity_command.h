@@ -13,13 +13,14 @@
 #include <ros/ros.h>
 #include <robot_msgs/CartesianTrajectoryAction.h>
 
-#include "robot_plan/position_velocity_plan.h"
+#include "common/plan_base.h"
+#include "robot_plan/position_integrate_option.h"
 
 
 namespace plan_runner {
 
 
-    class EETrajectoryVelocityCommandPlan : public PositionVelocityPlan {
+    class EETrajectoryVelocityCommandPlan : public RobotPlanBase {
     public:
         using Ptr = std::shared_ptr<EETrajectoryVelocityCommandPlan>;
         using PiecewisePolynomial = drake::trajectories::PiecewisePolynomial<double>;
@@ -86,6 +87,7 @@ namespace plan_runner {
 
         // The hypter-parameter
     private:
+        PositionIntegratorOption integrate_option_;
         Eigen::Vector3d kp_rotation_;
         Eigen::Vector3d kp_translation_;
     public:

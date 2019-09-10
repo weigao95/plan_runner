@@ -208,7 +208,7 @@ void plan_runner::EETrajectoryVelocityCommandPlan::ComputeCommand(
     Eigen::VectorXd qdot_command = svd.solve(desired_twist);
 
     // The forward integration position
-    const double* q_fwd_integration = GetForwardIntegrationJointPosition(input);
+    const double* q_fwd_integration = integrate_option_.GetForwardIntegrationJointPosition(input);
 
     // Write to the result
     command.set_invalid();
@@ -224,7 +224,7 @@ void plan_runner::EETrajectoryVelocityCommandPlan::ComputeCommand(
 // The processing of parameter
 plan_runner::LoadParameterStatus plan_runner::EETrajectoryVelocityCommandPlan::LoadParameterFrom(const YAML::Node &datamap) {
     // The base class
-    auto base_load_result = PositionVelocityPlan::LoadParameterFrom(datamap);
+    auto base_load_result = integrate_option_.LoadParameterFrom(datamap);
 
     // Check the key
     auto key = DefaultClassParameterNameKey();
@@ -250,7 +250,7 @@ plan_runner::LoadParameterStatus plan_runner::EETrajectoryVelocityCommandPlan::L
 
 void plan_runner::EETrajectoryVelocityCommandPlan::SaveParameterTo(YAML::Node &datamap) const {
     // The base class
-    PositionVelocityPlan::SaveParameterTo(datamap);
+    integrate_option_.SaveParameterTo(datamap);
 
     // The rotation gain
     auto key = DefaultClassParameterNameKey();
