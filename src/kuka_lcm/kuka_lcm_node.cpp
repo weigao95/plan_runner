@@ -5,10 +5,10 @@
 #include <ros/ros.h>
 #include <yaml-cpp/yaml.h>
 
-#include "robot_plan/joint_impedance_limit_dq.h"
 #include "supervisor/plan_supervisor.h"
 #include "simulated_robot/common_robot_model.h"
 #include "kuka_lcm.h"
+#include "joint_impedance_limit_dq.h"
 
 
 std::unique_ptr<plan_runner::KukaLCMInterface> constructKukaLCMInterface(const YAML::Node& config) {
