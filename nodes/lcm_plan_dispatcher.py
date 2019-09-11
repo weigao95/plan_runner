@@ -10,6 +10,7 @@ from robotlocomotion.robot_plan_t import robot_plan_t
 # The ros types
 import rospy
 import actionlib
+from std_srvs.srv import Trigger, TriggerRequest
 from robot_msgs.msg import JointTrajectoryGoal, JointTrajectoryAction
 from trajectory_msgs.msg import JointTrajectoryPoint
 
@@ -31,11 +32,12 @@ class KukaPlanDispatcherConfig(object):
     lcm_stop_channel = 'STOP'
 
 
-class KukaPlanDispatcherLCM(object):
+class KukaLCMPlanDispatcher(object):
 
     def __init__(self, config=KukaPlanDispatcherConfig()):
         self._config = config
         self._joint_trajectory_action = None  # type: actionlib.SimpleActionClient
+        self._stop_plan_service = None  # type: rospy.ServiceProxy
 
     def start(self):
         # Setup of the action
@@ -44,9 +46,13 @@ class KukaPlanDispatcherLCM(object):
             JointTrajectoryAction)
         self._joint_trajectory_action.wait_for_server()
 
+        # Setup of service
+        self._stop_plan_service = rospy.ServiceProxy(self._config.stop_plan_service, Trigger)
+
         # The lcm staff
         lcm_handle = lcm.LCM()
         lcm_handle.subscribe(self._config.lcm_command_channel, self.handle_joint_trajectory_plan)
+        lcm_handle.subscribe(self._config.lcm_stop_channel, self.handle_stop_plan)
 
         # Start processing
         try:
@@ -86,10 +92,14 @@ class KukaPlanDispatcherLCM(object):
         # Send the goal
         self._joint_trajectory_action.send_goal(goal_msg)
 
+    def handle_stop_plan(self, channel, data):
+        request = TriggerRequest()
+        self._stop_plan_service(request)
+
 
 def main():
     # Parse the argument
-    args, unknown = parser.parse_known_args()
+    args, _ = parser.parse_known_args()
     config_path = args.config_path  # type: str
 
     # Construct the the config
@@ -103,7 +113,7 @@ def main():
 
     # OK
     rospy.init_node('lcm_command_bridge')
-    dispatcher = KukaPlanDispatcherLCM(dispatcher_config)
+    dispatcher = KukaLCMPlanDispatcher(dispatcher_config)
     dispatcher.start()
 
 
