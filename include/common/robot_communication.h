@@ -55,5 +55,10 @@ namespace plan_runner {
     public:
         const decltype(measurement_history_)& GetMeasurementHistory() const { return measurement_history_; }
         const decltype(command_history_)& GetCommandHistory() const { return command_history_; }
+
+        // Caches
+        // Only accessed on main thread, assign before use
+    private:
+        RobotArmCommand command_cache;
     };
 }
