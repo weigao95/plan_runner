@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include <yaml-cpp/yaml.h>
 
+#include "robot_plan/joint_impedance_limit_dq.h"
 #include "supervisor/plan_supervisor.h"
 #include "simulated_robot/common_robot_model.h"
 #include "kuka_lcm.h"
@@ -18,10 +19,16 @@ std::unique_ptr<plan_runner::KukaLCMInterface> constructKukaLCMInterface(const Y
     // Construct the interface
     std::string lcm_status_channel = config["lcm_status_channel"].as<std::string>();
     std::string lcm_command_channel = config["lcm_command_channel"].as<std::string>();
-    return std::make_unique<plan_runner::KukaLCMInterface>(
+    auto rbt = std::make_unique<plan_runner::KukaLCMInterface>(
         std::move(lcm_status_channel),
         std::move(lcm_command_channel)
     );
+
+    // Add checker
+    auto dq_limiter = std::make_shared<plan_runner::JointImpedanceControllerLimitDq>();
+    rbt->AddCommandProcessor(dq_limiter);
+
+    return rbt;
 }
 
 
@@ -41,14 +48,18 @@ int main(int argc, char *argv[]) {
         std::exit(1);
     }
 
+
+
     // Init the ros staff
     using namespace plan_runner;
     ros::init(argc, argv, "plan_runner");
     ros::NodeHandle nh("plan_runner");
 
-    // The initialization
+    // Construct supervisor
     auto tree = constructDefaultKukaRBT();
     PlanSupervisor supervisor(std::move(tree), std::move(robot_arm), nh, config);
+
+    // The initialization
     supervisor.Initialize();
     ROS_INFO("Kuka lcm-interface supervisor started!");
 
