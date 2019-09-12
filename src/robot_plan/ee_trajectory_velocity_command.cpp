@@ -148,12 +148,6 @@ void plan_runner::EETrajectoryVelocityCommandPlan::InitializePlan(const plan_run
 }
 
 
-Eigen::Vector3d plan_runner::EETrajectoryVelocityCommandPlan::logSO3(const Eigen::Matrix3d& rotation) {
-    Eigen::AngleAxisd angle_axis(rotation);
-    return angle_axis.angle() * angle_axis.axis();
-}
-
-
 // The workforce function
 void plan_runner::EETrajectoryVelocityCommandPlan::ComputeCommand(
     const plan_runner::CommandInput &input,
@@ -230,7 +224,7 @@ plan_runner::LoadParameterStatus plan_runner::EETrajectoryVelocityCommandPlan::L
     auto key = DefaultClassParameterNameKey();
     if(!datamap[key]) {
         // Keep current value
-        return StatusAnd(base_load_result, LoadParameterStatus::NonFatalError);
+        return TheWorseStatus(base_load_result, LoadParameterStatus::NonFatalError);
     }
 
     // Load it
@@ -245,7 +239,7 @@ plan_runner::LoadParameterStatus plan_runner::EETrajectoryVelocityCommandPlan::L
         kp_translation_[1] = datamap[key]["translation"][1].as<double>();
         kp_translation_[2] = datamap[key]["translation"][2].as<double>();
     }
-    return StatusAnd(base_load_result, LoadParameterStatus::Success);
+    return TheWorseStatus(base_load_result, LoadParameterStatus::Success);
 }
 
 void plan_runner::EETrajectoryVelocityCommandPlan::SaveParameterTo(YAML::Node &datamap) const {

@@ -16,4 +16,7 @@ namespace plan_runner {
     int getBodyOrFrameIndex(
             const RigidBodyTree<double>& tree,
             const std::string& body_or_frame_name);
+
+    // Used for rotation controllers
+    Eigen::Vector3d logSO3(const Eigen::Matrix3d& rotation);
 }
