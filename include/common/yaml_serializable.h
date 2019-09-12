@@ -47,7 +47,7 @@ namespace plan_runner {
                 return true;
             return false;
         }
-        inline static LoadParameterStatus StatusAnd(LoadParameterStatus a, LoadParameterStatus b) {
+        inline static LoadParameterStatus TheWorseStatus(LoadParameterStatus a, LoadParameterStatus b) {
             if(IsStatusBetterThan(a ,b))
                 return b;
             else

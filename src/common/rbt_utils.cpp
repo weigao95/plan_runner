@@ -51,3 +51,9 @@ int plan_runner::getBodyOrFrameIndex(
     // OK
     return body_frame_index;
 }
+
+
+Eigen::Vector3d plan_runner::logSO3(const Eigen::Matrix3d& rotation) {
+    Eigen::AngleAxisd angle_axis(rotation);
+    return angle_axis.angle() * angle_axis.axis();
+}

@@ -8,6 +8,7 @@
 #include "robot_plan/ee_trajectory_velocity_command.h"
 #include "robot_plan/joint_streaming.h"
 #include "robot_plan/ee_velocity_streaming.h"
+#include "robot_plan/ee_pose_streaming.h"
 
 
 // The handler for joint trajectory action
@@ -108,6 +109,10 @@ bool plan_runner::PlanSupervisor::HandleStartStreamingService(
         case streaming_type.EE_VELOCITY_STREAMING:
             plan = std::make_shared<EEVelocityStreamingPlan>(
                     node_handle_, "/plan_runner/ee_velocity_streaming_setpoint");
+            break;
+        case streaming_type.EE_POSE_STREAMING:
+            plan = std::make_shared<EEPoseStreamingPlan>(
+                node_handle_, "/plan_runner/ee_pose_streaming_setpoint");
             break;
         default:
             break;
