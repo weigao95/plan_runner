@@ -58,7 +58,8 @@ class KukaLCMPlanDispatcher(object):
         try:
             rate = rospy.Rate(5)
             while True:
-                lcm_handle.handle()
+                if lcm_handle.handle() != 0:
+                    break
                 rate.sleep()
         except RuntimeError:
             pass
