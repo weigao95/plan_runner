@@ -45,11 +45,15 @@ void plan_runner::EEPoseStreamingPlan::ComputeCommand(
 ) {
     // Get the data
     mutex_.lock();
-    Eigen::Isometry3d target_pose_cache = target_frame_;
+    Eigen::Isometry3d cmd_frame_target_pose_cache = command_frame_desired_pose_;
+    Eigen::Isometry3d cmd_frame_in_ee = command_frame_in_ee_;
     ee_frame_id_cache = ee_frame_id_;
     expressed_in_frame_cache = target_expressed_in_frame_;
     bool command_valid = command_valid_;
     mutex_.unlock();
+
+    // The pose of end-effector in world
+    Eigen::Isometry3d desired_ee_pose_to_expressed_in = command_frame_desired_pose_ * command_frame_in_ee_.inverse();
 
     // Get tree
     const auto& tree = *input.robot_rbt;
@@ -84,7 +88,7 @@ void plan_runner::EEPoseStreamingPlan::ComputeCommand(
 
     // Compute the target pose
     Eigen::Isometry3d target_pose_in_world =
-        tree.relativeTransform(cache, world_frame, expressed_in_frame_index) * target_pose_cache;
+        tree.relativeTransform(cache, world_frame, expressed_in_frame_index) * desired_ee_pose_to_expressed_in;
 
     // Get transformation
     Eigen::Isometry3d ee_to_world = tree.relativeTransform(cache, world_frame, ee_frame_index);
@@ -139,8 +143,11 @@ void plan_runner::EEPoseStreamingPlan::updateStreamedCommand(
         orientation_msg.x,
         orientation_msg.y,
         orientation_msg.z);
-    target_frame_.translation() = target_position;
-    target_frame_.linear() = target_rotation.toRotationMatrix();
+    command_frame_desired_pose_.translation() = target_position;
+    command_frame_desired_pose_.linear() = target_rotation.toRotationMatrix();
+
+    // The relative pose of command frame and ee, currently identity
+    command_frame_in_ee_.setIdentity();
     
     // The flag
     if(!command_valid_)

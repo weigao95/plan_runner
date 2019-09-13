@@ -30,7 +30,8 @@ namespace plan_runner {
         std::mutex mutex_;
         std::string ee_frame_id_;
         std::string target_expressed_in_frame_;
-        Eigen::Isometry3d target_frame_;
+        Eigen::Isometry3d command_frame_desired_pose_;
+        Eigen::Isometry3d command_frame_in_ee_;
         bool command_valid_;
 
         // The ROS handler
