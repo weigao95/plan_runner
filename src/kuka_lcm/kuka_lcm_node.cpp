@@ -25,8 +25,8 @@ std::unique_ptr<plan_runner::KukaLCMInterface> constructKukaLCMInterface(const Y
     );
 
     // Add checker
-    auto dq_limiter = std::make_shared<plan_runner::JointImpedanceControllerLimitDq>();
-    rbt->AddCommandProcessor(dq_limiter);
+    //auto dq_limiter = std::make_shared<plan_runner::JointImpedanceControllerLimitDq>();
+    //rbt->AddCommandProcessor(dq_limiter);
 
     return rbt;
 }
