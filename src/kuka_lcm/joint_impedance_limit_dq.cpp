@@ -19,11 +19,12 @@ void plan_runner::JointImpedanceControllerLimitDq::ProcessCommand(
     double scale_factor = 1.0;
     constexpr int KUKA_IIWA_N_JOINTS = 7;
     for(auto i = 0; i < KUKA_IIWA_N_JOINTS; i++) {
-        auto command_position_i = command.joint_position[i];
-        auto q_diff_i = std::abs(command_position_i - measured_joint_position[i]);
+        double command_position_i = command.joint_position[i];
+        double q_diff_i = std::abs(command_position_i - measured_joint_position[i]);
         if(q_diff_i > max_dq_) {
             need_scale = true;
-            scale_factor = std::min(scale_factor, q_diff_i / max_dq_);
+            double new_scale_factor = max_dq_ / q_diff_i;
+            scale_factor = std::min(scale_factor, new_scale_factor);
         }
     }
 
