@@ -58,10 +58,9 @@ class KukaLCMPlanDispatcher(object):
         try:
             rate = rospy.Rate(5)
             while True:
-                if lcm_handle.handle() != 0:
-                    break
+                lcm_handle.handle()
                 rate.sleep()
-        except RuntimeError:
+        except KeyboardInterrupt:
             pass
 
     def handle_joint_trajectory_plan(self, channel, data):
