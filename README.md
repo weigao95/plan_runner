@@ -1,3 +1,3 @@
 # plan_runner
 
-The new implementation of plan-runner that is clear, simple and extendable to new robots.
+Plan runner is the interface between higher-level controllers (plan) and robot drivers.
