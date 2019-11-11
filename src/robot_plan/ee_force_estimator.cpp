@@ -22,7 +22,12 @@ plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
 }
 
 void plan_runner::EEForceTorqueEstimator::Initialize() {
-
+    // The startup of subscriber
+    joint_state_subscriber_ = std::make_shared<ros::Subscriber>(
+        node_handle_.subscribe(
+            joint_state_topic_,
+            1,
+            &EEForceTorqueEstimator::onReceiveJointState, this));
 }
 
 void plan_runner::EEForceTorqueEstimator::Stop() {
