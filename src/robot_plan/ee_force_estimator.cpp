@@ -36,6 +36,7 @@ void plan_runner::EEForceTorqueEstimator::Initialize() {
             joint_state_topic_,
             1,
             &EEForceTorqueEstimator::onReceiveJointState, this));
+    std::cout <<  "The force/torque estimator initialization OK" << std::endl;
 }
 
 
