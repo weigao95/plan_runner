@@ -4,6 +4,7 @@
 
 #include "robot_plan/ee_force_estimator.h"
 #include "common/rbt_utils.h"
+#include <robot_msgs/ForceTorque.h>
 
 
 plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
@@ -18,7 +19,7 @@ plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
     joint_state_topic_(std::move(joint_state_topic)),
     ee_frame_id_(std::move(ee_frame_id))
 {
-
+    estimation_publisher_ = node_handle_.advertise<robot_msgs::ForceTorque>(estimation_publish_topic_, 1);
 }
 
 void plan_runner::EEForceTorqueEstimator::Initialize() {
@@ -35,7 +36,26 @@ void plan_runner::EEForceTorqueEstimator::Stop() {
 }
 
 void plan_runner::EEForceTorqueEstimator::onReceiveJointState(const sensor_msgs::JointState::ConstPtr& joint_state) {
+    if(joint_state->position.size() <= 2 || joint_state->effort.size() <= 2)
+        return;
 
+    // Compute force and torque
+    Eigen::Vector3d force_in_world, torque_in_world;
+    estimateEEForceTorque(joint_state, force_in_world, torque_in_world);
+
+    // Make msg and publish it
+    robot_msgs::ForceTorque ft_msg;
+    ft_msg.frame_id = ee_frame_id_;
+    ft_msg.force.x = force_in_world[0];
+    ft_msg.force.y = force_in_world[1];
+    ft_msg.force.z = force_in_world[2];
+
+    ft_msg.torque.x = torque_in_world[0];
+    ft_msg.torque.y = torque_in_world[1];
+    ft_msg.torque.z = torque_in_world[2];
+
+    // Send the msg
+    estimation_publisher_.publish(ft_msg);
 }
 
 static Eigen::MatrixXd AngularVelocityJacobian(
