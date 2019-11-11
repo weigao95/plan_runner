@@ -21,6 +21,18 @@ plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
 
 }
 
+void plan_runner::EEForceTorqueEstimator::Initialize() {
+
+}
+
+void plan_runner::EEForceTorqueEstimator::Stop() {
+
+}
+
+void plan_runner::EEForceTorqueEstimator::onReceiveJointState(const sensor_msgs::JointState::ConstPtr& joint_state) {
+
+}
+
 static Eigen::MatrixXd AngularVelocityJacobian(
     const RigidBodyTreed& tree,
     const KinematicsCache<double>& cache, int ee_frame_id) {
@@ -73,3 +85,4 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
         force_in_world[i] = torque_force[i + 3];
     }
 }
+

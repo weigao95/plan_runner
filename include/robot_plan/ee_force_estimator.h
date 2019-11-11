@@ -21,6 +21,9 @@ namespace plan_runner {
             std::string estimation_publish_topic = "/plan_runner/estimated_ee_force",
             std::string joint_state_topic="/joint_states",
             std::string ee_frame_id="iiwa_link_ee");
+
+        void Initialize();
+        void Stop();
     private:
         // The meta info
         ros::NodeHandle node_handle_;
@@ -31,6 +34,7 @@ namespace plan_runner {
         // The topic for publishing and receiving
         std::shared_ptr<ros::Subscriber> joint_state_subscriber_;
         ros::Publisher estimation_publisher_;
+        void onReceiveJointState(const sensor_msgs::JointState::ConstPtr& joint_state);
 
         // The actual computation
     protected:
