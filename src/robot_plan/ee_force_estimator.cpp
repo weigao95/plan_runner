@@ -22,6 +22,13 @@ plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
     estimation_publisher_ = node_handle_.advertise<robot_msgs::ForceTorque>(estimation_publish_topic_, 1);
 }
 
+
+plan_runner::EEForceTorqueEstimator::~EEForceTorqueEstimator() {
+    if(joint_state_subscriber_ != nullptr)
+        joint_state_subscriber_->shutdown();
+}
+
+
 void plan_runner::EEForceTorqueEstimator::Initialize() {
     // The startup of subscriber
     joint_state_subscriber_ = std::make_shared<ros::Subscriber>(
@@ -31,9 +38,6 @@ void plan_runner::EEForceTorqueEstimator::Initialize() {
             &EEForceTorqueEstimator::onReceiveJointState, this));
 }
 
-void plan_runner::EEForceTorqueEstimator::Stop() {
-
-}
 
 void plan_runner::EEForceTorqueEstimator::onReceiveJointState(const sensor_msgs::JointState::ConstPtr& joint_state) {
     if(joint_state->position.size() <= 2 || joint_state->effort.size() <= 2)
@@ -58,6 +62,7 @@ void plan_runner::EEForceTorqueEstimator::onReceiveJointState(const sensor_msgs:
     estimation_publisher_.publish(ft_msg);
 }
 
+
 static Eigen::MatrixXd AngularVelocityJacobian(
     const RigidBodyTreed& tree,
     const KinematicsCache<double>& cache, int ee_frame_id) {
@@ -67,6 +72,7 @@ static Eigen::MatrixXd AngularVelocityJacobian(
     Eigen::MatrixXd angular_velocity_jacobian = twist_jacobian.block(0, 0, 3, n_cols);
     return angular_velocity_jacobian;
 }
+
 
 void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     const sensor_msgs::JointState::ConstPtr &joint_state,
@@ -110,4 +116,3 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
         force_in_world[i] = torque_force[i + 3];
     }
 }
-

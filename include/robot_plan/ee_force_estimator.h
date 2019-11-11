@@ -21,9 +21,9 @@ namespace plan_runner {
             std::string estimation_publish_topic = "/plan_runner/estimated_ee_force",
             std::string joint_state_topic="/joint_states",
             std::string ee_frame_id="iiwa_link_ee");
+        ~EEForceTorqueEstimator();
 
         void Initialize();
-        void Stop();
     private:
         // The meta info
         ros::NodeHandle node_handle_;
