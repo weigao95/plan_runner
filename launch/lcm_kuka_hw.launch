@@ -13,4 +13,8 @@
 <node name="lcm_command_bridge" pkg="$(arg pkg_name)" type="lcm_plan_dispatcher.py" output="screen" args="$(arg config_path)">
 </node>
 
+<!--The force/torque estimator-->
+<node name="force_torque_estimator" pkg="$(arg pkg_name)" type="ee_force_estimator_node" output="screen" args="$(arg config_path)">
+</node>
+
 </launch>
