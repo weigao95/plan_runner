@@ -11,22 +11,29 @@ plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
     ros::NodeHandle &nh,
     std::unique_ptr<RigidBodyTree<double>> tree,
     std::string estimation_publish_topic,
+    std::string reinit_service_name,
     std::string joint_state_topic,
     std::string ee_frame_id
 ) : node_handle_(nh),
     tree_(std::move(tree)),
     estimation_publish_topic_(std::move(estimation_publish_topic)),
     joint_state_topic_(std::move(joint_state_topic)),
+    reinit_offset_srv_name_(std::move(reinit_service_name)),
     ee_frame_id_(std::move(ee_frame_id)),
     offset_valid_(false)
 {
     estimation_publisher_ = node_handle_.advertise<robot_msgs::ForceTorque>(estimation_publish_topic_, 1);
+    reinit_offset_server_ = std::make_shared<ros::ServiceServer>(
+        node_handle_.advertiseService(reinit_offset_srv_name_,
+                                  &EEForceTorqueEstimator::onReinitServiceRequeat, this));
 }
 
 
 plan_runner::EEForceTorqueEstimator::~EEForceTorqueEstimator() {
     if(joint_state_subscriber_ != nullptr)
         joint_state_subscriber_->shutdown();
+    if(reinit_offset_server_ != nullptr)
+        reinit_offset_server_->shutdown();
 }
 
 
@@ -62,6 +69,18 @@ void plan_runner::EEForceTorqueEstimator::onReceiveJointState(const sensor_msgs:
 
     // Send the msg
     estimation_publisher_.publish(ft_msg);
+}
+
+
+bool plan_runner::EEForceTorqueEstimator::onReinitServiceRequeat(
+    std_srvs::Trigger::Request &req,
+    std_srvs::Trigger::Response &res
+) {
+    std::lock_guard<std::mutex> guard(mutex_);
+    offset_valid_ = false;
+    res.success = true;
+    std::cout << "Reinit the joint torque offset" << std::endl;
+    return true;
 }
 
 

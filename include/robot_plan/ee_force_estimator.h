@@ -8,6 +8,7 @@
 #include <ros/ros.h>
 #include <drake/multibody/rigid_body_tree.h>
 #include <sensor_msgs/JointState.h>
+#include <std_srvs/Trigger.h>
 
 
 namespace plan_runner {
@@ -19,22 +20,26 @@ namespace plan_runner {
             ros::NodeHandle& nh,
             std::unique_ptr<RigidBodyTree<double>> tree,
             std::string estimation_publish_topic = "/plan_runner/estimated_ee_force",
+            std::string reinit_service_name = "/plan_runner/ee_estimator_reset",
             std::string joint_state_topic="/joint_states",
             std::string ee_frame_id="iiwa_link_ee");
         ~EEForceTorqueEstimator();
 
         void Initialize();
+        void onReceiveJointState(const sensor_msgs::JointState::ConstPtr& joint_state);
+        bool onReinitServiceRequeat(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
     private:
         // The meta info
         ros::NodeHandle node_handle_;
         std::string ee_frame_id_;
         std::string joint_state_topic_;
         std::string estimation_publish_topic_;
+        std::string reinit_offset_srv_name_;
 
         // The topic for publishing and receiving
         std::shared_ptr<ros::Subscriber> joint_state_subscriber_;
         ros::Publisher estimation_publisher_;
-        void onReceiveJointState(const sensor_msgs::JointState::ConstPtr& joint_state);
+        std::shared_ptr<ros::ServiceServer> reinit_offset_server_;
 
         // The actual computation
     protected:
