@@ -89,6 +89,7 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     // The offset
     mutex_.lock();
     if(!offset_valid_) {
+        torque_offset_.resize(q_size);
         torque_offset_ = raw_joint_torque;
         offset_valid_ = true;
     }
@@ -126,7 +127,7 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     K.block(0, 6, 6, 7) = concantated_jacobian;
     K.block(6, 6, 7, 6) = concantated_jacobian.transpose();
 
-    Eigen::VectorXd rhs; rhs.setZero();
+    Eigen::VectorXd rhs; rhs.resize(6 + n_cols); rhs.setZero();
     for(auto i = 0; i < n_cols; i++)
         rhs[i + 6] = joint_torque[i];
 
