@@ -121,7 +121,7 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     // The KKT condition is
     // [I_6x6 J    ] [ x     ] = 0
     // [J_T   0_7x7] [ lambda] = joint_torque
-    Eigen::MatrixXd K; K.resize(6 + n_cols, 6 + n_cols); K.setZero();
+    /*Eigen::MatrixXd K; K.resize(6 + n_cols, 6 + n_cols); K.setZero();
     for(auto i = 0; i < 6; i++)
         K(i, i) = 1;
     K.block(0, 6, 6, 7) = concantated_jacobian;
@@ -134,15 +134,17 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     // Solve it
     auto svd = K.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
     svd.setThreshold(0.01);
-    Eigen::VectorXd torque_force_lambda = svd.solve(rhs);
-    // Eigen::MatrixXd J_T = concantated_jacobian.transpose();
-    // auto svd = J_T.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
-    // svd.setThreshold(0.01);
-    // Eigen::VectorXd torque_force = svd.solve(joint_torque);
+    Eigen::VectorXd torque_force_lambda = svd.solve(rhs);*/
+    
+    // The old solver
+    Eigen::MatrixXd J_T = concantated_jacobian.transpose();
+    auto svd = J_T.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+    svd.setThreshold(0.01);
+    Eigen::VectorXd torque_force = svd.solve(joint_torque);
 
     // Save the result
     for(auto i = 0; i < 3; i++) {
-        torque_in_world[i] = torque_force_lambda[i];
-        force_in_world[i] = torque_force_lambda[i + 3];
+        torque_in_world[i] = torque_force[i];
+        force_in_world[i] = torque_force[i + 3];
     }
 }
