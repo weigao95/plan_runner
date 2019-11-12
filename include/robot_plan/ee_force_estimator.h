@@ -44,6 +44,7 @@ namespace plan_runner {
             Eigen::Vector3d& force_in_world, Eigen::Vector3d& torque_in_world);
 
         // The offset of parameter
+        std::mutex mutex_;
         Eigen::VectorXd torque_offset_;
         bool offset_valid_;
     };

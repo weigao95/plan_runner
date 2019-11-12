@@ -87,11 +87,13 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     Eigen::Map<const Eigen::VectorXd> raw_joint_torque = Eigen::Map<const Eigen::VectorXd>(joint_state->effort.data(), q_size);
 
     // The offset
+    mutex_.lock();
     if(!offset_valid_) {
         torque_offset_ = raw_joint_torque;
         offset_valid_ = true;
     }
     Eigen::VectorXd joint_torque = raw_joint_torque - torque_offset_;
+    mutex_.unlock();
 
     // Kinematic computation
     KinematicsCache<double> cache = tree_->CreateKinematicsCache();
