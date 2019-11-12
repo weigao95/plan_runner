@@ -43,6 +43,8 @@ namespace plan_runner {
             const sensor_msgs::JointState::ConstPtr& joint_state,
             Eigen::Vector3d& force_in_world, Eigen::Vector3d& torque_in_world);
 
-        // Low pass filtering
+        // The offset of parameter
+        Eigen::VectorXd torque_offset_;
+        bool offset_valid_;
     };
 }

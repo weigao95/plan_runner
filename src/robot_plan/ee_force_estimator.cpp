@@ -17,7 +17,8 @@ plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
     tree_(std::move(tree)),
     estimation_publish_topic_(std::move(estimation_publish_topic)),
     joint_state_topic_(std::move(joint_state_topic)),
-    ee_frame_id_(std::move(ee_frame_id))
+    ee_frame_id_(std::move(ee_frame_id)),
+    offset_valid_(false)
 {
     estimation_publisher_ = node_handle_.advertise<robot_msgs::ForceTorque>(estimation_publish_topic_, 1);
 }
@@ -83,7 +84,14 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     // Get the data
     auto q_size = tree_->get_num_positions();
     Eigen::Map<const Eigen::VectorXd> q = Eigen::Map<const Eigen::VectorXd>(joint_state->position.data(), q_size);
-    Eigen::Map<const Eigen::VectorXd> joint_torque = Eigen::Map<const Eigen::VectorXd>(joint_state->effort.data(), q_size);
+    Eigen::Map<const Eigen::VectorXd> raw_joint_torque = Eigen::Map<const Eigen::VectorXd>(joint_state->effort.data(), q_size);
+
+    // The offset
+    if(!offset_valid_) {
+        torque_offset_ = raw_joint_torque;
+        offset_valid_ = true;
+    }
+    Eigen::VectorXd joint_torque = raw_joint_torque - torque_offset_;
 
     // Kinematic computation
     KinematicsCache<double> cache = tree_->CreateKinematicsCache();
@@ -104,16 +112,34 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     concantated_jacobian.block(0, 0, 3, n_cols) = angular_velocity_jacobian;
     concantated_jacobian.block(3, 0, 3, n_cols) = linear_velocity_jacobian;
 
-    // Compute force torque
-    // J_T dot (torque, force) = joint_torque
-    Eigen::MatrixXd J_T = concantated_jacobian.transpose();
-    auto svd = J_T.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+    // Compute force torque using QP
+    // min: ||(torque, force)||^2
+    // s.t: J_T dot (torque, force) = joint_torque
+    // The KKT condition is
+    // [I_6x6 J    ] [ x     ] = 0
+    // [J_T   0_7x7] [ lambda] = joint_torque
+    Eigen::MatrixXd K; K.resize(6 + n_cols, 6 + n_cols); K.setZero();
+    for(auto i = 0; i < 6; i++)
+        K(i, i) = 1;
+    K.block(0, 6, 6, 7) = concantated_jacobian;
+    K.block(6, 6, 7, 6) = concantated_jacobian.transpose();
+
+    Eigen::VectorXd rhs; rhs.setZero();
+    for(auto i = 0; i < n_cols; i++)
+        rhs[i + 6] = joint_torque[i];
+
+    // Solve it
+    auto svd = K.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
     svd.setThreshold(0.01);
-    Eigen::VectorXd torque_force = svd.solve(joint_torque);
+    Eigen::VectorXd torque_force_lambda = svd.solve(rhs);
+    // Eigen::MatrixXd J_T = concantated_jacobian.transpose();
+    // auto svd = J_T.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+    // svd.setThreshold(0.01);
+    // Eigen::VectorXd torque_force = svd.solve(joint_torque);
 
     // Save the result
     for(auto i = 0; i < 3; i++) {
-        torque_in_world[i] = torque_force[i];
-        force_in_world[i] = torque_force[i + 3];
+        torque_in_world[i] = torque_force_lambda[i];
+        force_in_world[i] = torque_force_lambda[i + 3];
     }
 }
