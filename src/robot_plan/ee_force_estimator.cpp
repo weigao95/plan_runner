@@ -20,7 +20,8 @@ plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
     joint_state_topic_(std::move(joint_state_topic)),
     reinit_offset_srv_name_(std::move(reinit_service_name)),
     ee_frame_id_(std::move(ee_frame_id)),
-    offset_valid_(false)
+    offset_valid_(false),
+    prev_valid_(false)
 {
     estimation_publisher_ = node_handle_.advertise<robot_msgs::ForceTorque>(estimation_publish_topic_, 1);
     reinit_offset_server_ = std::make_shared<ros::ServiceServer>(
@@ -55,6 +56,7 @@ void plan_runner::EEForceTorqueEstimator::onReceiveJointState(const sensor_msgs:
     // Compute force and torque
     Eigen::Vector3d force_in_world, torque_in_world;
     estimateEEForceTorque(joint_state, force_in_world, torque_in_world);
+    filterEstimatedForceTorque(force_in_world, torque_in_world);
 
     // Make msg and publish it
     robot_msgs::ForceTorque ft_msg;
@@ -111,6 +113,7 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
         torque_offset_.resize(q_size);
         torque_offset_ = raw_joint_torque;
         offset_valid_ = true;
+        prev_valid_ = false; // Invalidate the previous result
     }
     Eigen::VectorXd joint_torque = raw_joint_torque - torque_offset_;
     mutex_.unlock();
@@ -166,4 +169,22 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
         torque_in_world[i] = torque_force[i];
         force_in_world[i] = torque_force[i + 3];
     }
+}
+
+
+void plan_runner::EEForceTorqueEstimator::filterEstimatedForceTorque(
+    Eigen::Vector3d &force_in_world,
+    Eigen::Vector3d &torque_in_world
+) {
+    if(!prev_valid_) {
+        prev_force_ = force_in_world;
+        prev_torque_ = torque_in_world;
+        return;
+    }
+
+    constexpr double filter_lambda = 0.5;
+    force_in_world = filter_lambda * force_in_world + (1.0 - filter_lambda) * prev_force_;
+    torque_in_world = filter_lambda * torque_in_world + (1.0 - filter_lambda) * prev_torque_;
+    prev_force_ = force_in_world;
+    prev_torque_ = torque_in_world;
 }

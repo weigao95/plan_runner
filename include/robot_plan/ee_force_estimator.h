@@ -52,5 +52,11 @@ namespace plan_runner {
         std::mutex mutex_;
         Eigen::VectorXd torque_offset_;
         bool offset_valid_;
+
+        // The low pass filtering
+        Eigen::Vector3d prev_force_;
+        Eigen::Vector3d prev_torque_;
+        bool prev_valid_;
+        void filterEstimatedForceTorque(Eigen::Vector3d& force_in_world, Eigen::Vector3d& torque_in_world);
     };
 }
