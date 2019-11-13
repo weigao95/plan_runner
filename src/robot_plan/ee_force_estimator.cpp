@@ -182,7 +182,7 @@ void plan_runner::EEForceTorqueEstimator::filterEstimatedForceTorque(
         return;
     }
 
-    constexpr double filter_lambda = 0.5;
+    constexpr double filter_lambda = 0.2;
     force_in_world = filter_lambda * force_in_world + (1.0 - filter_lambda) * prev_force_;
     torque_in_world = filter_lambda * torque_in_world + (1.0 - filter_lambda) * prev_torque_;
     prev_force_ = force_in_world;
