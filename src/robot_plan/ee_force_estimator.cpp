@@ -10,12 +10,14 @@
 plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
     ros::NodeHandle &nh,
     std::unique_ptr<RigidBodyTree<double>> tree,
+    bool force_only,
     std::string estimation_publish_topic,
     std::string reinit_service_name,
     std::string joint_state_topic,
     std::string ee_frame_id
 ) : node_handle_(nh),
     tree_(std::move(tree)),
+    force_only_(force_only),
     estimation_publish_topic_(std::move(estimation_publish_topic)),
     joint_state_topic_(std::move(joint_state_topic)),
     reinit_offset_srv_name_(std::move(reinit_service_name)),
@@ -26,7 +28,8 @@ plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
     estimation_publisher_ = node_handle_.advertise<robot_msgs::ForceTorque>(estimation_publish_topic_, 1);
     reinit_offset_server_ = std::make_shared<ros::ServiceServer>(
         node_handle_.advertiseService(reinit_offset_srv_name_,
-                                  &EEForceTorqueEstimator::onReinitServiceRequeat, this));
+                                  &EEForceTorqueEstimator::onReinitServiceRequest, this));
+    force_applied_point_in_ee_.setZero();
 }
 
 
@@ -74,12 +77,17 @@ void plan_runner::EEForceTorqueEstimator::onReceiveJointState(const sensor_msgs:
 }
 
 
-bool plan_runner::EEForceTorqueEstimator::onReinitServiceRequeat(
-    std_srvs::Trigger::Request &req,
-    std_srvs::Trigger::Response &res
+bool plan_runner::EEForceTorqueEstimator::onReinitServiceRequest(
+    robot_msgs::ResetForceEstimatorEE::Request &req,
+    robot_msgs::ResetForceEstimatorEE::Response &res
 ) {
     std::lock_guard<std::mutex> guard(mutex_);
     offset_valid_ = false;
+    force_applied_point_in_ee_[0] = req.force_applied_point_in_ee.x;
+    force_applied_point_in_ee_[1] = req.force_applied_point_in_ee.y;
+    force_applied_point_in_ee_[2] = req.force_applied_point_in_ee.z;
+
+    // OK
     res.success = true;
     std::cout << "Reinit the joint torque offset" << std::endl;
     return true;
@@ -123,6 +131,21 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     cache.initialize(q);
     tree_->doKinematics(cache);
 
+    // Do computation
+    if(force_only_) {
+        computeEEForceOnly(cache, joint_torque, force_in_world, torque_in_world);
+    } else {
+        computeEEForceTorque(cache, joint_torque, force_in_world, torque_in_world);
+    }
+}
+
+
+void plan_runner::EEForceTorqueEstimator::computeEEForceTorque(
+    const KinematicsCache<double> &cache,
+    const Eigen::VectorXd& joint_torque,
+    Eigen::Vector3d &force_in_world,
+    Eigen::Vector3d &torque_in_world
+) const {
     // Get the jacobian
     auto ee_frame_index = getBodyOrFrameIndex(*tree_, ee_frame_id_);
     auto world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
@@ -130,7 +153,7 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     // Compute jacobian
     Eigen::MatrixXd angular_velocity_jacobian = AngularVelocityJacobian(*tree_, cache, ee_frame_index);
     Eigen::MatrixXd linear_velocity_jacobian = tree_->transformPointsJacobian(
-        cache, Eigen::Vector3d::Zero(), ee_frame_index, world_frame, true);
+        cache, force_applied_point_in_ee_, ee_frame_index, world_frame, true);
     auto n_cols = linear_velocity_jacobian.cols();
     Eigen::MatrixXd concantated_jacobian;
     concantated_jacobian.resize(6, n_cols);
@@ -157,7 +180,7 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     auto svd = K.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
     svd.setThreshold(0.01);
     Eigen::VectorXd torque_force_lambda = svd.solve(rhs);*/
-    
+
     // The old solver
     Eigen::MatrixXd J_T = concantated_jacobian.transpose();
     auto svd = J_T.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -168,6 +191,33 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     for(auto i = 0; i < 3; i++) {
         torque_in_world[i] = torque_force[i];
         force_in_world[i] = torque_force[i + 3];
+    }
+}
+
+
+void plan_runner::EEForceTorqueEstimator::computeEEForceOnly(
+    const KinematicsCache<double> &cache,
+    const Eigen::VectorXd &joint_torque,
+    Eigen::Vector3d &force_in_world, Eigen::Vector3d &torque_in_world
+) const {
+    // Get the jacobian
+    auto ee_frame_index = getBodyOrFrameIndex(*tree_, ee_frame_id_);
+    auto world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
+
+    // Compute jacobian
+    Eigen::MatrixXd linear_velocity_jacobian = tree_->transformPointsJacobian(
+        cache, force_applied_point_in_ee_, ee_frame_index, world_frame, true);
+
+    // The solver
+    Eigen::MatrixXd J_T = linear_velocity_jacobian.transpose();
+    auto svd = J_T.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+    svd.setThreshold(0.01);
+    Eigen::VectorXd ee_force = svd.solve(joint_torque);
+
+    // Save the result
+    for(auto i = 0; i < 3; i++) {
+        torque_in_world[i] = 0.0;
+        force_in_world[i] = ee_force[i];
     }
 }
 
