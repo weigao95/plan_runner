@@ -127,7 +127,7 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
 
     // Do computation
     if(force_only_) {
-
+        computeEEForceOnly(cache, joint_torque, force_in_world, torque_in_world);
     } else {
         computeEEForceTorque(cache, joint_torque, force_in_world, torque_in_world);
     }
@@ -194,7 +194,25 @@ void plan_runner::EEForceTorqueEstimator::computeEEForceOnly(
     const Eigen::VectorXd &joint_torque,
     Eigen::Vector3d &force_in_world, Eigen::Vector3d &torque_in_world
 ) const {
+    // Get the jacobian
+    auto ee_frame_index = getBodyOrFrameIndex(*tree_, ee_frame_id_);
+    auto world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
 
+    // Compute jacobian
+    Eigen::MatrixXd linear_velocity_jacobian = tree_->transformPointsJacobian(
+        cache, Eigen::Vector3d::Zero(), ee_frame_index, world_frame, true);
+
+    // The solver
+    Eigen::MatrixXd J_T = linear_velocity_jacobian.transpose();
+    auto svd = J_T.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+    svd.setThreshold(0.01);
+    Eigen::VectorXd ee_force = svd.solve(joint_torque);
+
+    // Save the result
+    for(auto i = 0; i < 3; i++) {
+        torque_in_world[i] = 0.0;
+        force_in_world[i] = ee_force[i];
+    }
 }
 
 
