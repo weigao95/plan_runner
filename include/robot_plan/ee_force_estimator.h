@@ -9,6 +9,7 @@
 #include <drake/multibody/rigid_body_tree.h>
 #include <sensor_msgs/JointState.h>
 #include <std_srvs/Trigger.h>
+#include <robot_msgs/ResetForceEstimatorEE.h>
 
 
 namespace plan_runner {
@@ -28,7 +29,9 @@ namespace plan_runner {
 
         void Initialize();
         void onReceiveJointState(const sensor_msgs::JointState::ConstPtr& joint_state);
-        bool onReinitServiceRequeat(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
+        bool onReinitServiceRequest(
+            robot_msgs::ResetForceEstimatorEE::Request &req,
+            robot_msgs::ResetForceEstimatorEE::Response &res);
     private:
         // The meta info
         ros::NodeHandle node_handle_;
@@ -61,6 +64,7 @@ namespace plan_runner {
         // The offset of parameter
         std::mutex mutex_;
         Eigen::VectorXd torque_offset_;
+        Eigen::Vector3d force_applied_point_in_ee_;
         bool offset_valid_;
 
         // The low pass filtering
