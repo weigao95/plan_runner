@@ -10,12 +10,14 @@
 plan_runner::EEForceTorqueEstimator::EEForceTorqueEstimator(
     ros::NodeHandle &nh,
     std::unique_ptr<RigidBodyTree<double>> tree,
+    bool force_only,
     std::string estimation_publish_topic,
     std::string reinit_service_name,
     std::string joint_state_topic,
     std::string ee_frame_id
 ) : node_handle_(nh),
     tree_(std::move(tree)),
+    force_only_(force_only),
     estimation_publish_topic_(std::move(estimation_publish_topic)),
     joint_state_topic_(std::move(joint_state_topic)),
     reinit_offset_srv_name_(std::move(reinit_service_name)),
@@ -123,6 +125,21 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     cache.initialize(q);
     tree_->doKinematics(cache);
 
+    // Do computation
+    if(force_only_) {
+
+    } else {
+        computeEEForceTorque(cache, joint_torque, force_in_world, torque_in_world);
+    }
+}
+
+
+void plan_runner::EEForceTorqueEstimator::computeEEForceTorque(
+    const KinematicsCache<double> &cache,
+    const Eigen::VectorXd& joint_torque,
+    Eigen::Vector3d &force_in_world,
+    Eigen::Vector3d &torque_in_world
+) const {
     // Get the jacobian
     auto ee_frame_index = getBodyOrFrameIndex(*tree_, ee_frame_id_);
     auto world_frame = RigidBodyTreeConstants::kWorldBodyIndex;
@@ -157,7 +174,7 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
     auto svd = K.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
     svd.setThreshold(0.01);
     Eigen::VectorXd torque_force_lambda = svd.solve(rhs);*/
-    
+
     // The old solver
     Eigen::MatrixXd J_T = concantated_jacobian.transpose();
     auto svd = J_T.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -169,6 +186,15 @@ void plan_runner::EEForceTorqueEstimator::estimateEEForceTorque(
         torque_in_world[i] = torque_force[i];
         force_in_world[i] = torque_force[i + 3];
     }
+}
+
+
+void plan_runner::EEForceTorqueEstimator::computeEEForceOnly(
+    const KinematicsCache<double> &cache,
+    const Eigen::VectorXd &joint_torque,
+    Eigen::Vector3d &force_in_world, Eigen::Vector3d &torque_in_world
+) const {
+
 }
 
 

@@ -19,6 +19,7 @@ namespace plan_runner {
         EEForceTorqueEstimator(
             ros::NodeHandle& nh,
             std::unique_ptr<RigidBodyTree<double>> tree,
+            bool force_only = true,
             std::string estimation_publish_topic = "/plan_runner/estimated_ee_force",
             std::string reinit_service_name = "/plan_runner/ee_estimator_reset",
             std::string joint_state_topic="/joint_states",
@@ -31,10 +32,11 @@ namespace plan_runner {
     private:
         // The meta info
         ros::NodeHandle node_handle_;
-        std::string ee_frame_id_;
-        std::string joint_state_topic_;
-        std::string estimation_publish_topic_;
-        std::string reinit_offset_srv_name_;
+        const bool force_only_;
+        const std::string ee_frame_id_;
+        const std::string joint_state_topic_;
+        const std::string estimation_publish_topic_;
+        const std::string reinit_offset_srv_name_;
 
         // The topic for publishing and receiving
         std::shared_ptr<ros::Subscriber> joint_state_subscriber_;
@@ -47,6 +49,14 @@ namespace plan_runner {
         void estimateEEForceTorque(
             const sensor_msgs::JointState::ConstPtr& joint_state,
             Eigen::Vector3d& force_in_world, Eigen::Vector3d& torque_in_world);
+        void computeEEForceTorque(
+            const KinematicsCache<double>& cache,
+            const Eigen::VectorXd& joint_torque,
+            Eigen::Vector3d& force_in_world, Eigen::Vector3d& torque_in_world) const;
+        void computeEEForceOnly(
+            const KinematicsCache<double>& cache,
+            const Eigen::VectorXd& joint_torque,
+            Eigen::Vector3d& force_in_world, Eigen::Vector3d& torque_in_world) const;
 
         // The offset of parameter
         std::mutex mutex_;
