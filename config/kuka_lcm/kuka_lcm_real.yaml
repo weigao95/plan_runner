@@ -34,3 +34,19 @@ joint_limits:
   iiwa_joint_5: [-170, 170]
   iiwa_joint_6: [-120, 120]
   iiwa_joint_7: [-175, 175]
+external_torque_limit_lb:
+  - -60.0
+  - -60.0
+  - -40.0
+  - -30.0
+  - -30.0
+  - -20.0
+  - -20.0
+external_torque_limit_ub:
+  - 60.0
+  - 60.0
+  - 40.0
+  - 30.0
+  - 30.0
+  - 20.0
+  - 20.0

@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include <yaml-cpp/yaml.h>
 
+#include "robot_plan/forceguard_checker.h"
 #include "supervisor/plan_supervisor.h"
 #include "simulated_robot/common_robot_model.h"
 #include "kuka_lcm.h"
@@ -49,7 +50,6 @@ int main(int argc, char *argv[]) {
     }
 
 
-
     // Init the ros staff
     using namespace plan_runner;
     ros::init(argc, argv, "plan_runner");
@@ -58,6 +58,12 @@ int main(int argc, char *argv[]) {
     // Construct supervisor
     auto tree = constructDefaultKukaRBT();
     PlanSupervisor supervisor(std::move(tree), std::move(robot_arm), nh, config);
+
+    // The external torque checker
+    ExternalTorqueGuardChecker::Ptr torque_checker = std::make_shared<ExternalTorqueGuardChecker>();
+    if(torque_checker->LoadParameterFrom(config) == LoadParameterStatus::Success) {
+        supervisor.AddSafetyChecker(torque_checker);
+    }
 
     // The initialization
     supervisor.Initialize();

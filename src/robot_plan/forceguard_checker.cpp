@@ -6,6 +6,7 @@
 #include "robot_plan/forceguard_checker.h"
 
 
+// Limit the norm of torque
 plan_runner::SafetyChecker::CheckResult plan_runner::TotalForceGuardChecker::CheckSafety(
         const plan_runner::CommandInput &input,
         const plan_runner::RobotArmCommand &command
@@ -26,6 +27,7 @@ plan_runner::SafetyChecker::CheckResult plan_runner::TotalForceGuardChecker::Che
 }
 
 
+// For extenal torque limiter
 plan_runner::ExternalForceGuardChecker::ExternalForceGuardChecker(
         int body_idx, Eigen::Vector3d point_in_body,
         Eigen::Vector3d force_threshold, int force_expressed_in_frame
@@ -130,4 +132,59 @@ std::vector<plan_runner::SafetyChecker::Ptr> plan_runner::ExternalForceGuardChec
 
     // OK
     return checker_vec;
+}
+
+
+// Limit the external torque on each dimension
+// Usually a global safety checker
+struct plan_runner::SafetyChecker::CheckResult plan_runner::ExternalTorqueGuardChecker::CheckSafety(
+    const struct plan_runner::CommandInput & input,
+    const struct plan_runner::RobotArmCommand & command
+) {
+    // When it comes here the measurement should be valid
+    DRAKE_ASSERT(input.is_valid());
+    DRAKE_ASSERT(HasRequiredField(input, command));
+
+    // Get type
+    int nq = input.robot_rbt->get_num_positions();
+    Eigen::Map<const Eigen::VectorXd> tau(input.latest_measurement->joint_torque, nq);
+
+    // OK
+    auto result = CheckResult();
+    for(auto i = 0; i < nq; i++) {
+        if(tau[i] < torque_lb_[i] || tau[i] > torque_ub_[i]) {
+            result.is_safe = false;
+            result.violation = std::max(std::abs(tau[i] - torque_lb_[i]), std::abs(tau[i] - torque_ub_[i]));
+            return result;
+        }
+    }
+
+    // The torque is safe
+    result.set_safe();
+    return result;
+}
+
+
+enum plan_runner::LoadParameterStatus
+    plan_runner::ExternalTorqueGuardChecker::LoadParameterFrom(const YAML::Node & datamap) {
+    if(datamap["external_torque_limit_lb"]) {
+        std::vector<double> lb_vector = datamap["external_torque_limit_lb"].as<std::vector<double>>();
+        torque_lb_.resize(lb_vector.size());
+        for(auto i = 0; i < lb_vector.size(); i++)
+            torque_lb_[i] = lb_vector[i];
+    } else {
+        return LoadParameterStatus::FatalError;
+    }
+
+    if(datamap["external_torque_limit_ub"]) {
+        std::vector<double> ub_vector = datamap["external_torque_limit_ub"].as<std::vector<double>>();
+        torque_ub_.resize(ub_vector.size());
+        for(auto i = 0; i < ub_vector.size(); i++)
+            torque_ub_[i] = ub_vector[i];
+    } else {
+        return LoadParameterStatus::FatalError;
+    }
+
+    // OK
+    return LoadParameterStatus::Success;
 }
