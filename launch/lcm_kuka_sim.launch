@@ -3,14 +3,10 @@
 
 <!--The path to config file-->
 <arg name="pkg_name" default="plan_runner" />
-<arg name="config_path" default="$(eval find(arg('pkg_name')) +'/config/kuka_lcm/kuka_lcm_sim.yaml')" />
+<arg name="config_path" default="$(eval find(arg('pkg_name')) +'/config/kuka_lcm/kuka_lcm_real.yaml')" />
 
 <!--The simulated kuka robot-->
 <node name="plan_runner" pkg="$(arg pkg_name)" type="kuka_lcm_node" output="screen" args="$(arg config_path)">
-</node>
-
-<!--The LCM command dispatcher-->
-<node name="lcm_command_bridge" pkg="$(arg pkg_name)" type="lcm_plan_dispatcher.py" output="screen" args="$(arg config_path)">
 </node>
 
 </launch>
