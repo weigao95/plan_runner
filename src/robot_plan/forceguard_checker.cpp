@@ -184,4 +184,7 @@ enum plan_runner::LoadParameterStatus
     } else {
         return LoadParameterStatus::FatalError;
     }
+
+    // OK
+    return LoadParameterStatus::Success;
 }
