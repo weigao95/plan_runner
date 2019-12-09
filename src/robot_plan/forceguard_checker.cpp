@@ -163,3 +163,25 @@ struct plan_runner::SafetyChecker::CheckResult plan_runner::ExternalTorqueGuardC
     result.set_safe();
     return result;
 }
+
+
+enum plan_runner::LoadParameterStatus
+    plan_runner::ExternalTorqueGuardChecker::LoadParameterFrom(const YAML::Node & datamap) {
+    if(datamap["external_torque_limit_lb"]) {
+        std::vector<double> lb_vector = datamap["external_torque_limit_lb"].as<std::vector<double>>();
+        torque_lb_.resize(lb_vector.size());
+        for(auto i = 0; i < lb_vector.size(); i++)
+            torque_lb_[i] = lb_vector[i];
+    } else {
+        return LoadParameterStatus::FatalError;
+    }
+
+    if(datamap["external_torque_limit_ub"]) {
+        std::vector<double> ub_vector = datamap["external_torque_limit_ub"].as<std::vector<double>>();
+        torque_ub_.resize(ub_vector.size());
+        for(auto i = 0; i < ub_vector.size(); i++)
+            torque_ub_[i] = ub_vector[i];
+    } else {
+        return LoadParameterStatus::FatalError;
+    }
+}
