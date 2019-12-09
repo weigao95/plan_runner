@@ -50,7 +50,6 @@ int main(int argc, char *argv[]) {
     }
 
 
-
     // Init the ros staff
     using namespace plan_runner;
     ros::init(argc, argv, "plan_runner");
