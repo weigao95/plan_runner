@@ -64,4 +64,21 @@ namespace plan_runner {
         Eigen::MatrixXd jacobian_cache;
         Eigen::VectorXd torque_threshold_cache;
     };
+
+
+    class ExternalTorqueGuardChecker : public SafetyChecker {
+    public:
+        using Ptr = std::shared_ptr<ExternalTorqueGuardChecker>;
+        ExternalTorqueGuardChecker() = default;
+        ~ExternalTorqueGuardChecker() override = default;
+
+        // The evaluation interface
+        bool HasRequiredField(const CommandInput& input, const RobotArmCommand& command) override {
+            return input.latest_measurement->torque_validity;
+        }
+        CheckResult CheckSafety(const CommandInput& input, const RobotArmCommand& command) override;
+    private:
+        Eigen::VectorXd torque_lb_;
+        Eigen::VectorXd torque_ub_;
+    };
 }
