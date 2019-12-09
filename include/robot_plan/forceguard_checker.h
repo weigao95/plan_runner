@@ -77,6 +77,9 @@ namespace plan_runner {
             return input.latest_measurement->torque_validity;
         }
         CheckResult CheckSafety(const CommandInput& input, const RobotArmCommand& command) override;
+
+        // Load the result from yaml map
+        LoadParameterStatus LoadParameterFrom(const YAML::Node& datamap) override;
     private:
         Eigen::VectorXd torque_lb_;
         Eigen::VectorXd torque_ub_;
